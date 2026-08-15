@@ -464,7 +464,11 @@
             <span class="detail-meta-label">Pays d'édition :</span>
             <span><strong>${album.country}</strong></span>
           </div>` : ''}
-        </div>
+          ${album.discogsId ? `
+           <a href="https://www.discogs.com/release/${album.discogsId}" target="_blank" rel="noopener" class="btn btn-secondary" style="width: 100%; text-decoration: none; margin-bottom: 12px; display: inline-flex; justify-content: center; align-items: center; gap: 6px;">
+          🔗 Voir sur Discogs
+          </a>` : ''}
+          </div>
 
         <div class="modal-actions">
           <button class="btn btn-secondary" onclick="closeDetailModal(); openFormModal(${index})">✏️ Modifier</button>
@@ -604,7 +608,9 @@
         const conductorIdx = headers.indexOf('Conductors');
         const yearIdx = headers.indexOf('Release Year');
         const countryIdx = headers.indexOf('Country');
+        const discogsIdx = headers.indexOf('discogs Release ID'); // <-- AJOUTER CETTE LIGNE
         const coverIdx = headers.indexOf('Uploaded Image URL');
+
 
         if (titleIdx === -1 || artistIdx === -1) {
           alert("Format CSV non reconnu.");
@@ -631,6 +637,7 @@
             conductor: conductorIdx !== -1 && cols[conductorIdx] ? cols[conductorIdx].trim() : '',
             year: yearIdx !== -1 && cols[yearIdx] ? cols[yearIdx].trim() : '',
             country: countryIdx !== -1 && cols[countryIdx] ? cols[countryIdx].trim() : '',
+            discogsId: discogsIdx !== -1 && cols[discogsIdx] ? cols[discogsIdx].trim() : '', // <-- AJOUTER CETTE LIGNE
             support: support,
             cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : ''
           });
