@@ -38,9 +38,10 @@
       background-color: var(--bg); 
       color: var(--text); 
       padding: 16px; 
+      padding-top: calc(16px + env(safe-area-inset-top)); 
+      padding-bottom: calc(40px + env(safe-area-inset-bottom)); 
       max-width: 900px; 
       margin: 0 auto; 
-      padding-bottom: calc(40px + env(safe-area-inset-bottom)); 
     }
 
     header { 
