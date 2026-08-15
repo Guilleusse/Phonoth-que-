@@ -18,60 +18,225 @@
       --text: #f4f4f5;
       --text-muted: #a1a1aa;
       --border: #27272a;
+      --danger: #dc2626;
       --badge-vinyle-bg: #451a03; --badge-vinyle-text: #fde68a;
       --badge-cd-bg: #1e3a8a;     --badge-cd-text: #bfdbfe;
       --badge-sacd-bg: #581c87;   --badge-sacd-text: #e9d5ff;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg); color: var(--text); padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: calc(40px + env(safe-area-inset-bottom)); max-width: 900px; margin: 0 auto; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Roboto, sans-serif; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+    
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+      background-color: var(--bg); 
+      color: var(--text);
+    }
 
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-    h1 { font-size: 1.6rem; font-weight: 700; }
-    .stats { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
+    body { 
+      padding: 16px; 
+      padding-top: calc(16px + env(safe-area-inset-top)); 
+      padding-bottom: calc(40px + env(safe-area-inset-bottom)); 
+      max-width: 900px; 
+      margin: 0 auto; 
+    }
 
-    .btn { background: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+    header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 16px; 
+      padding-bottom: 12px; 
+      border-bottom: 1px solid var(--border); 
+    }
+    
+    h1 { font-size: 1.5rem; font-weight: 700; }
+    .stats { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+
+    .header-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .btn { 
+      background: var(--accent); 
+      color: white; 
+      border: none; 
+      padding: 8px 12px; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      font-size: 0.85rem; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      text-decoration: none;
+      gap: 4px;
+    }
     .btn:active { transform: scale(0.96); }
     .btn-secondary { background: #27272a; color: var(--text); border: 1px solid #3f3f46; }
+    .btn-danger { background: var(--danger); color: white; }
 
-    .toolbar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
-    .search-bar { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 1rem; }
+    .toolbar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .search-bar { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 0.95rem; }
 
     .controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .filters { display: flex; gap: 8px; flex-wrap: wrap; }
-    .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted); cursor: pointer; font-size: 0.9rem; font-weight: 500; }
+    .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 500; }
     .filter-btn.active { background: var(--text); color: var(--bg); font-weight: 700; }
 
-    .artist-section { margin-bottom: 32px; }
-    .artist-header { font-size: 1.25rem; font-weight: 700; padding-bottom: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; color: #38bdf8; }
-    .artist-count { font-size: 0.85rem; color: var(--text-muted); font-weight: 400; }
+    .artist-section { margin-bottom: 28px; }
+    .artist-header { 
+      font-size: 1.15rem; 
+      font-weight: 700; 
+      padding-bottom: 6px; 
+      margin-bottom: 12px; 
+      border-bottom: 1px solid var(--border); 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      color: #38bdf8; 
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .artist-count { font-size: 0.8rem; color: var(--text-muted); font-weight: 400; flex-shrink: 0; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
-    .card { position: relative; background: var(--card-bg); border-radius: 14px; padding: 12px; border: 1px solid var(--card-border); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: background 0.2s; }
-    .card:active { background: #27272a; }
-    .card img { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; background: #27272a; flex-shrink: 0; }
-    .card-info { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; gap: 4px; }
-    .card .title { font-weight: 700; font-size: 1.05rem; line-height: 1.25; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card .conductor { font-size: 0.85rem; color: var(--text-muted); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
     
-    .badge { display: inline-block; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; text-transform: uppercase; width: fit-content; }
+    .card { 
+      position: relative; 
+      background: var(--card-bg); 
+      border-radius: 12px; 
+      padding: 10px; 
+      border: 1px solid var(--card-border); 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      cursor: pointer; 
+      overflow: hidden;
+    }
+    .card:active { background: #27272a; }
+    
+    .card img { width: 85px; height: 85px; object-fit: cover; border-radius: 8px; background: #27272a; flex-shrink: 0; }
+    
+    .card-info { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      min-width: 0; 
+      height: 85px; 
+    }
+    
+    .card .title { 
+      font-weight: 700; 
+      font-size: 0.92rem; 
+      line-height: 1.2; 
+      color: var(--text); 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+    }
+    
+    .card .conductor { 
+      font-size: 0.78rem; 
+      color: var(--text-muted); 
+      font-style: italic; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+    }
+    
+    .card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .badge { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 5px; font-weight: 700; text-transform: uppercase; width: fit-content; }
     .badge-vinyle { background: var(--badge-vinyle-bg); color: var(--badge-vinyle-text); }
     .badge-cd { background: var(--badge-cd-bg); color: var(--badge-cd-text); }
     .badge-sacd { background: var(--badge-sacd-bg); color: var(--badge-sacd-text); }
 
-    .file-input-label { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .card-btn-icon {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      padding: 4px 6px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .card-btn-icon:hover { color: var(--text); background: #27272a; }
 
-    /* Modal Fiche Détaillée */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-content { background: #18181b; border: 1px solid #27272a; border-radius: 20px; width: 100%; max-width: 440px; padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .file-input-label { cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+
+    /* Modals */
+    .modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100%; height: 100%; 
+      background: rgba(0,0,0,0.85); 
+      backdrop-filter: blur(8px); 
+      -webkit-backdrop-filter: blur(8px); 
+      z-index: 1000; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 16px; 
+    }
+    
+    .modal-content { 
+      background: #18181b; 
+      border: 1px solid #27272a; 
+      border-radius: 16px; 
+      width: 100%; 
+      max-width: 440px; 
+      padding: 20px; 
+      max-height: 90vh; 
+      overflow-y: auto; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+      word-break: break-word;
+    }
+    
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .detail-cover { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 14px; margin-bottom: 16px; background: #27272a; }
-    .detail-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; line-height: 1.2; }
-    .detail-artist { font-size: 1.1rem; color: #38bdf8; font-weight: 600; margin-bottom: 8px; }
-    .detail-conductor { font-size: 0.95rem; color: var(--text-muted); font-style: italic; margin-bottom: 16px; }
-    .detail-meta { background: #09090b; border: 1px solid #27272a; border-radius: 12px; padding: 14px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; }
+    .detail-cover { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; margin-bottom: 14px; background: #27272a; }
+    .detail-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2; word-break: break-word; }
+    .detail-artist { font-size: 1.05rem; color: #38bdf8; font-weight: 600; margin-bottom: 6px; word-break: break-word; }
+    .detail-conductor { font-size: 0.9rem; color: var(--text-muted); font-style: italic; margin-bottom: 14px; word-break: break-word; }
+    
+    .detail-meta { 
+      background: #09090b; 
+      border: 1px solid #27272a; 
+      border-radius: 10px; 
+      padding: 12px; 
+      margin-bottom: 16px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      font-size: 0.88rem; 
+    }
     .detail-meta-item { display: flex; justify-content: space-between; align-items: center; }
     .detail-meta-label { color: var(--text-muted); }
+
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+    /* Form Styles */
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+    .form-group input, .form-group select { 
+      width: 100%; 
+      padding: 10px; 
+      border-radius: 8px; 
+      border: 1px solid #3f3f46; 
+      background: #09090b; 
+      color: var(--text); 
+      font-size: 0.9rem; 
+    }
   </style>
 </head>
 <body>
@@ -81,10 +246,11 @@
       <h1>Phonothèque</h1>
       <div class="stats" id="statsCount">0 album</div>
     </div>
-    <div style="display: flex; gap: 8px;">
+    <div class="header-actions">
+      <button class="btn" onclick="openFormModal()">➕</button>
       <button class="btn btn-secondary" onclick="pickRandom()">🎲</button>
       <label class="btn file-input-label">
-        📁 Importer CSV
+        📁 Importer
         <input type="file" accept=".csv" onchange="importCSVFile(event)" style="display: none;">
       </label>
     </div>
@@ -99,7 +265,7 @@
         <button class="filter-btn" onclick="filterSupport('CD', this)">CD</button>
         <button class="filter-btn" onclick="filterSupport('SACD', this)">SACD</button>
       </div>
-      <button class="btn btn-secondary" style="font-size:0.8rem; padding:8px 12px;" onclick="resetCollection()">🗑️ Vider</button>
+      <button class="btn btn-secondary" style="font-size:0.75rem; padding:6px 10px;" onclick="resetCollection()">🗑️ Vider</button>
     </div>
   </div>
 
@@ -110,9 +276,50 @@
     <div class="modal-content" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h3 style="font-size: 1.1rem;">Détails de l'album</h3>
-        <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 1rem;" onclick="closeDetailModal()">&times;</button>
+        <button class="btn btn-secondary" style="padding: 4px 10px;" onclick="closeDetailModal()">&times;</button>
       </div>
       <div id="detailBody"></div>
+    </div>
+  </div>
+
+  <!-- Modal Formulaire (Ajout / Édition) -->
+  <div id="formModal" class="modal" onclick="closeFormModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="formModalTitle" style="font-size: 1.1rem;">Ajouter un album</h3>
+        <button class="btn btn-secondary" style="padding: 4px 10px;" onclick="closeFormModal()">&times;</button>
+      </div>
+      <form id="albumForm" onsubmit="handleFormSubmit(event)">
+        <input type="hidden" id="editIndex" value="-1">
+        <div class="form-group">
+          <label>Artiste / Compositeur *</label>
+          <input type="text" id="formArtist" required placeholder="ex: Genesis">
+        </div>
+        <div class="form-group">
+          <label>Titre de l'album *</label>
+          <input type="text" id="formTitle" required placeholder="ex: Foxtrot">
+        </div>
+        <div class="form-group">
+          <label>Chef d'orchestre / Interprète</label>
+          <input type="text" id="formConductor" placeholder="ex: Herbert von Karajan">
+        </div>
+        <div class="form-group">
+          <label>Support *</label>
+          <select id="formSupport">
+            <option value="Vinyle">Vinyle</option>
+            <option value="CD" selected>CD</option>
+            <option value="SACD">SACD</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>URL d'image de la pochette</label>
+          <input type="url" id="formCover" placeholder="https://...">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeFormModal()">Annuler</button>
+          <button type="submit" class="btn">Enregistrer</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -126,7 +333,7 @@
     }
 
     function resetCollection() {
-      if (confirm("Effacer tous les albums de l'application ?")) {
+      if (confirm("Effacer TOUS les albums de l'application ?")) {
         collection = [];
         saveCollection();
       }
@@ -137,7 +344,8 @@
       const searchQuery = document.getElementById('searchInput').value.toLowerCase();
       container.innerHTML = '';
 
-      let filtered = collection.filter(album => {
+      let filtered = collection.filter((album, originalIndex) => {
+        album._id = originalIndex;
         const matchesFilter = activeFilter === 'TOUS' || (album.support && album.support.toLowerCase() === activeFilter.toLowerCase());
         const matchesSearch = (album.artist && album.artist.toLowerCase().includes(searchQuery)) || 
                               (album.title && album.title.toLowerCase().includes(searchQuery)) ||
@@ -148,7 +356,7 @@
       document.getElementById('statsCount').innerText = `${filtered.length} album${filtered.length > 1 ? 's' : ''}` + (activeFilter !== 'TOUS' ? ` (${activeFilter})` : '');
 
       if (filtered.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted); padding: 40px 0; text-align: center; font-size: 1rem;">Aucun album trouvé.<br><br>Si la liste est vide, clique sur <strong>📁 Importer CSV</strong>.</p>';
+        container.innerHTML = '<p style="color: var(--text-muted); padding: 40px 0; text-align: center;">Aucun album trouvé.<br><br>Clique sur <strong>📁 Importer</strong> pour charger ton CSV.</p>';
         return;
       }
 
@@ -167,22 +375,26 @@
         section.innerHTML = `<div class="artist-header"><span>${artistName}</span><span class="artist-count">(${artistAlbums.length})</span></div><div class="grid"></div>`;
         
         const grid = section.querySelector('.grid');
-        artistAlbums.forEach((album) => {
+        artistAlbums.forEach(album => {
           const card = document.createElement('div');
           card.className = 'card';
-          card.onclick = () => openDetailModal(album);
+          card.onclick = () => openDetailModal(album._id);
 
           const coverSrc = album.cover || 'https://via.placeholder.com/150/27272a/a1a1aa?text=Pas+d%27image';
           const supportName = album.support || 'CD';
           const badgeClass = 'badge-' + supportName.toLowerCase();
 
           card.innerHTML = `
-            <img src="${coverSrc}" alt="Pochette" onerror="this.src='https://via.placeholder.com/150/27272a/a1a1aa?text=Erreur+Image'">
+            <img src="${coverSrc}" alt="Pochette" onerror="this.src='https://via.placeholder.com/150/27272a/a1a1aa?text=Erreur'">
             <div class="card-info">
               <div>
                 <span class="badge ${badgeClass}">${supportName}</span>
                 <div class="title" title="${album.title}">${album.title}</div>
                 ${album.conductor ? `<div class="conductor" title="${album.conductor}">Dir. : ${album.conductor}</div>` : ''}
+              </div>
+              <div class="card-actions">
+                <button class="card-btn-icon" onclick="event.stopPropagation(); openFormModal(${album._id})" title="Modifier">✏️</button>
+                <button class="card-btn-icon" onclick="event.stopPropagation(); deleteAlbum(${album._id})" title="Supprimer">🗑️</button>
               </div>
             </div>
           `;
@@ -192,14 +404,17 @@
       });
     }
 
-    function openDetailModal(album) {
+    function openDetailModal(index) {
+      const album = collection[index];
+      if (!album) return;
+
       const coverSrc = album.cover || 'https://via.placeholder.com/300/27272a/a1a1aa?text=Pas+d%27image';
       const supportName = album.support || 'CD';
       const badgeClass = 'badge-' + supportName.toLowerCase();
 
       const detailBody = document.getElementById('detailBody');
       detailBody.innerHTML = `
-        <img src="${coverSrc}" class="detail-cover" alt="Pochette" onerror="this.src='https://via.placeholder.com/300/27272a/a1a1aa?text=Erreur+Image'">
+        <img src="${coverSrc}" class="detail-cover" alt="Pochette" onerror="this.src='https://via.placeholder.com/300/27272a/a1a1aa?text=Erreur'">
         <div class="detail-title">${album.title}</div>
         <div class="detail-artist">${album.artist}</div>
         ${album.conductor ? `<div class="detail-conductor">Dir. : ${album.conductor}</div>` : ''}
@@ -210,6 +425,11 @@
             <span class="badge ${badgeClass}">${supportName}</span>
           </div>
         </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeDetailModal(); openFormModal(${index})">✏️ Modifier</button>
+          <button class="btn btn-danger" onclick="deleteAlbum(${index}); closeDetailModal();">🗑️ Supprimer</button>
+        </div>
       `;
 
       document.getElementById('detailModal').style.display = 'flex';
@@ -217,6 +437,57 @@
 
     function closeDetailModal() {
       document.getElementById('detailModal').style.display = 'none';
+    }
+
+    function openFormModal(index = -1) {
+      document.getElementById('editIndex').value = index;
+      if (index >= 0) {
+        const album = collection[index];
+        document.getElementById('formModalTitle').innerText = "Modifier l'album";
+        document.getElementById('formArtist').value = album.artist || '';
+        document.getElementById('formTitle').value = album.title || '';
+        document.getElementById('formConductor').value = album.conductor || '';
+        document.getElementById('formSupport').value = album.support || 'CD';
+        document.getElementById('formCover').value = album.cover || '';
+      } else {
+        document.getElementById('formModalTitle').innerText = "Ajouter un album";
+        document.getElementById('albumForm').reset();
+      }
+      document.getElementById('formModal').style.display = 'flex';
+    }
+
+    function closeFormModal() {
+      document.getElementById('formModal').style.display = 'none';
+    }
+
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      const index = parseInt(document.getElementById('editIndex').value, 10);
+      const newAlbum = {
+        artist: document.getElementById('formArtist').value.trim(),
+        title: document.getElementById('formTitle').value.trim(),
+        conductor: document.getElementById('formConductor').value.trim(),
+        support: document.getElementById('formSupport').value,
+        cover: document.getElementById('formCover').value.trim()
+      };
+
+      if (index >= 0) {
+        collection[index] = newAlbum;
+      } else {
+        collection.push(newAlbum);
+      }
+
+      saveCollection();
+      closeFormModal();
+    }
+
+    function deleteAlbum(index) {
+      const album = collection[index];
+      if (!album) return;
+      if (confirm(`Supprimer "${album.title}" de ${album.artist} ?`)) {
+        collection.splice(index, 1);
+        saveCollection();
+      }
     }
 
     function filterSupport(support, btn) {
@@ -232,6 +503,44 @@
       alert(`Au hasard :\n\n${a.artist} - ${a.title} (${a.support})`);
     }
 
+    // Parser CSV robuste gérant les guillemets et retours à la ligne internes
+    function parseCSV(text) {
+      const rows = [];
+      let currentRow = [];
+      let currentVal = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const nextC = text[i+1];
+        
+        if (c === '"' && inQuotes && nextC === '"') {
+          currentVal += '"';
+          i++;
+        } else if (c === '"') {
+          inQuotes = !inQuotes;
+        } else if (c === ',' && !inQuotes) {
+          currentRow.push(currentVal);
+          currentVal = '';
+        } else if ((c === '\r' || c === '\n') && !inQuotes) {
+          if (c === '\r' && nextC === '\n') { i++; }
+          currentRow.push(currentVal);
+          currentVal = '';
+          if (currentRow.length > 1 || (currentRow.length === 1 && currentRow[0] !== '')) {
+            rows.push(currentRow);
+          }
+          currentRow = [];
+        } else {
+          currentVal += c;
+        }
+      }
+      if (currentVal !== '' || currentRow.length > 0) {
+        currentRow.push(currentVal);
+        rows.push(currentRow);
+      }
+      return rows;
+    }
+
     function importCSVFile(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -239,36 +548,29 @@
       const reader = new FileReader();
       reader.onload = function(e) {
         const text = e.target.result;
-        const lines = text.split(/\r?\n/);
-        if (lines.length < 2) return;
+        const rows = parseCSV(text);
+        if (rows.length < 2) return;
 
-        function parseCSVLine(line) {
-          const result = [];
-          let cur = '';
-          let inQuotes = false;
-          for (let i = 0; i < line.length; i++) {
-            const c = line[i];
-            if (c === '"' && line[i+1] === '"') { cur += '"'; i++; }
-            else if (c === '"') { inQuotes = !inQuotes; }
-            else if (c === ',' && !inQuotes) { result.push(cur); cur = ''; }
-            else { cur += c; }
-          }
-          result.push(cur);
-          return result;
-        }
-
-        const headers = parseCSVLine(lines[0]).map(h => h.trim());
+        const headers = rows[0].map(h => h.trim());
         const titleIdx = headers.indexOf('Title');
         const artistIdx = headers.indexOf('Artist');
         const mediaIdx = headers.indexOf('Media');
         const conductorIdx = headers.indexOf('Conductors');
         const coverIdx = headers.indexOf('Uploaded Image URL');
 
+        if (titleIdx === -1 || artistIdx === -1) {
+          alert("Format CSV non reconnu.");
+          return;
+        }
+
         const imported = [];
-        for (let i = 1; i < lines.length; i++) {
-          if (!lines[i].trim()) continue;
-          const cols = parseCSVLine(lines[i]);
+        for (let i = 1; i < rows.length; i++) {
+          const cols = rows[i];
           if (cols.length <= titleIdx) continue;
+
+          const title = cols[titleIdx] ? cols[titleIdx].trim() : '';
+          const artist = cols[artistIdx] ? cols[artistIdx].trim() : '';
+          if (!title && !artist) continue;
 
           let support = cols[mediaIdx] || 'CD';
           if (support.includes('Vinyl') || support.includes('Vinyle')) support = 'Vinyle';
@@ -276,11 +578,11 @@
           else support = 'CD';
 
           imported.push({
-            title: cols[titleIdx] || 'Sans titre',
-            artist: cols[artistIdx] || 'Artiste inconnu',
-            conductor: cols[conductorIdx] || '',
+            title: title || 'Sans titre',
+            artist: artist || 'Artiste inconnu',
+            conductor: cols[conductorIdx] ? cols[conductorIdx].trim() : '',
             support: support,
-            cover: cols[coverIdx] || ''
+            cover: cols[coverIdx] ? cols[coverIdx].trim() : ''
           });
         }
 
