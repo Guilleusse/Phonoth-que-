@@ -542,10 +542,12 @@
     }
 
     function pickRandom() {
-      if (!collection.length) return alert("Collection vide !");
-      const a = collection[Math.floor(Math.random() * collection.length)];
-      alert(`Au hasard :\n\n${a.artist} - ${a.title} (${a.support})`);
-    }
+  if (!collection.length) return alert("Collection vide !");
+  const randomIndex = Math.floor(Math.random() * collection.length);
+  openDetailModal(randomIndex);
+}
+
+    
 
     // Parser CSV robuste gérant les guillemets et retours à la ligne internes
     function parseCSV(text) {
