@@ -149,12 +149,20 @@
       overflow: hidden; 
       text-overflow: ellipsis; 
     }
+
+    .card .meta-sub {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     
     .card-actions {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .badge { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 5px; font-weight: 700; text-transform: uppercase; width: fit-content; }
@@ -217,7 +225,7 @@
       margin-bottom: 16px; 
       display: flex; 
       flex-direction: column; 
-      gap: 8px; 
+      gap: 10px; 
       font-size: 0.88rem; 
     }
     .detail-meta-item { display: flex; justify-content: space-between; align-items: center; }
@@ -237,6 +245,8 @@
       color: var(--text); 
       font-size: 0.9rem; 
     }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
   </style>
 </head>
 <body>
@@ -257,7 +267,7 @@
   </header>
 
   <div class="toolbar">
-    <input type="text" id="searchInput" class="search-bar" placeholder="Rechercher artiste, titre, chef..." oninput="render()">
+    <input type="text" id="searchInput" class="search-bar" placeholder="Rechercher artiste, titre, chef, année, pays..." oninput="render()">
     <div class="controls">
       <div class="filters">
         <button class="filter-btn active" onclick="filterSupport('TOUS', this)">Tous</button>
@@ -302,6 +312,16 @@
         <div class="form-group">
           <label>Chef d'orchestre / Interprète</label>
           <input type="text" id="formConductor" placeholder="ex: Herbert von Karajan">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Année de sortie</label>
+            <input type="text" id="formYear" placeholder="ex: 1973">
+          </div>
+          <div class="form-group">
+            <label>Pays d'édition</label>
+            <input type="text" id="formCountry" placeholder="ex: Japon">
+          </div>
         </div>
         <div class="form-group">
           <label>Support *</label>
@@ -349,7 +369,9 @@
         const matchesFilter = activeFilter === 'TOUS' || (album.support && album.support.toLowerCase() === activeFilter.toLowerCase());
         const matchesSearch = (album.artist && album.artist.toLowerCase().includes(searchQuery)) || 
                               (album.title && album.title.toLowerCase().includes(searchQuery)) ||
-                              (album.conductor && album.conductor.toLowerCase().includes(searchQuery));
+                              (album.conductor && album.conductor.toLowerCase().includes(searchQuery)) ||
+                              (album.year && album.year.toLowerCase().includes(searchQuery)) ||
+                              (album.country && album.country.toLowerCase().includes(searchQuery));
         return matchesFilter && matchesSearch;
       });
 
@@ -384,6 +406,11 @@
           const supportName = album.support || 'CD';
           const badgeClass = 'badge-' + supportName.toLowerCase();
 
+          const subMetaParts = [];
+          if (album.year) subMetaParts.push(album.year);
+          if (album.country) subMetaParts.push(album.country);
+          const subMetaText = subMetaParts.join(' • ');
+
           card.innerHTML = `
             <img src="${coverSrc}" alt="Pochette" onerror="this.src='https://via.placeholder.com/150/27272a/a1a1aa?text=Erreur'">
             <div class="card-info">
@@ -393,8 +420,11 @@
                 ${album.conductor ? `<div class="conductor" title="${album.conductor}">Dir. : ${album.conductor}</div>` : ''}
               </div>
               <div class="card-actions">
-                <button class="card-btn-icon" onclick="event.stopPropagation(); openFormModal(${album._id})" title="Modifier">✏️</button>
-                <button class="card-btn-icon" onclick="event.stopPropagation(); deleteAlbum(${album._id})" title="Supprimer">🗑️</button>
+                <span class="meta-sub">${subMetaText}</span>
+                <div>
+                  <button class="card-btn-icon" onclick="event.stopPropagation(); openFormModal(${album._id})" title="Modifier">✏️</button>
+                  <button class="card-btn-icon" onclick="event.stopPropagation(); deleteAlbum(${album._id})" title="Supprimer">🗑️</button>
+                </div>
               </div>
             </div>
           `;
@@ -424,6 +454,16 @@
             <span class="detail-meta-label">Support :</span>
             <span class="badge ${badgeClass}">${supportName}</span>
           </div>
+          ${album.year ? `
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Année de sortie :</span>
+            <span><strong>${album.year}</strong></span>
+          </div>` : ''}
+          ${album.country ? `
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Pays d'édition :</span>
+            <span><strong>${album.country}</strong></span>
+          </div>` : ''}
         </div>
 
         <div class="modal-actions">
@@ -447,6 +487,8 @@
         document.getElementById('formArtist').value = album.artist || '';
         document.getElementById('formTitle').value = album.title || '';
         document.getElementById('formConductor').value = album.conductor || '';
+        document.getElementById('formYear').value = album.year || '';
+        document.getElementById('formCountry').value = album.country || '';
         document.getElementById('formSupport').value = album.support || 'CD';
         document.getElementById('formCover').value = album.cover || '';
       } else {
@@ -467,6 +509,8 @@
         artist: document.getElementById('formArtist').value.trim(),
         title: document.getElementById('formTitle').value.trim(),
         conductor: document.getElementById('formConductor').value.trim(),
+        year: document.getElementById('formYear').value.trim(),
+        country: document.getElementById('formCountry').value.trim(),
         support: document.getElementById('formSupport').value,
         cover: document.getElementById('formCover').value.trim()
       };
@@ -556,6 +600,8 @@
         const artistIdx = headers.indexOf('Artist');
         const mediaIdx = headers.indexOf('Media');
         const conductorIdx = headers.indexOf('Conductors');
+        const yearIdx = headers.indexOf('Release Year');
+        const countryIdx = headers.indexOf('Country');
         const coverIdx = headers.indexOf('Uploaded Image URL');
 
         if (titleIdx === -1 || artistIdx === -1) {
@@ -580,9 +626,11 @@
           imported.push({
             title: title || 'Sans titre',
             artist: artist || 'Artiste inconnu',
-            conductor: cols[conductorIdx] ? cols[conductorIdx].trim() : '',
+            conductor: conductorIdx !== -1 && cols[conductorIdx] ? cols[conductorIdx].trim() : '',
+            year: yearIdx !== -1 && cols[yearIdx] ? cols[yearIdx].trim() : '',
+            country: countryIdx !== -1 && cols[countryIdx] ? cols[countryIdx].trim() : '',
             support: support,
-            cover: cols[coverIdx] ? cols[coverIdx].trim() : ''
+            cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : ''
           });
         }
 
