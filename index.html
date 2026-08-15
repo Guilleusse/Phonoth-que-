@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ma Phonoth&egrave;que</title>
+  
+  <!-- Configuration Application Native iOS / PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Phonoth&egrave;que">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3293/3293810.png">
+
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --card-border: #27272a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --border: #27272a;
+      --danger: #dc2626;
+      
+      /* Couleurs par support */
+      --badge-vinyle-bg: #451a03;
+      --badge-vinyle-text: #fde68a;
+      --badge-cd-bg: #1e3a8a;
+      --badge-cd-text: #bfdbfe;
+      --badge-sacd-bg: #581c87;
+      --badge-sacd-text: #e9d5ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body { 
+      background-color: var(--bg); 
+      color: var(--text); 
+      padding: 16px; 
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding-bottom: calc(40px + env(safe-area-inset-bottom)); 
+    }
+
+    header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 12px; 
+      padding-bottom: 12px; 
+      border-bottom: 1px solid var(--border); 
+    }
+    
+    h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; }
+    .stats { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+    .btn { 
+      background: var(--accent); 
+      color: white; 
+      border: none; 
+      padding: 8px 14px; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      font-size: 0.85rem; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      text-decoration: none;
+      transition: transform 0.1s ease, background-color 0.2s ease;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-secondary { background: #27272a; color: var(--text); border: 1px solid #3f3f46; }
+
+    .toolbar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .search-bar { 
+      width: 100%; 
+      padding: 12px; 
+      border-radius: 10px; 
+      border: 1px solid var(--border); 
+      background: var(--card-bg); 
+      color: var(--text); 
+      font-size: 0.95rem; 
+    }
+    .search-bar:focus { outline: 2px solid var(--accent); }
+
+    .controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .filters { display: flex; gap: 6px; }
+    .filter-btn { 
+      padding: 6px 14px; 
+      border-radius: 20px; 
+      border: 1px solid var(--border); 
+      background: var(--card-bg); 
+      color: var(--text-muted); 
+      cursor: pointer; 
+      font-size: 0.8rem; 
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
+
+    /* Structure par artiste */
+    .artist-section { margin-bottom: 28px; }
+    .artist-header { 
+      font-size: 1.1rem; 
+      font-weight: 700; 
+      color: var(--text); 
+      padding-bottom: 6px; 
+      margin-bottom: 12px; 
+      border-bottom: 1px solid var(--border); 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    .artist-count { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+    /* Cartes en disposition horizontale */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+    
+    .card { 
+      position: relative;
+      background: var(--card-bg); 
+      border-radius: 12px; 
+      padding: 10px; 
+      border: 1px solid var(--card-border); 
+      display: flex; 
+      flex-direction: row; 
+      align-items: center; 
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .card:active { transform: scale(0.98); }
+    
+    .btn-delete-top {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(220, 38, 38, 0.8);
+      color: white;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      padding: 0;
+      line-height: 1;
+    }
+    .btn-delete-top:active { transform: scale(0.9); }
+
+    .card img { 
+      width: 90px; 
+      height: 90px; 
+      object-fit: cover; 
+      border-radius: 8px; 
+      background: #27272a; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+    
+    .card-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+      height: 90px;
+      padding-right: 18px;
+    }
+
+    .card .title { 
+      font-weight: 600; 
+      font-size: 0.88rem; 
+      line-height: 1.2; 
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card .conductor {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .card .badge { 
+      display: inline-block; 
+      font-size: 0.65rem; 
+      padding: 2px 6px; 
+      border-radius: 5px; 
+      font-weight: 700; 
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .badge-vinyle { background: var(--badge-vinyle-bg); color: var(--badge-vinyle-text); }
+    .badge-cd { background: var(--badge-cd-bg); color: var(--badge-cd-text); }
+    .badge-sacd { background: var(--badge-sacd-bg); color: var(--badge-sacd-text); }
+
+    .card-actions { display: flex; gap: 6px; align-items: center; }
+
+    /* Modales */
+    .modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100%; height: 100%; 
+      background: rgba(0,0,0,0.8); 
+      backdrop-filter: blur(8px); 
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center; 
+      padding: 16px; 
+    }
+    
+    .modal-content { 
+      background: #18181b; 
+      border: 1px solid #27272a; 
+      border-radius: 16px; 
+      width: 100%; 
+      max-width: 420px; 
+      padding: 22px; 
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+    .form-group input, .form-group select, .form-group textarea { 
+      width: 100%; 
+      padding: 9px; 
+      border-radius: 8px; 
+      border: 1px solid #3f3f46; 
+      background: #09090b; 
+      color: var(--text); 
+      font-size: 0.88rem; 
+    }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+    /* Vue détaillée */
+    .detail-cover {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      background: #27272a;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+    .detail-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2; }
+    .detail-artist { font-size: 1rem; color: var(--accent); font-weight: 600; margin-bottom: 10px; }
+    .detail-conductor { font-size: 0.9rem; color: var(--text-muted); font-style: italic; margin-bottom: 14px; }
+    .detail-meta { 
+      background: #09090b; 
+      border: 1px solid #27272a; 
+      border-radius: 10px; 
+      padding: 12px; 
+      margin-bottom: 16px; 
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .detail-meta-item { display: flex; justify-content: space-between; }
+    .detail-meta-label { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Phonoth&egrave;que</h1>
+      <div class="stats" id="statsCount">0 album</div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-secondary" onclick="pickRandom()">&#127922;</button>
+      <button class="btn" onclick="openAddModal()">+ Ajouter</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input type="text" id="searchInput" class="search-bar" placeholder="Rechercher artiste, titre, chef, pays..." oninput="render()">
+    
+    <div class="controls">
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterSupport('TOUS', this)">Tous</button>
+        <button class="filter-btn" onclick="filterSupport('Vinyle', this)">Vinyles</button>
+        <button class="filter-btn" onclick="filterSupport('CD', this)">CD</button>
+        <button class="filter-btn" onclick="filterSupport('SACD', this)">SACD</button>
+      </div>
+      <div>
+        <button class="btn btn-secondary" style="font-size:0.75rem; padding:6px 10px;" onclick="exportData()">&#128190; Sauvegarder</button>
+        <button class="btn btn-secondary" style="font-size:0.75rem; padding:6px 10px;" onclick="openImportModal()">&#128206;</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mainContainer"></div>
+
+  <!-- Modal Fiche Détaillée -->
+  <div id="detailModal" class="modal" onclick="closeDetailModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>D&eacute;tails de l'album</h3>
+        <button class="btn btn-secondary" style="padding: 4px 10px;" onclick="closeDetailModal()">&times;</button>
+      </div>
+      <div id="detailBody"></div>
+    </div>
+  </div>
+
+  <!-- Modal Ajout / Modification Album -->
+  <div id="addModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalFormTitle">Ajouter un album</h3>
+        <button class="btn btn-secondary" style="padding: 4px 10px;" onclick="closeAddModal()">&times;</button>
+      </div>
+      <form id="albumForm" onsubmit="saveAlbum(event)">
+        <div class="form-group">
+          <label>Artiste / Compositeur *</label>
+          <input type="text" id="artistInput" required placeholder="ex: Ludwig van Beethoven">
+        </div>
+        <div class="form-group">
+          <label>Titre de l'album *</label>
+          <input type="text" id="titleInput" required placeholder="ex: Symphonies n&deg; 5 &amp; 7">
+        </div>
+        <div class="form-group">
+          <label>Chef d'orchestre / Interpr&egrave;te</label>
+          <input type="text" id="conductorInput" placeholder="ex: Carlos Kleiber / Wiener Philharmoniker">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Support</label>
+            <select id="supportInput">
+              <option value="Vinyle">Vinyle</option>
+              <option value="CD">CD</option>
+              <option value="SACD">SACD</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pays</label>
+            <input type="text" id="countryInput" placeholder="ex: Allemagne, Japon...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Date / Ann&eacute;e de sortie</label>
+          <input type="text" id="releaseDateInput" placeholder="ex: 1975 ou 15/03/1975">
+        </div>
+        <div class="form-group">
+          <label>URL Pochette (Image)</label>
+          <input type="url" id="coverInput" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>Lien Discogs</label>
+          <input type="url" id="discogsInput" placeholder="https://www.discogs.com/fr/release/...">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Annuler</button>
+          <button type="submit" class="btn">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Import -->
+  <div id="importModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Importer la sauvegarde</h3>
+        <button class="btn btn-secondary" style="padding: 4px 10px;" onclick="closeImportModal()">&times;</button>
+      </div>
+      <div class="form-group">
+        <label>Collez votre code JSON ici :</label>
+        <textarea id="importJsonText" rows="6" placeholder="[{ &quot;artist&quot;: ... }]"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeImportModal()">Annuler</button>
+        <button class="btn" onclick="processImport()">Restaurer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let collection = JSON.parse(localStorage.getItem('audiophile_collection')) || [
+      {
+        id: 1,
+        artist: "Ludwig van Beethoven",
+        title: "Symphonies n\u00B0 5 & 7",
+        conductor: "Carlos Kleiber / Wiener Philharmoniker",
+        support: "SACD",
+        releaseDate: "2003",
+        country: "Allemagne",
+        cover: "",
+        discogsUrl: "https://www.discogs.com/fr/master/328328-Ludwig-van-Beethoven"
+      }
+    ];
+
+    let activeFilter = 'TOUS';
+    let editingId = null;
+
+    function saveCollection() {
+      localStorage.setItem('audiophile_collection', JSON.stringify(collection));
+      render();
+    }
+
+    function formatUrl(url) {
+      if (!url) return '';
+      let trimmed = url.trim();
+      if (trimmed && !trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+        return 'https://' + trimmed;
+      }
+      return trimmed;
+    }
+
+    function getBadgeClass(support) {
+      switch(support.toUpperCase()) {
+        case 'VINYLE': return 'badge-vinyle';
+        case 'CD': return 'badge-cd';
+        case 'SACD': return 'badge-sacd';
+        default: return '';
+      }
+    }
+
+    function render() {
+      const container = document.getElementById('mainContainer');
+      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+      const statsCount = document.getElementById('statsCount');
+      container.innerHTML = '';
+
+      let filtered = collection.filter(album => {
+        const matchesFilter = activeFilter === 'TOUS' || album.support.toLowerCase() === activeFilter.toLowerCase();
+        const matchesSearch = album.artist.toLowerCase().includes(searchQuery) || 
+                              album.title.toLowerCase().includes(searchQuery) ||
+                              (album.conductor && album.conductor.toLowerCase().includes(searchQuery)) ||
+                              (album.country && album.country.toLowerCase().includes(searchQuery));
+        return matchesFilter && matchesSearch;
+      });
+
+      statsCount.innerText = `${filtered.length} album${filtered.length > 1 ? 's' : ''}` + (activeFilter !== 'TOUS' ? ` (${activeFilter})` : '');
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); padding: 30px 0; text-align: center; font-size: 0.9rem;">Aucun album trouv&eacute;.</p>';
+        return;
+      }
+
+      // Regroupement par artiste
+      const grouped = {};
+      filtered.forEach(album => {
+        if (!grouped[album.artist]) {
+          grouped[album.artist] = [];
+        }
+        grouped[album.artist].push(album);
+      });
+
+      // Tri des noms d'artistes A-Z
+      const sortedArtists = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+
+      sortedArtists.forEach(artistName => {
+        const artistAlbums = grouped[artistName];
+        
+        artistAlbums.sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
+
+        const section = document.createElement('div');
+        section.className = 'artist-section';
+
+        section.innerHTML = `
+          <div class="artist-header">
+            <span>${artistName}</span>
+            <span class="artist-count">(${artistAlbums.length} album${artistAlbums.length > 1 ? 's' : ''})</span>
+          </div>
+          <div class="grid"></div>
+        `;
+
+        const grid = section.querySelector('.grid');
+
+        artistAlbums.forEach(album => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.onclick = () => openDetailModal(album.id);
+
+          const coverSrc = album.cover ? formatUrl(album.cover) : 'https://via.placeholder.com/150/27272a/a1a1aa?text=Pas+d%27image';
+          const discogsLink = formatUrl(album.discogsUrl);
+          const badgeClass = getBadgeClass(album.support);
+
+          card.innerHTML = `
+            <button class="btn-delete-top" title="Supprimer" onclick="event.stopPropagation(); deleteAlbum(${album.id})">&times;</button>
+            <img src="${coverSrc}" alt="Pochette" onerror="this.src='https://via.placeholder.com/150/27272a/a1a1aa?text=Erreur+Image'">
+            <div class="card-info">
+              <div>
+                <div>
+                  <span class="badge ${badgeClass}">${album.support}</span>
+                  ${album.releaseDate ? `<span style="font-size:0.7rem; color:var(--text-muted); font-weight:500;"> &bull; ${album.releaseDate}</span>` : ''}
+                </div>
+                <div class="title" title="${album.title}">${album.title}</div>
+                ${album.conductor ? `<div class="conductor" title="${album.conductor}">Dir. : ${album.conductor}</div>` : ''}
+              </div>
+              <div class="card-actions">
+                ${discogsLink ? `<a href="${discogsLink}" class="btn btn-secondary" style="flex:1; font-size:0.7rem; padding: 4px 6px;" onclick="event.stopPropagation();">Discogs &#8599;</a>` : ''}
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size:0.7rem;" onclick="event.stopPropagation(); editAlbum(${album.id})">&#9998;</button>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        container.appendChild(section);
+      });
+    }
+
+    /* Modale détaillée */
+    function openDetailModal(id) {
+      const album = collection.find(a => a.id === id);
+      if (!album) return;
+
+      const coverSrc = album.cover ? formatUrl(album.cover) : 'https://via.placeholder.com/300/27272a/a1a1aa?text=Pas+d%27image';
+      const discogsLink = formatUrl(album.discogsUrl);
+      const badgeClass = getBadgeClass(album.support);
+
+      const detailBody = document.getElementById('detailBody');
+      detailBody.innerHTML = `
+        <img src="${coverSrc}" class="detail-cover" alt="Pochette" onerror="this.src='https://via.placeholder.com/300/27272a/a1a1aa?text=Erreur+Image'">
+        <div class="detail-title">${album.title}</div>
+        <div class="detail-artist">${album.artist}</div>
+        ${album.conductor ? `<div class="detail-conductor">Dir. : ${album.conductor}</div>` : ''}
+        
+        <div class="detail-meta">
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Support :</span>
+            <span class="badge ${badgeClass}">${album.support}</span>
+          </div>
+          ${album.releaseDate ? `<div class="detail-meta-item"><span class="detail-meta-label">Date de sortie :</span><span>${album.releaseDate}</span></div>` : ''}
+          ${album.country ? `<div class="detail-meta-item"><span class="detail-meta-label">Pays d'origine :</span><span>${album.country}</span></div>` : ''}
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          ${discogsLink ? `<a href="${discogsLink}" class="btn" style="flex:1;" target="_blank">Ouvrir sur Discogs &#8599;</a>` : ''}
+          <button class="btn btn-secondary" onclick="closeDetailModal(); editAlbum(${album.id})">&#9998; Modifier</button>
+        </div>
+      `;
+
+      document.getElementById('detailModal').style.display = 'flex';
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').style.display = 'none';
+    }
+
+    function filterSupport(support, btn) {
+      activeFilter = support;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    function pickRandom() {
+      if (collection.length === 0) return alert("Ta collection est vide !");
+      const randomAlbum = collection[Math.floor(Math.random() * collection.length)];
+      let text = `S\u00E9lection au hasard :\n\n${randomAlbum.artist} - ${randomAlbum.title}`;
+      if (randomAlbum.conductor) text += `\nDir. : ${randomAlbum.conductor}`;
+      text += ` (${randomAlbum.support})`;
+      alert(text);
+    }
+
+    function openAddModal() {
+      editingId = null;
+      document.getElementById('modalFormTitle').innerText = "Ajouter un album";
+      document.getElementById('albumForm').reset();
+      document.getElementById('addModal').style.display = 'flex';
+    }
+
+    function editAlbum(id) {
+      const album = collection.find(a => a.id === id);
+      if (!album) return;
+
+      editingId = id;
+      document.getElementById('modalFormTitle').innerText = "Modifier l'album";
+      document.getElementById('artistInput').value = album.artist || '';
+      document.getElementById('titleInput').value = album.title || '';
+      document.getElementById('conductorInput').value = album.conductor || '';
+      document.getElementById('supportInput').value = album.support || 'Vinyle';
+      document.getElementById('countryInput').value = album.country || '';
+      document.getElementById('releaseDateInput').value = album.releaseDate || album.year || '';
+      document.getElementById('coverInput').value = album.cover || '';
+      document.getElementById('discogsInput').value = album.discogsUrl || '';
+
+      document.getElementById('addModal').style.display = 'flex';
+    }
+
+    function closeAddModal() {
+      document.getElementById('addModal').style.display = 'none';
+      editingId = null;
+    }
+
+    function saveAlbum(event) {
+      event.preventDefault();
+
+      const artist = document.getElementById('artistInput').value.trim();
+      const title = document.getElementById('titleInput').value.trim();
+      const conductor = document.getElementById('conductorInput').value.trim();
+      const support = document.getElementById('supportInput').value;
+      const country = document.getElementById('countryInput').value.trim();
+      const releaseDate = document.getElementById('releaseDateInput').value.trim();
+      const cover = document.getElementById('coverInput').value.trim();
+      const discogsUrl = document.getElementById('discogsInput').value.trim();
+
+      if (editingId) {
+        const index = collection.findIndex(a => a.id === editingId);
+        if (index !== -1) {
+          collection[index] = { ...collection[index], artist, title, conductor, support, country, releaseDate, cover, discogsUrl };
+        }
+      } else {
+        collection.push({
+          id: Date.now(),
+          artist,
+          title,
+          conductor,
+          support,
+          country,
+          releaseDate,
+          cover,
+          discogsUrl
+        });
+      }
+
+      saveCollection();
+      closeAddModal();
+    }
+
+    function deleteAlbum(id) {
+      if (confirm("Supprimer cet album de la collection ?")) {
+        collection = collection.filter(a => a.id !== id);
+        saveCollection();
+      }
+    }
+
+    function exportData() {
+      const dataStr = JSON.stringify(collection, null, 2);
+      navigator.clipboard.writeText(dataStr).then(() => {
+        alert("Donn\u00E9es copi\u00E9es dans le presse-papier !\nTu peux les coller dans l'application Notes pour garder une sauvegarde.");
+      }).catch(() => {
+        prompt("Copie ce texte pour sauvegarder ta base :", dataStr);
+      });
+    }
+
+    function openImportModal() {
+      document.getElementById('importJsonText').value = '';
+      document.getElementById('importModal').style.display = 'flex';
+    }
+
+    function closeImportModal() {
+      document.getElementById('importModal').style.display = 'none';
+    }
+
+    function processImport() {
+      const text = document.getElementById('importJsonText').value.trim();
+      if (!text) return;
+      try {
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) {
+          collection = parsed;
+          saveCollection();
+          closeImportModal();
+          alert("Importation r\u00E9ussie !");
+        } else {
+          alert("Format JSON invalide : doit \u00EAtre un tableau d'albums.");
+        }
+      } catch (e) {
+        alert("Erreur de lecture du code JSON.");
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
