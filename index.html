@@ -23,42 +23,55 @@
       --badge-sacd-bg: #581c87;   --badge-sacd-text: #e9d5ff;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg); color: var(--text); padding: 16px; padding-top: calc(16px + env(safe-area-inset-top)); padding-bottom: calc(40px + env(safe-area-inset-bottom)); max-width: 900px; margin: 0 auto; }
 
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-    h1 { font-size: 1.4rem; font-weight: 700; }
-    .stats { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    h1 { font-size: 1.6rem; font-weight: 700; }
+    .stats { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
 
-    .btn { background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+    .btn { background: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
     .btn:active { transform: scale(0.96); }
     .btn-secondary { background: #27272a; color: var(--text); border: 1px solid #3f3f46; }
 
-    .toolbar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-    .search-bar { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 0.95rem; }
+    .toolbar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .search-bar { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 1rem; }
 
     .controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .filters { display: flex; gap: 6px; }
-    .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted); cursor: pointer; font-size: 0.8rem; }
-    .filter-btn.active { background: var(--text); color: var(--bg); font-weight: 600; }
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted); cursor: pointer; font-size: 0.9rem; font-weight: 500; }
+    .filter-btn.active { background: var(--text); color: var(--bg); font-weight: 700; }
 
-    .artist-section { margin-bottom: 28px; }
-    .artist-header { font-size: 1.1rem; font-weight: 700; padding-bottom: 6px; margin-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
-    .artist-count { font-size: 0.8rem; color: var(--text-muted); }
+    .artist-section { margin-bottom: 32px; }
+    .artist-header { font-size: 1.25rem; font-weight: 700; padding-bottom: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; color: #38bdf8; }
+    .artist-count { font-size: 0.85rem; color: var(--text-muted); font-weight: 400; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
-    .card { position: relative; background: var(--card-bg); border-radius: 12px; padding: 10px; border: 1px solid var(--card-border); display: flex; align-items: center; gap: 12px; cursor: pointer; }
-    .card img { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; background: #27272a; flex-shrink: 0; }
-    .card-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; height: 90px; }
-    .card .title { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card .conductor { font-size: 0.76rem; color: var(--text-muted); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+    .card { position: relative; background: var(--card-bg); border-radius: 14px; padding: 12px; border: 1px solid var(--card-border); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: background 0.2s; }
+    .card:active { background: #27272a; }
+    .card img { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; background: #27272a; flex-shrink: 0; }
+    .card-info { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; gap: 4px; }
+    .card .title { font-weight: 700; font-size: 1.05rem; line-height: 1.25; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card .conductor { font-size: 0.85rem; color: var(--text-muted); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    .badge { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 5px; font-weight: 700; text-transform: uppercase; }
+    .badge { display: inline-block; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; text-transform: uppercase; width: fit-content; }
     .badge-vinyle { background: var(--badge-vinyle-bg); color: var(--badge-vinyle-text); }
     .badge-cd { background: var(--badge-cd-bg); color: var(--badge-cd-text); }
     .badge-sacd { background: var(--badge-sacd-bg); color: var(--badge-sacd-text); }
 
     .file-input-label { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+
+    /* Modal Fiche Détaillée */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; padding: 16px; }
+    .modal-content { background: #18181b; border: 1px solid #27272a; border-radius: 20px; width: 100%; max-width: 440px; padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .detail-cover { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 14px; margin-bottom: 16px; background: #27272a; }
+    .detail-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; line-height: 1.2; }
+    .detail-artist { font-size: 1.1rem; color: #38bdf8; font-weight: 600; margin-bottom: 8px; }
+    .detail-conductor { font-size: 0.95rem; color: var(--text-muted); font-style: italic; margin-bottom: 16px; }
+    .detail-meta { background: #09090b; border: 1px solid #27272a; border-radius: 12px; padding: 14px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; }
+    .detail-meta-item { display: flex; justify-content: space-between; align-items: center; }
+    .detail-meta-label { color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -86,11 +99,22 @@
         <button class="filter-btn" onclick="filterSupport('CD', this)">CD</button>
         <button class="filter-btn" onclick="filterSupport('SACD', this)">SACD</button>
       </div>
-      <button class="btn btn-secondary" style="font-size:0.75rem; padding:6px 10px;" onclick="resetCollection()">🗑️ Vider</button>
+      <button class="btn btn-secondary" style="font-size:0.8rem; padding:8px 12px;" onclick="resetCollection()">🗑️ Vider</button>
     </div>
   </div>
 
   <div id="mainContainer"></div>
+
+  <!-- Modal Fiche Détaillée -->
+  <div id="detailModal" class="modal" onclick="closeDetailModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem;">Détails de l'album</h3>
+        <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 1rem;" onclick="closeDetailModal()">&times;</button>
+      </div>
+      <div id="detailBody"></div>
+    </div>
+  </div>
 
   <script>
     let collection = JSON.parse(localStorage.getItem('phonotheque_data')) || [];
@@ -121,10 +145,10 @@
         return matchesFilter && matchesSearch;
       });
 
-      document.getElementById('statsCount').innerText = `${filtered.length} album${filtered.length > 1 ? 's' : ''}`;
+      document.getElementById('statsCount').innerText = `${filtered.length} album${filtered.length > 1 ? 's' : ''}` + (activeFilter !== 'TOUS' ? ` (${activeFilter})` : '');
 
       if (filtered.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted); padding: 40px 0; text-align: center;">Aucun album enregistré.<br><br>Clique sur <strong>📁 Importer CSV</strong> pour charger ton fichier MusicBuddy.csv.</p>';
+        container.innerHTML = '<p style="color: var(--text-muted); padding: 40px 0; text-align: center; font-size: 1rem;">Aucun album trouvé.<br><br>Si la liste est vide, clique sur <strong>📁 Importer CSV</strong>.</p>';
         return;
       }
 
@@ -143,9 +167,11 @@
         section.innerHTML = `<div class="artist-header"><span>${artistName}</span><span class="artist-count">(${artistAlbums.length})</span></div><div class="grid"></div>`;
         
         const grid = section.querySelector('.grid');
-        artistAlbums.forEach(album => {
+        artistAlbums.forEach((album) => {
           const card = document.createElement('div');
           card.className = 'card';
+          card.onclick = () => openDetailModal(album);
+
           const coverSrc = album.cover || 'https://via.placeholder.com/150/27272a/a1a1aa?text=Pas+d%27image';
           const supportName = album.support || 'CD';
           const badgeClass = 'badge-' + supportName.toLowerCase();
@@ -164,6 +190,33 @@
         });
         container.appendChild(section);
       });
+    }
+
+    function openDetailModal(album) {
+      const coverSrc = album.cover || 'https://via.placeholder.com/300/27272a/a1a1aa?text=Pas+d%27image';
+      const supportName = album.support || 'CD';
+      const badgeClass = 'badge-' + supportName.toLowerCase();
+
+      const detailBody = document.getElementById('detailBody');
+      detailBody.innerHTML = `
+        <img src="${coverSrc}" class="detail-cover" alt="Pochette" onerror="this.src='https://via.placeholder.com/300/27272a/a1a1aa?text=Erreur+Image'">
+        <div class="detail-title">${album.title}</div>
+        <div class="detail-artist">${album.artist}</div>
+        ${album.conductor ? `<div class="detail-conductor">Dir. : ${album.conductor}</div>` : ''}
+        
+        <div class="detail-meta">
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Support :</span>
+            <span class="badge ${badgeClass}">${supportName}</span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('detailModal').style.display = 'flex';
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').style.display = 'none';
     }
 
     function filterSupport(support, btn) {
