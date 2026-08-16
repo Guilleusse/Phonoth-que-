@@ -267,24 +267,32 @@
   </header>
 
   <div class="toolbar">
-<div style="position: relative; width: 100%; margin-bottom: 12px;">
-  <input 
-    type="text" 
-    id="searchInput" 
-    placeholder="Rechercher un titre, artiste, chef..." 
-    oninput="handleSearchInput()" 
-    style="width: 100%; height: 42px; padding: 0 38px 0 14px; font-size: 16px; background: #ffffff; color: #000000; border: none; border-radius: 10px; box-sizing: border-box;"
-  >
-  <button 
-    id="clearSearchBtn" 
-    onclick="clearSearch()" 
-    style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%; background: #8e8e93; color: #ffffff; border: none; font-size: 12px; font-weight: bold; cursor: pointer; padding: 0; line-height: 22px; text-align: center;"
-  >
-    ✕
-  </button>
+<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+  <!-- Champ de recherche (légèrement réduit) -->
+  <div style="position: relative; flex: 1;">
+    <input 
+      type="text" 
+      id="searchInput" 
+      placeholder="Rechercher un titre, artiste..." 
+      oninput="handleSearchInput()" 
+      onkeydown="if(event.key === 'Enter') this.blur();"
+      enterkeyhint="search"
+      style="width: 100%; height: 42px; padding: 0 38px 0 14px; font-size: 16px; background: #ffffff; color: #000000; border: none; border-radius: 10px; box-sizing: border-box;"
+    >
+    <button 
+      id="clearSearchBtn" 
+      onclick="clearSearch()" 
+      style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%; background: #8e8e93; color: #ffffff; border: none; font-size: 12px; font-weight: bold; cursor: pointer; padding: 0; line-height: 22px; text-align: center;"
+    >
+      ✕
+    </button>
+  </div>
+
+  <!-- Bouton loupe bleue -->
+  <div style="width: 42px; height: 42px; background: #007aff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 18px; flex-shrink: 0;">
+    🔍
+  </div>
 </div>
-
-
     <div class="controls">
       <div class="filters">
         <button class="filter-btn active" onclick="filterSupport('TOUS', this)">Tous</button>
