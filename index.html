@@ -694,11 +694,20 @@ function handleSearchInput() {
   const input = document.getElementById('searchInput');
   const clearBtn = document.getElementById('clearSearchBtn');
   
-  // Affiche la croix uniquement si du texte est tapé
-  clearBtn.style.display = input.value ? 'block' : 'none';
+  if (clearBtn) {
+    clearBtn.style.display = input.value ? 'block' : 'none';
+  }
   
-  // Lance ton filtre habituel
-  filterCollection(); 
+  // Tente d'appeler la fonction de filtrage selon son nom
+  if (typeof filterCollection === 'function') {
+    filterCollection();
+  } else if (typeof filter === 'function') {
+    filter();
+  } else if (typeof rechercher === 'function') {
+    rechercher();
+  } else if (typeof search === 'function') {
+    search();
+  }
 }
 
 function clearSearch() {
@@ -706,8 +715,12 @@ function clearSearch() {
   const clearBtn = document.getElementById('clearSearchBtn');
   
   input.value = '';
-  clearBtn.style.display = 'none';
+  if (clearBtn) clearBtn.style.display = 'none';
   input.focus();
+  
+  handleSearchInput();
+}
+
   
   // Réaffiche toute la collection
   filterCollection(); 
