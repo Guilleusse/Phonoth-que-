@@ -267,7 +267,23 @@
   </header>
 
   <div class="toolbar">
-    <input type="text" id="searchInput" class="search-bar" placeholder="Rechercher artiste, titre, chef, année, pays..." oninput="render()">
+<div style="position: relative; width: 100%;">
+  <input 
+    type="text" 
+    id="searchInput" 
+    placeholder="Rechercher un titre, artiste..." 
+    oninput="handleSearchInput()" 
+    style="width: 100%; padding-right: 35px;"
+  >
+  <button 
+    id="clearSearchBtn" 
+    onclick="clearSearch()" 
+    style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 18px; color: #888; cursor: pointer; padding: 0;"
+  >
+    ✖
+  </button>
+</div>
+
     <div class="controls">
       <div class="filters">
         <button class="filter-btn active" onclick="filterSupport('TOUS', this)">Tous</button>
@@ -655,6 +671,29 @@
     }
 
     render();
+
+function handleSearchInput() {
+  const input = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearSearchBtn');
+  
+  // Affiche la croix uniquement si du texte est tapé
+  clearBtn.style.display = input.value ? 'block' : 'none';
+  
+  // Lance ton filtre habituel
+  filterCollection(); 
+}
+
+function clearSearch() {
+  const input = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearSearchBtn');
+  
+  input.value = '';
+  clearBtn.style.display = 'none';
+  input.focus();
+  
+  // Réaffiche toute la collection
+  filterCollection(); 
+}
   </script>
 </body>
 </html>
