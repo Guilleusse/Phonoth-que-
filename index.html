@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+i<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -268,6 +268,7 @@
 
   <div class="toolbar">
 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+  <!-- Champ de recherche -->
   <div style="position: relative; flex: 1;">
     <input 
       type="text" 
@@ -291,14 +292,16 @@
     </button>
   </div>
 
+  <!-- Bouton loupe bleue cliquable -->
   <button 
-    onclick="filterCollection(); document.getElementById('searchInput').blur();" 
+    type="button" 
+    onclick="handleSearchInput(); document.getElementById('searchInput').blur();" 
     style="width: 42px; height: 42px; background: #007aff; border: none; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 18px; flex-shrink: 0; cursor: pointer; padding: 0;"
   >
     🔍
   </button>
 </div>
-</div>
+  </div>
     <div class="controls">
       <div class="filters">
         <button class="filter-btn active" onclick="filterSupport('TOUS', this)">Tous</button>
