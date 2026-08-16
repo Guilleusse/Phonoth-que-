@@ -268,7 +268,6 @@
 
   <div class="toolbar">
 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-  <!-- Champ de recherche (légèrement réduit) -->
   <div style="position: relative; flex: 1;">
     <input 
       type="text" 
@@ -277,6 +276,10 @@
       oninput="handleSearchInput()" 
       onkeydown="if(event.key === 'Enter') this.blur();"
       enterkeyhint="search"
+      autocorrect="off"
+      autocapitalize="none"
+      spellcheck="false"
+      autocomplete="off"
       style="width: 100%; height: 42px; padding: 0 38px 0 14px; font-size: 16px; background: #ffffff; color: #000000; border: none; border-radius: 10px; box-sizing: border-box;"
     >
     <button 
@@ -288,10 +291,13 @@
     </button>
   </div>
 
-  <!-- Bouton loupe bleue -->
-  <div style="width: 42px; height: 42px; background: #007aff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 18px; flex-shrink: 0;">
+  <button 
+    onclick="filterCollection(); document.getElementById('searchInput').blur();" 
+    style="width: 42px; height: 42px; background: #007aff; border: none; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 18px; flex-shrink: 0; cursor: pointer; padding: 0;"
+  >
     🔍
-  </div>
+  </button>
+</div>
 </div>
     <div class="controls">
       <div class="filters">
