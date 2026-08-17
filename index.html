@@ -356,10 +356,15 @@
             <option value="SACD">SACD</option>
           </select>
         </div>
-        <div class="form-group">
+                <div class="form-group">
           <label>URL d'image de la pochette</label>
           <input type="url" id="formCover" placeholder="https://...">
         </div>
+        <div class="form-group">
+          <label>ID Discogs (numéro de release)</label>
+          <input type="text" id="formDiscogsId" placeholder="ex: 1234567">
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" onclick="closeFormModal()">Annuler</button>
           <button type="submit" class="btn">Enregistrer</button>
@@ -462,11 +467,15 @@
       });
     }
 
-    function openDetailModal(index) {
+        function openDetailModal(index) {
       const album = collection[index];
       if (!album) return;
 
-      const coverSrc = album.cover || 'https://via.placeholder.com/300/27272a/a1a1aa?text=Pas+d%27image';
+      // Utilisation du proxy weserv.nl pour la pochette agrandie
+      const coverSrc = album.cover 
+        ? `https://images.weserv.nl/?url=${encodeURIComponent(album.cover)}` 
+        : 'https://via.placeholder.com/300/27272a/a1a1aa?text=Pas+d%27image';
+
       const supportName = album.support || 'CD';
       const badgeClass = 'badge-' + supportName.toLowerCase();
 
@@ -523,6 +532,9 @@
         document.getElementById('formCountry').value = album.country || '';
         document.getElementById('formSupport').value = album.support || 'CD';
         document.getElementById('formCover').value = album.cover || '';
+        if (document.getElementById('formDiscogsId')) {
+          document.getElementById('formDiscogsId').value = album.discogsId || '';
+        }
       } else {
         document.getElementById('formModalTitle').innerText = "Ajouter un album";
         document.getElementById('albumForm').reset();
@@ -537,6 +549,10 @@
     function handleFormSubmit(event) {
       event.preventDefault();
       const index = parseInt(document.getElementById('editIndex').value, 10);
+      
+      const discogsInput = document.getElementById('formDiscogsId');
+      const existingDiscogsId = (index >= 0 && collection[index]) ? (collection[index].discogsId || '') : '';
+
       const newAlbum = {
         artist: document.getElementById('formArtist').value.trim(),
         title: document.getElementById('formTitle').value.trim(),
@@ -544,7 +560,8 @@
         year: document.getElementById('formYear').value.trim(),
         country: document.getElementById('formCountry').value.trim(),
         support: document.getElementById('formSupport').value,
-        cover: document.getElementById('formCover').value.trim()
+        cover: document.getElementById('formCover').value.trim(),
+        discogsId: discogsInput ? discogsInput.value.trim() : existingDiscogsId
       };
 
       if (index >= 0) {
@@ -574,12 +591,10 @@
     }
 
     function pickRandom() {
-  if (!collection.length) return alert("Collection vide !");
-  const randomIndex = Math.floor(Math.random() * collection.length);
-  openDetailModal(randomIndex);
-}
-
-    
+      if (!collection.length) return alert("Collection vide !");
+      const randomIndex = Math.floor(Math.random() * collection.length);
+      openDetailModal(randomIndex);
+    }
 
     // Parser CSV robuste gérant les guillemets et retours à la ligne internes
     function parseCSV(text) {
@@ -636,9 +651,8 @@
         const conductorIdx = headers.indexOf('Conductors');
         const yearIdx = headers.indexOf('Release Year');
         const countryIdx = headers.indexOf('Country');
-        const discogsIdx = headers.indexOf('discogs Release ID'); // <-- AJOUTER CETTE LIGNE
+        const discogsIdx = headers.indexOf('discogs Release ID');
         const coverIdx = headers.indexOf('Uploaded Image URL');
-
 
         if (titleIdx === -1 || artistIdx === -1) {
           alert("Format CSV non reconnu.");
@@ -665,7 +679,7 @@
             conductor: conductorIdx !== -1 && cols[conductorIdx] ? cols[conductorIdx].trim() : '',
             year: yearIdx !== -1 && cols[yearIdx] ? cols[yearIdx].trim() : '',
             country: countryIdx !== -1 && cols[countryIdx] ? cols[countryIdx].trim() : '',
-            discogsId: discogsIdx !== -1 && cols[discogsIdx] ? cols[discogsIdx].trim() : '', // <-- AJOUTER CETTE LIGNE
+            discogsId: discogsIdx !== -1 && cols[discogsIdx] ? cols[discogsIdx].trim() : '',
             support: support,
             cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : ''
           });
@@ -684,27 +698,27 @@
 
     render();
 
-function handleSearchInput() {
-  const input = document.getElementById('searchInput');
-  const clearBtn = document.getElementById('clearSearchBtn');
-  
-  if (clearBtn) {
-    clearBtn.style.display = input.value ? 'block' : 'none';
-  }
-  
-  render();
-}
+    function handleSearchInput() {
+      const input = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      
+      if (clearBtn) {
+        clearBtn.style.display = input.value ? 'block' : 'none';
+      }
+      
+      render();
+    }
 
-function clearSearch() {
-  const input = document.getElementById('searchInput');
-  const clearBtn = document.getElementById('clearSearchBtn');
-  
-  input.value = '';
-  if (clearBtn) clearBtn.style.display = 'none';
-  input.focus();
-  
-  handleSearchInput();
-}
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      
+      input.value = '';
+      if (clearBtn) clearBtn.style.display = 'none';
+      input.focus();
+      
+      handleSearchInput();
+    }
 
   </script>
 </body>
