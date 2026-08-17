@@ -427,7 +427,10 @@
           card.className = 'card';
           card.onclick = () => openDetailModal(album._id);
 
-          const coverSrc = album.cover || 'https://via.placeholder.com/150/27272a/a1a1aa?text=Pas+d%27image';
+          const coverSrc = album.cover 
+          ? `https://images.weserv.nl/?url=${encodeURIComponent(album.cover)}` 
+          : 'https://via.placeholder.com/150/27272a/a1a1aa?text=Pas+d%27image';
+
           const supportName = album.support || 'CD';
           const badgeClass = 'badge-' + supportName.toLowerCase();
 
