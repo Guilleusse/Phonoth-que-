@@ -701,18 +701,6 @@ function handleSearchInput() {
   render();
 }
 
-  
-  // Tente d'appeler la fonction de filtrage selon son nom
-  if (typeof filterCollection === 'function') {
-    filterCollection();
-  } else if (typeof filter === 'function') {
-    filter();
-  } else if (typeof rechercher === 'function') {
-    rechercher();
-  } else if (typeof search === 'function') {
-    search();
-  }
-}
 
 function clearSearch() {
   const input = document.getElementById('searchInput');
