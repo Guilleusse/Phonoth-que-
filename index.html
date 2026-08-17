@@ -698,6 +698,10 @@ function handleSearchInput() {
     clearBtn.style.display = input.value ? 'block' : 'none';
   }
   
+  render();
+}
+
+  
   // Tente d'appeler la fonction de filtrage selon son nom
   if (typeof filterCollection === 'function') {
     filterCollection();
