@@ -259,16 +259,23 @@
       <h1>Phonothèque</h1>
       <div class="stats" id="statsCount">0 album</div>
     </div>
-        <div class="header-actions">
-      <button class="btn" onclick="openFormModal()" title="Ajouter un album">+</button>
-      <button class="btn btn-secondary" onclick="pickRandom()" title="Album aléatoire">🎲</button>
-      <button class="btn btn-secondary" onclick="exportToCSV()" title="Exporter en CSV">📥 Exporter</button>
-      <label class="btn btn-secondary file-input-label" title="Importer un fichier CSV">
-        📤 Importer
-        <input type="file" accept=".csv" onchange="importFromCSV(event)" style="display: none;">
-      </label>
+        <div class="header-actions" style="display: flex; gap: 10px; align-items: center; margin-left: auto; padding-left: 16px;">
+      <!-- Colonne 1 : Les deux carrés superposés (+ et 🎲) -->
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <button class="btn" onclick="openFormModal()" title="Ajouter un album" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 18px;">+</button>
+        <button class="btn btn-secondary" onclick="pickRandom()" title="Album aléatoire" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 16px;">🎲</button>
+      </div>
+
+      <!-- Colonne 2 : Les deux rectangles superposés (Exporter et Importer) -->
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <button class="btn btn-secondary" onclick="exportToCSV()" title="Exporter en CSV" style="height: 38px; padding: 0 10px; display: flex; align-items: center; gap: 4px; font-size: 13px; white-space: nowrap;">📥 Exporter</button>
+        <label class="btn btn-secondary file-input-label" title="Importer un fichier CSV" style="height: 38px; padding: 0 10px; display: flex; align-items: center; gap: 4px; font-size: 13px; white-space: nowrap; margin: 0; cursor: pointer;">
+          📤 Importer
+          <input type="file" accept=".csv" onchange="importFromCSV(event)" style="display: none;">
+        </label>
+      </div>
     </div>
-  </div>
+
   </header>
 
   <div class="toolbar">
@@ -838,25 +845,34 @@
       searchDiscogsAuto(decodedText.trim());
     }
     // --- Exportation au format CSV ---
-    function exportToCSV() {
-      const albums = JSON.parse(localStorage.getItem('albums')) || [];
-      if (albums.length === 0) {
+        function exportToCSV() {
+      // Récupération directe de la liste affichée à l'écran
+      let list = [];
+      if (typeof albums !== 'undefined' && Array.isArray(albums) && albums.length > 0) {
+        list = albums;
+      } else {
+        const stored = localStorage.getItem('albums') || localStorage.getItem('phonotheque') || localStorage.getItem('musicCollection');
+        if (stored) {
+          try { list = JSON.parse(stored); } catch(e) {}
+        }
+      }
+
+      if (!list || list.length === 0) {
         alert("Votre phonothèque est vide, aucun album à exporter.");
         return;
       }
 
       const headers = ["Artiste", "Titre", "Année", "Pays", "Support", "DiscogsID", "Pochette"];
-      const rows = albums.map(a => [
-        `"${(a.artist || '').replace(/"/g, '""')}"`,
-        `"${(a.title || '').replace(/"/g, '""')}"`,
-        `"${(a.year || '').replace(/"/g, '""')}"`,
-        `"${(a.country || '').replace(/"/g, '""')}"`,
-        `"${(a.support || '').replace(/"/g, '""')}"`,
-        `"${(a.discogsId || '').replace(/"/g, '""')}"`,
-        `"${(a.cover || '').replace(/"/g, '""')}"`
+      const rows = list.map(a => [
+        `"${(a.artist || a.artiste || '').toString().replace(/"/g, '""')}"`,
+        `"${(a.title || a.titre || '').toString().replace(/"/g, '""')}"`,
+        `"${(a.year || a.annee || '').toString().replace(/"/g, '""')}"`,
+        `"${(a.country || a.pays || '').toString().replace(/"/g, '""')}"`,
+        `"${(a.support || '').toString().replace(/"/g, '""')}"`,
+        `"${(a.discogsId || a.discogs_id || a.id || '').toString().replace(/"/g, '""')}"`,
+        `"${(a.cover || a.pochette || '').toString().replace(/"/g, '""')}"`
       ]);
 
-      // En-tête UTF-8 (\uFEFF) pour préserver les accents dans Excel
       const csvContent = "\uFEFF" + [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -869,14 +885,14 @@
       link.click();
       document.body.removeChild(link);
     }
-
+    
     // --- Importation depuis un fichier CSV ---
     function importFromCSV(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = et function(e) {
         const text = e.target.result;
         const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
         
