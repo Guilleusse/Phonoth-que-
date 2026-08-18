@@ -334,6 +334,15 @@
           <button type="button" class="btn" style="width: 100%; background: #059669;" onclick="toggleScanner()">📷 Scanner un code-barres</button>
           <div id="qr-reader" style="width: 100%; margin-top: 10px; display: none; border-radius: 8px; overflow: hidden; border: 1px solid var(--border);"></div>
         </div>
+        
+        <!-- Recherche manuelle par Code-barres ou Réf. Discogs -->
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label>Recherche auto (Code-barres ou Réf. Catalogue)</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="manualQuery" placeholder="ex: 060253712345 ou SD 19129" style="flex: 1;">
+            <button type="button" class="btn btn-secondary" onclick="searchDiscogsAuto()">🔍 Chercher</button>
+          </div>
+        </div>
 
         <div class="form-group">
           <label>Artiste / Compositeur *</label>
@@ -767,20 +776,26 @@
       searchDiscogsByBarcode(decodedText.trim());
     }
 
-    function searchDiscogsByBarcode(barcode) {
-      const url = `https://api.discogs.com/database/search?barcode=${encodeURIComponent(barcode)}&token=${DISCOGS_TOKEN}`;
+        function searchDiscogsAuto(queryOverride) {
+      const query = queryOverride || document.getElementById('manualQuery').value.trim();
+      if (!query) {
+        alert("Veuillez saisir un code-barres ou une référence d'album.");
+        return;
+      }
+
+      // La recherche Discogs par query globale trouve les EAN et les numéros de catalogue
+      const url = `https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&token=${DISCOGS_TOKEN}`;
 
       fetch(url)
         .then(res => res.json())
         .then(data => {
           if (!data.results || data.results.length === 0) {
-            alert(`Aucun album trouvé sur Discogs pour le code-barres : ${barcode}`);
+            alert(`Aucun album trouvé sur Discogs pour : ${query}`);
             return;
           }
 
           const result = data.results[0];
 
-          // Séparation "Artiste - Titre"
           let artist = 'Artiste inconnu';
           let title = result.title || '';
 
@@ -790,19 +805,16 @@
             title = parts.slice(1).join(' - ').trim();
           }
 
-          // Remplissage automatique des champs du formulaire
           document.getElementById('formArtist').value = artist;
           document.getElementById('formTitle').value = title;
           document.getElementById('formYear').value = result.year || '';
           document.getElementById('formCountry').value = result.country || '';
           document.getElementById('formDiscogsId').value = result.id || '';
 
-          // Pochette Discogs
           if (result.cover_image) {
             document.getElementById('formCover').value = result.cover_image;
           }
 
-          // Détection du format (Vinyle, CD, SACD)
           if (result.format && Array.isArray(result.format)) {
             const fmtStr = result.format.join(' ').toLowerCase();
             if (fmtStr.includes('vinyl') || fmtStr.includes('vinyle')) {
@@ -818,6 +830,12 @@
           alert("Erreur lors de la recherche Discogs : " + err);
         });
     }
+
+    function onScanSuccess(decodedText) {
+      stopScanner();
+      searchDiscogsAuto(decodedText.trim());
+    }
+
 
     
   </script>
