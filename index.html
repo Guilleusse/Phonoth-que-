@@ -844,14 +844,13 @@
       stopScanner();
       searchDiscogsAuto(decodedText.trim());
     }
-    // --- Exportation au format CSV ---
-        function exportToCSV() {
-      // Récupération directe de la liste affichée à l'écran
+        // --- Exportation au format CSV ---
+    function exportToCSV() {
       let list = [];
-      if (typeof albums !== 'undefined' && Array.isArray(albums) && albums.length > 0) {
-        list = albums;
+      if (typeof collection !== 'undefined' && Array.isArray(collection) && collection.length > 0) {
+        list = collection;
       } else {
-        const stored = localStorage.getItem('albums') || localStorage.getItem('phonotheque') || localStorage.getItem('musicCollection');
+        const stored = localStorage.getItem('phonotheque') || localStorage.getItem('collection');
         if (stored) {
           try { list = JSON.parse(stored); } catch(e) {}
         }
@@ -892,7 +891,7 @@
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = et function(e) {
+      reader.onload = function(e) {
         const text = e.target.result;
         const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
         
@@ -902,7 +901,6 @@
         }
 
         const newAlbums = [];
-        // Traitement à partir de la ligne 1 (en ignorant les en-têtes)
         for (let i = 1; i < lines.length; i++) {
           const cols = lines[i].split(";").map(col => col.replace(/^"|"$/g, '').replace(/""/g, '"'));
           if (cols.length >= 2) {
@@ -919,22 +917,15 @@
         }
 
         if (confirm(`Voulez-vous importer ${newAlbums.length} album(s) ?`)) {
-          const existingAlbums = JSON.parse(localStorage.getItem('albums')) || [];
-          const updatedAlbums = [...existingAlbums, ...newAlbums];
-          localStorage.setItem('albums', JSON.stringify(updatedAlbums));
-          
-          if (typeof renderAlbums === 'function') {
-            renderAlbums();
-          } else {
-            location.reload();
-          }
+          collection = [...collection, ...newAlbums];
+          saveCollection();
+          render();
           alert("Importation réussie !");
         }
       };
       reader.readAsText(file, "UTF-8");
       event.target.value = '';
     }
-
   </script>
 </body>
 </html>
