@@ -259,14 +259,16 @@
       <h1>Phonothèque</h1>
       <div class="stats" id="statsCount">0 album</div>
     </div>
-    <div class="header-actions">
-      <button class="btn" onclick="openFormModal()">➕</button>
-      <button class="btn btn-secondary" onclick="pickRandom()">🎲</button>
-      <label class="btn file-input-label">
-        📁 Importer
-        <input type="file" accept=".csv" onchange="importCSVFile(event)" style="display: none;">
+        <div class="header-actions">
+      <button class="btn" onclick="openFormModal()" title="Ajouter un album">+</button>
+      <button class="btn btn-secondary" onclick="pickRandom()" title="Album aléatoire">🎲</button>
+      <button class="btn btn-secondary" onclick="exportToCSV()" title="Exporter en CSV">📥 Exporter</button>
+      <label class="btn btn-secondary file-input-label" title="Importer un fichier CSV">
+        📤 Importer
+        <input type="file" accept=".csv" onchange="importFromCSV(event)" style="display: none;">
       </label>
     </div>
+  </div>
   </header>
 
   <div class="toolbar">
@@ -835,9 +837,88 @@
       stopScanner();
       searchDiscogsAuto(decodedText.trim());
     }
+    // --- Exportation au format CSV ---
+    function exportToCSV() {
+      const albums = JSON.parse(localStorage.getItem('albums')) || [];
+      if (albums.length === 0) {
+        alert("Votre phonothèque est vide, aucun album à exporter.");
+        return;
+      }
 
+      const headers = ["Artiste", "Titre", "Année", "Pays", "Support", "DiscogsID", "Pochette"];
+      const rows = albums.map(a => [
+        `"${(a.artist || '').replace(/"/g, '""')}"`,
+        `"${(a.title || '').replace(/"/g, '""')}"`,
+        `"${(a.year || '').replace(/"/g, '""')}"`,
+        `"${(a.country || '').replace(/"/g, '""')}"`,
+        `"${(a.support || '').replace(/"/g, '""')}"`,
+        `"${(a.discogsId || '').replace(/"/g, '""')}"`,
+        `"${(a.cover || '').replace(/"/g, '""')}"`
+      ]);
 
-    
+      // En-tête UTF-8 (\uFEFF) pour préserver les accents dans Excel
+      const csvContent = "\uFEFF" + [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      
+      const today = new Date().toISOString().split('T')[0];
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `phonotheque_backup_${today}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // --- Importation depuis un fichier CSV ---
+    function importFromCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+        
+        if (lines.length <= 1) {
+          alert("Fichier CSV vide ou format invalide.");
+          return;
+        }
+
+        const newAlbums = [];
+        // Traitement à partir de la ligne 1 (en ignorant les en-têtes)
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(";").map(col => col.replace(/^"|"$/g, '').replace(/""/g, '"'));
+          if (cols.length >= 2) {
+            newAlbums.push({
+              artist: cols[0] || '',
+              title: cols[1] || '',
+              year: cols[2] || '',
+              country: cols[3] || '',
+              support: cols[4] || 'Vinyle',
+              discogsId: cols[5] || '',
+              cover: cols[6] || ''
+            });
+          }
+        }
+
+        if (confirm(`Voulez-vous importer ${newAlbums.length} album(s) ?`)) {
+          const existingAlbums = JSON.parse(localStorage.getItem('albums')) || [];
+          const updatedAlbums = [...existingAlbums, ...newAlbums];
+          localStorage.setItem('albums', JSON.stringify(updatedAlbums));
+          
+          if (typeof renderAlbums === 'function') {
+            renderAlbums();
+          } else {
+            location.reload();
+          }
+          alert("Importation réussie !");
+        }
+      };
+      reader.readAsText(file, "UTF-8");
+      event.target.value = '';
+    }
+
   </script>
 </body>
 </html>
