@@ -248,6 +248,9 @@
     .form-row { display: flex; gap: 10px; }
     .form-row .form-group { flex: 1; }
   </style>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+
 </head>
 <body>
 
@@ -326,6 +329,12 @@
       </div>
       <form id="albumForm" onsubmit="handleFormSubmit(event)">
         <input type="hidden" id="editIndex" value="-1">
+                <!-- Bloc Scanner -->
+        <div class="form-group" style="margin-bottom: 16px;">
+          <button type="button" class="btn" style="width: 100%; background: #059669;" onclick="toggleScanner()">📷 Scanner un code-barres</button>
+          <div id="qr-reader" style="width: 100%; margin-top: 10px; display: none; border-radius: 8px; overflow: hidden; border: 1px solid var(--border);"></div>
+        </div>
+
         <div class="form-group">
           <label>Artiste / Compositeur *</label>
           <input type="text" id="formArtist" required placeholder="ex: Genesis">
@@ -720,6 +729,97 @@
       handleSearchInput();
     }
 
+      const DISCOGS_TOKEN = "fOpDVnfmMrEGrhsxwNKmpMWowHnFoXEELIiQCFGj";
+    let html5QrCode = null;
+
+    async function toggleScanner() {
+      const readerDiv = document.getElementById('qr-reader');
+      
+      if (html5QrCode && html5QrCode.isScanning) {
+        await stopScanner();
+        return;
+      }
+
+      readerDiv.style.display = 'block';
+      html5QrCode = new Html5Qrcode("qr-reader");
+
+      const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+
+      html5QrCode.start(
+        { facingMode: "environment" }, 
+        config, 
+        onScanSuccess
+      ).catch(err => {
+        alert("Impossible d'accéder à la caméra : " + err);
+        readerDiv.style.display = 'none';
+      });
+    }
+
+    async function stopScanner() {
+      if (html5QrCode && html5QrCode.isScanning) {
+        await html5QrCode.stop();
+        document.getElementById('qr-reader').style.display = 'none';
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      stopScanner();
+      searchDiscogsByBarcode(decodedText.trim());
+    }
+
+    function searchDiscogsByBarcode(barcode) {
+      const url = `https://api.discogs.com/database/search?barcode=${encodeURIComponent(barcode)}&token=${DISCOGS_TOKEN}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.results || data.results.length === 0) {
+            alert(`Aucun album trouvé sur Discogs pour le code-barres : ${barcode}`);
+            return;
+          }
+
+          const result = data.results[0];
+
+          // Séparation "Artiste - Titre"
+          let artist = 'Artiste inconnu';
+          let title = result.title || '';
+
+          if (result.title && result.title.includes(' - ')) {
+            const parts = result.title.split(' - ');
+            artist = parts[0].trim();
+            title = parts.slice(1).join(' - ').trim();
+          }
+
+          // Remplissage automatique des champs du formulaire
+          document.getElementById('formArtist').value = artist;
+          document.getElementById('formTitle').value = title;
+          document.getElementById('formYear').value = result.year || '';
+          document.getElementById('formCountry').value = result.country || '';
+          document.getElementById('formDiscogsId').value = result.id || '';
+
+          // Pochette Discogs
+          if (result.cover_image) {
+            document.getElementById('formCover').value = result.cover_image;
+          }
+
+          // Détection du format (Vinyle, CD, SACD)
+          if (result.format && Array.isArray(result.format)) {
+            const fmtStr = result.format.join(' ').toLowerCase();
+            if (fmtStr.includes('vinyl') || fmtStr.includes('vinyle')) {
+              document.getElementById('formSupport').value = 'Vinyle';
+            } else if (fmtStr.includes('sacd')) {
+              document.getElementById('formSupport').value = 'SACD';
+            } else {
+              document.getElementById('formSupport').value = 'CD';
+            }
+          }
+        })
+        .catch(err => {
+          alert("Erreur lors de la recherche Discogs : " + err);
+        });
+    }
+
+    
   </script>
 </body>
 </html>
