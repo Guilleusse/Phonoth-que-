@@ -917,7 +917,7 @@
         }
 
         if (confirm(`Voulez-vous importer ${newAlbums.length} album(s) ?`)) {
-          collection = [...collection, ...newAlbums];
+          collection = newAlbums
           saveCollection();
           render();
           alert("Importation réussie !");
