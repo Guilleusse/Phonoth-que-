@@ -962,31 +962,39 @@
       reader.readAsText(file, "UTF-8");
       event.target.value = '';
     }
-      // 1. Fonction qui génère dynamiquement les lettres selon les artistes présents
+      // 1. Génération dynamique de l'index alphabétique
 function updateAlphabetIndex() {
   const container = document.getElementById('alphabet-index');
   if (!container) return;
 
-  // Extraire la première lettre de chaque artiste présent
-  const activeLetters = [...new Set(albums.map(album => {
-    const firstChar = (album.artist || '').trim().charAt(0).toUpperCase();
+  if (!collection || collection.length === 0) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'flex';
+
+  // Extraction de la première lettre de chaque artiste dans la collection
+  const activeLetters = [...new Set(collection.map(album => {
+    const artistName = (album.artist || '').trim();
+    const firstChar = artistName.charAt(0).toUpperCase();
     return /[A-Z]/.test(firstChar) ? firstChar : '#';
   }))].sort();
 
-  // Créer les boutons uniquement pour les lettres existantes
   container.innerHTML = activeLetters.map(letter => `
     <button class="index-letter" onclick="scrollToLetter('${letter}')">${letter}</button>
   `).join('');
 }
 
-// 2. Fonction pour faire défiler la page jusqu'au premier artiste correspondant
+// 2. Défilement fluide vers la section de l'artiste sélectionné
 function scrollToLetter(letter) {
-  const target = Array.from(document.querySelectorAll('.album-card, .artist-header, .album-item')).find(el => {
-    const artistText = el.textContent.trim().toUpperCase();
+  const headers = Array.from(document.querySelectorAll('.artist-section, h2, h3'));
+  const target = headers.find(el => {
+    const text = el.textContent.trim().toUpperCase();
     if (letter === '#') {
-      return !/^[A-Z]/.test(artistText.charAt(0));
+      return !/^[A-Z]/.test(text.charAt(0));
     }
-    return artistText.startsWith(letter);
+    return text.startsWith(letter);
   });
 
   if (target) {
