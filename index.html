@@ -248,11 +248,45 @@
     }
     .form-row { display: flex; gap: 10px; }
     .form-row .form-group { flex: 1; }
+    
+  /* Index alphabétique dynamique sur le côté droit */
+#alphabet-index {
+  position: fixed;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1000;
+  background: rgba(24, 24, 27, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 6px 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.index-letter {
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: center;
+  line-height: 1;
+}
+
+.index-letter:active {
+  color: #ffffff;
+  background: #2563eb;
+}
   </style>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 
-</head>
 <body>
 
   <header>
@@ -493,6 +527,7 @@
         });
         container.appendChild(section);
       });
+          updateAlphabetIndex();
     }
 
         function openDetailModal(index) {
@@ -927,6 +962,38 @@
       reader.readAsText(file, "UTF-8");
       event.target.value = '';
     }
+      // 1. Fonction qui génère dynamiquement les lettres selon les artistes présents
+function updateAlphabetIndex() {
+  const container = document.getElementById('alphabet-index');
+  if (!container) return;
+
+  // Extraire la première lettre de chaque artiste présent
+  const activeLetters = [...new Set(albums.map(album => {
+    const firstChar = (album.artist || '').trim().charAt(0).toUpperCase();
+    return /[A-Z]/.test(firstChar) ? firstChar : '#';
+  }))].sort();
+
+  // Créer les boutons uniquement pour les lettres existantes
+  container.innerHTML = activeLetters.map(letter => `
+    <button class="index-letter" onclick="scrollToLetter('${letter}')">${letter}</button>
+  `).join('');
+}
+
+// 2. Fonction pour faire défiler la page jusqu'au premier artiste correspondant
+function scrollToLetter(letter) {
+  const target = Array.from(document.querySelectorAll('.album-card, .artist-header, .album-item')).find(el => {
+    const artistText = el.textContent.trim().toUpperCase();
+    if (letter === '#') {
+      return !/^[A-Z]/.test(artistText.charAt(0));
+    }
+    return artistText.startsWith(letter);
+  });
+
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
   </script>
+      <div id="alphabet-index"></div>
 </body>
 </html>
