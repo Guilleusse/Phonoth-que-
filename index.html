@@ -250,20 +250,23 @@
     .form-row .form-group { flex: 1; }
     
   /* Index alphabétique dynamique sur le côté droit */
-#alphabet-index {
+     #alphabet-index {
   position: fixed;
-  right: 4px;
+  right: 2px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   z-index: 1000;
   background: rgba(24, 24, 27, 0.85);
   backdrop-filter: blur(8px);
-  padding: 6px 4px;
-  border-radius: 12px;
+  -webkit-backdrop-filter: blur(8px);
+  padding: 4px 2px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 .index-letter {
@@ -288,7 +291,8 @@
 </head>
 
 <body>
-
+<div id="alphabet-index"></div>
+  
   <header>
     <div>
       <h1>Phonothèque</h1>
@@ -1002,6 +1006,5 @@ function scrollToLetter(letter) {
   }
 }
   </script>
-      <div id="alphabet-index"></div>
-</body>
+      </body>
 </html>
