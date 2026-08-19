@@ -286,6 +286,15 @@
   color: #ffffff;
   background: #2563eb;
 }
+/* 1. Marge sous la barre de filtres (Tous, Vinyles, CD...) */
+.filters, .filter-bar, #filters {
+  margin-bottom: 24px !important;
+}
+
+/* 2. Marge de sécurité pour le scroll A-Z (évite que le nom repasse sous l'heure de l'iPhone) */
+.artist-section, h2, h3 {
+  scroll-margin-top: 110px;
+}
   </style>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
