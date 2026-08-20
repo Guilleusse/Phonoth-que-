@@ -295,7 +295,20 @@
 .artist-section, h2, h3 {
   scroll-margin-top: 40px;
 }
-  </style>
+  /* Alignement parfait sur la même ligne des filtres et du bouton Vider */
+.filters, .filter-bar, #filters {
+  display: flex !important;
+  align-items: center !important; /* Aligne verticalement au millimètre */
+  justify-content: space-between !important; /* Place les filtres à gauche et Vider à droite */
+  flex-wrap: nowrap !important;
+}
+
+/* Annulation des marges parasites sur le bouton Vider */
+.filters button, .filter-bar button {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+</style>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 
