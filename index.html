@@ -295,26 +295,36 @@
 .artist-section, h2, h3 {
   scroll-margin-top: 40px;
 }
-  /* Alignement sur une ligne avec espace réduit entre SACD et Vider */
+  /* Alignement strict sur une seule ligne avec défilement fluide des filtres */
 .controls {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  justify-content: flex-start !important; /* Colle tout vers la gauche sans grand vide */
-  gap: 8px !important; /* Espacement fixe entre les filtres et Vider */
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important; /* Interdit le passage à la ligne */
   width: 100% !important;
+  gap: 8px !important;
 }
 
 .controls .filters {
   display: flex !important;
   align-items: center !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important; /* Défilement horizontal si écran étroit */
+  -webkit-overflow-scrolling: touch;
   gap: 4px !important;
+  scrollbar-width: none; /* Cache la barre de défilement */
+}
+
+.controls .filters::-webkit-scrollbar {
+  display: none; /* Cache la barre de défilement sur Safari iOS */
 }
 
 .controls > button {
+  flex-shrink: 0 !important; /* Empêche le bouton Vider de sauter ou de se déformer */
   white-space: nowrap !important;
-  flex-shrink: 0 !important;
   margin: 0 !important;
+  align-self: center !important;
 }
 </style>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
