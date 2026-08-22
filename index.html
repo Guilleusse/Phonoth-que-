@@ -1183,7 +1183,7 @@
       return rows;
     }
 
-    function importFromCSV(event) {
+        function importFromCSV(event) {
       const file = event.target.files[0];
       if (!file) return;
 
@@ -1217,15 +1217,24 @@
         } else {
           const rows = parseCSV(text);
           if (rows.length > 1) {
-            const headers = rows[0].map(h => h.trim());
-            const titleIdx = headers.indexOf('Title');
-            const artistIdx = headers.indexOf('Artist');
-            const mediaIdx = headers.indexOf('Media');
-            const conductorIdx = headers.indexOf('Conductors');
-            const yearIdx = headers.indexOf('Release Year');
-            const countryIdx = headers.indexOf('Country');
-            const discogsIdx = headers.indexOf('discogs Release ID');
-            const coverIdx = headers.indexOf('Uploaded Image URL');
+            const headers = rows[0].map(h => h.trim().toLowerCase());
+            
+            // Helper de recherche d'index d'entêtes (français / anglais / MusicBuddy)
+            const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k)));
+
+            const titleIdx = findIdx(['title', 'titre']);
+            const artistIdx = findIdx(['artist', 'artiste']);
+            const mediaIdx = findIdx(['media', 'format', 'support']);
+            const conductorIdx = findIdx(['conductor', 'chef', 'interprète']);
+            const yearIdx = findIdx(['release year', 'year', 'année']);
+            const countryIdx = findIdx(['country', 'pays']);
+            const discogsIdx = findIdx(['discogs release id', 'discogs']);
+            const coverIdx = findIdx(['uploaded image url', 'cover', 'pochette', 'image']);
+            
+            // Nouveaux champs d'achat (MusicBuddy & génériques)
+            const priceIdx = findIdx(['price', 'prix', 'cost', 'cout']);
+            const dateIdx = findIdx(['purchase date', 'date d\'achat', 'bought date', 'date']);
+            const locationIdx = findIdx(['store', 'location', 'lieu', 'magasin', 'place']);
 
             for (let i = 1; i < rows.length; i++) {
               const cols = rows[i];
@@ -1234,8 +1243,8 @@
               if (!title && !artist) continue;
 
               let support = (mediaIdx !== -1 && cols[mediaIdx]) ? cols[mediaIdx] : 'CD';
-              if (support.includes('Vinyl') || support.includes('Vinyle')) support = 'Vinyle';
-              else if (support.includes('SACD')) support = 'SACD';
+              if (support.toLowerCase().includes('vinyl') || support.toLowerCase().includes('vinyle')) support = 'Vinyle';
+              else if (support.toLowerCase().includes('sacd')) support = 'SACD';
               else support = 'CD';
 
               newAlbums.push({
@@ -1244,9 +1253,9 @@
                 conductor: conductorIdx !== -1 && cols[conductorIdx] ? cols[conductorIdx].trim() : '',
                 year: yearIdx !== -1 && cols[yearIdx] ? cols[yearIdx].trim() : '',
                 country: countryIdx !== -1 && cols[countryIdx] ? cols[countryIdx].trim() : '',
-                purchaseDate: '',
-                purchasePrice: '',
-                purchaseLocation: '',
+                purchaseDate: dateIdx !== -1 && cols[dateIdx] ? cols[dateIdx].trim() : '',
+                purchasePrice: priceIdx !== -1 && cols[priceIdx] ? cols[priceIdx].trim().replace('€', '').replace(',', '.') : '',
+                purchaseLocation: locationIdx !== -1 && cols[locationIdx] ? cols[locationIdx].trim() : '',
                 discogsId: discogsIdx !== -1 && cols[discogsIdx] ? cols[discogsIdx].trim() : '',
                 support: support,
                 cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : ''
@@ -1268,6 +1277,7 @@
       reader.readAsText(file, "UTF-8");
       event.target.value = '';
     }
+
 
     // --- Index alphabétique A-Z ---
     function updateAlphabetIndex() {
