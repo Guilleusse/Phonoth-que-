@@ -447,7 +447,12 @@
     }
   </style>
 
+  <!-- HTML5 QR Code Scanner -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <!-- Firebase SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
@@ -602,10 +607,39 @@
   </div>
 
   <script>
+    // --- Initialisation Firebase ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyADp8kgtHBqXUx2PF4z1Up5Kn-o73bh_P4",
+      authDomain: "phonotheque-264a6.firebaseapp.com",
+      projectId: "phonotheque-264a6",
+      storageBucket: "phonotheque-264a6.firebasestorage.app",
+      messagingSenderId: "535162805091",
+      appId: "1:535162805091:web:e0933e8e203c5323ee9156"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     let collection = JSON.parse(localStorage.getItem('phonotheque_data')) || [];
     let activeFilter = 'TOUS';
     const DISCOGS_TOKEN = "fOpDVnfmMrEGrhsxwNKmpMWowHnFoXEELIiQCFGj";
     let html5QrCode = null;
+
+    // --- Synchronisation Cloud en temps réel ---
+    db.collection('phonotheque').doc('main').onSnapshot((doc) => {
+      if (doc.exists) {
+        collection = doc.data().list || [];
+        localStorage.setItem('phonotheque_data', JSON.stringify(collection));
+        render();
+      } else {
+        // Migration initiale de la mémoire locale vers Firebase
+        if (collection.length > 0) {
+          saveCollection();
+        }
+      }
+    }, (error) => {
+      console.error("Erreur de synchronisation Firebase :", error);
+    });
 
     // --- Utilitaire Regex & Formotage ---
     function escapeRegExp(string) {
@@ -621,6 +655,8 @@
     // --- Sauvegarde & Réinitialisation ---
     function saveCollection() {
       localStorage.setItem('phonotheque_data', JSON.stringify(collection));
+      db.collection('phonotheque').doc('main').set({ list: collection })
+        .catch(err => console.error("Erreur d'enregistrement Firebase :", err));
       render();
     }
 
