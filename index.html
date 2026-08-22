@@ -335,23 +335,60 @@
 
     .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
 
-    /* Form Styles (Corrige les bugs d'alignement iOS) */
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
-    .form-group input, .form-group select { 
-      width: 100%; 
-      height: 42px;
-      padding: 0 10px; 
-      border-radius: 8px; 
-      border: 1px solid #3f3f46; 
-      background: #09090b; 
-      color: var(--text); 
-      font-size: 0.9rem; 
-      box-sizing: border-box;
+    /* Form Styles - Alignement et hauteur stricte pour iOS Safari */
+    .modal-content form {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 12px !important;
     }
-    .form-row { display: flex; gap: 10px; width: 100%; }
-    .form-row .form-group { flex: 1 1 0%; min-width: 0; }
-    
+
+    .form-group {
+      margin-bottom: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+
+    .form-group label {
+      display: block !important;
+      font-size: 0.8rem !important;
+      color: var(--text-muted) !important;
+      margin-bottom: 4px !important;
+      font-weight: 600 !important;
+    }
+
+    .form-group input, 
+    .form-group select {
+      width: 100% !important;
+      height: 40px !important;
+      min-height: 40px !important;
+      padding: 8px 10px !important;
+      border-radius: 8px !important;
+      border: 1px solid #3f3f46 !important;
+      background: #09090b !important;
+      color: var(--text) !important;
+      font-size: 0.88rem !important;
+      box-sizing: border-box !important;
+      line-height: 1.2 !important;
+    }
+
+    /* Correctif spécifique Safari iOS pour l'input date */
+    input[type="date"]::-webkit-date-and-time-value {
+      text-align: left !important;
+      line-height: 1.2 !important;
+    }
+
+    .form-row {
+      display: flex !important;
+      gap: 10px !important;
+      width: 100% !important;
+    }
+
+    .form-row .form-group {
+      flex: 1 1 0% !important;
+      min-width: 0 !important;
+    }
+
     /* Index alphabétique */
     #alphabet-index {
       position: fixed;
@@ -518,10 +555,11 @@
         </div>
         <div class="form-group">
           <label>Support *</label>
-          <select id="formSupport">
+          <select id="formSupport" required>
             <option value="Vinyle">Vinyle</option>
             <option value="CD" selected>CD</option>
             <option value="SACD">SACD</option>
+            <option value="WISHLIST">💡 Envie (Wishlist)</option>
           </select>
         </div>
         <div class="form-group">
@@ -1203,6 +1241,3 @@
   </script>
 </body>
 </html>
-
-
-
