@@ -335,20 +335,22 @@
 
     .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
 
-    /* Form Styles */
+    /* Form Styles (Corrige les bugs d'alignement iOS) */
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
     .form-group input, .form-group select { 
       width: 100%; 
-      padding: 10px; 
+      height: 42px;
+      padding: 0 10px; 
       border-radius: 8px; 
       border: 1px solid #3f3f46; 
       background: #09090b; 
       color: var(--text); 
       font-size: 0.9rem; 
+      box-sizing: border-box;
     }
-    .form-row { display: flex; gap: 10px; }
-    .form-row .form-group { flex: 1; }
+    .form-row { display: flex; gap: 10px; width: 100%; }
+    .form-row .form-group { flex: 1 1 0%; min-width: 0; }
     
     /* Index alphabétique */
     #alphabet-index {
@@ -1201,5 +1203,6 @@
   </script>
 </body>
 </html>
+
 
 
