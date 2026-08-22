@@ -51,14 +51,19 @@
     header { 
       display: flex; 
       justify-content: space-between; 
-      align-items: center; 
+      align-items: flex-start; 
       margin-bottom: 16px; 
       padding-bottom: 12px; 
       border-bottom: 1px solid var(--border); 
     }
     
     h1 { font-size: 1.5rem; font-weight: 700; }
-    .stats { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+    .stats { 
+      font-size: 0.78rem; 
+      color: var(--text-muted); 
+      margin-top: 2px; 
+      line-height: 1.35;
+    }
 
     .header-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
@@ -82,14 +87,100 @@
     .btn-danger { background: var(--danger); color: white; }
 
     .toolbar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-    .search-bar { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 0.95rem; }
 
-    .controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .filters { display: flex; gap: 6px; flex-wrap: wrap; }
-    .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 500; }
+    /* Zone de recherche avec croix d'effacement + Menu de tri */
+    .search-container {
+      display: flex !important;
+      align-items: center !important;
+      position: relative !important;
+      gap: 8px !important;
+      margin-bottom: 12px !important;
+      width: 100% !important;
+    }
+
+    .search-input-wrapper {
+      position: relative !important;
+      flex: 1 1 auto !important;
+      display: flex !important;
+      align-items: center !important;
+      min-width: 0 !important;
+    }
+
+    .search-input-wrapper input {
+      width: 100% !important;
+      padding: 8px 32px 8px 10px !important;
+      font-size: 0.85rem !important;
+      border-radius: 10px !important;
+      border: 1px solid var(--border) !important;
+      background: var(--card-bg) !important;
+      color: var(--text) !important;
+      box-sizing: border-box !important;
+    }
+
+    .clear-search-btn {
+      position: absolute !important;
+      right: 10px !important;
+      background: none !important;
+      border: none !important;
+      color: #8e8e93 !important;
+      font-size: 14px !important;
+      cursor: pointer !important;
+      display: none;
+      padding: 0 !important;
+    }
+
+    /* Menu de tri compact avec flèches blanches sur iOS */
+    .sort-select {
+      flex: 0 0 auto !important;
+      width: 115px !important;
+      padding: 8px 4px !important;
+      font-size: 0.78rem !important;
+      color: #ffffff !important;
+      background-color: #1c1c1e !important;
+      color-scheme: dark !important;
+      border: 1px solid #3a3a3c !important;
+      border-radius: 8px !important;
+      outline: none;
+    }
+
+    /* Filtres et bouton vider sur une seule ligne défilante */
+    .controls {
+      width: 100% !important;
+      overflow: hidden !important;
+      margin-bottom: 20px !important;
+    }
+
+    .controls .filters {
+      display: flex !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      gap: 6px !important;
+      width: 100% !important;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .controls .filters::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-btn { 
+      padding: 6px 14px; 
+      border-radius: 20px; 
+      border: 1px solid var(--border); 
+      background: var(--card-bg); 
+      color: var(--text-muted); 
+      cursor: pointer; 
+      font-size: 0.85rem; 
+      font-weight: 500; 
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+    }
     .filter-btn.active { background: var(--text); color: var(--bg); font-weight: 700; }
 
-    .artist-section { margin-bottom: 28px; }
+    .artist-section { margin-bottom: 28px; scroll-margin-top: 40px; }
     .artist-header { 
       font-size: 1.15rem; 
       font-weight: 700; 
@@ -184,6 +275,16 @@
 
     .file-input-label { cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 
+    /* Étiquette pays cliquable */
+    .country-tag {
+      cursor: pointer !important;
+      text-decoration: underline !important;
+      text-decoration-style: dotted !important;
+    }
+    .country-tag:hover {
+      color: #0a84ff !important;
+    }
+
     /* Modals */
     .modal { 
       display: none; 
@@ -249,154 +350,46 @@
     .form-row { display: flex; gap: 10px; }
     .form-row .form-group { flex: 1; }
     
-  /* Index alphabétique dynamique sur le côté droit */
-     #alphabet-index {
-  position: fixed;
-  right: 2px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  z-index: 1000;
-  background: rgba(24, 24, 27, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 4px 2px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  max-height: 85vh;
-  overflow-y: auto;
-}
+    /* Index alphabétique dynamique sur le côté droit */
+    #alphabet-index {
+      position: fixed;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-top: 22px !important;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      z-index: 1000;
+      background: rgba(24, 24, 27, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 4px 2px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
 
-.index-letter {
-  background: none;
-  border: none;
-  color: #a1a1aa;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 2px 4px;
-  cursor: pointer;
-  border-radius: 4px;
-  text-align: center;
-  line-height: 1;
-}
+    .index-letter {
+      background: none;
+      border: none;
+      color: #a1a1aa;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 4px;
+      cursor: pointer;
+      border-radius: 4px;
+      text-align: center;
+      line-height: 1;
+    }
 
-.index-letter:active {
-  color: #ffffff;
-  background: #2563eb;
-}
-/* 1. Marge sous la barre de filtres (Tous, Vinyles, CD...) */
-.filters, .filter-bar, #filters {
-  margin-bottom: 24px !important;
-}
+    .index-letter:active {
+      color: #ffffff;
+      background: #2563eb;
+    }
+</style>
 
-/* 2. Marge de sécurité pour le scroll A-Z (évite que le nom repasse sous l'heure de l'iPhone) */
-.artist-section, h2, h3 {
-  scroll-margin-top: 40px;
-}
-  /* Alignement direct des 5 boutons dans le même conteneur */
-.filters {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  width: 100% !important;
-  gap: 6px !important;
-}
-  /* Décalage de l'index A-Z vers le bas pour libérer le bouton Vider */
-#alphabet-index {
-  margin-top: 22px !important;
-}
-/* Statistiques sous le titre */
-.stats-bar {
-  font-size: 0.8rem;
-  color: #8e8e93;
-  margin-top: -4px;
-  margin-bottom: 12px;
-}
-
-/* Zone barre de recherche & tri */
-.search-container {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-bottom: 12px;
-}
-
-.search-container input {
-  flex: 1 !important;
-  margin-bottom: 0 !important;
-}
-
-.sort-select {
-  background: #1c1c1e;
-  color: #fff;
-  border: 1px solid #3a3a3c;
-  border-radius: 8px;
-  padding: 10px 8px;
-  font-size: 0.85rem;
-  outline: none;
-}
-
-/* Étiquette pays cliquable */
-.country-tag {
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-}
-.country-tag:hover {
-  color: #0a84ff;
-}
-/* Ajustement de la recherche et du menu de tri */
-.search-container {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-bottom: 12px !important;
-  width: 100% !important;
-}
-
-.search-container input {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  width: 100% !important;
-}
-
-.sort-select {
-  flex: 0 0 auto !important;
-  width: 125px !important;
-  padding: 8px 6px !important;
-  font-size: 0.8rem !important;
-}
-
-/* Verrouillage des 6 boutons sur une seule ligne fluide */
-.controls {
-  width: 100% !important;
-  overflow: hidden !important;
-}
-
-.controls .filters {
-  display: flex !important;
-  align-items: center !important;
-  flex-wrap: nowrap !important; /* Interdit formellement le saut à la ligne */
-  overflow-x: auto !important; /* Défilement horizontal fluide si écran étroit */
-  -webkit-overflow-scrolling: touch;
-  gap: 5px !important;
-  width: 100% !important;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-
-.controls .filters::-webkit-scrollbar {
-  display: none;
-}
-
-.controls .filters button {
-  flex-shrink: 0 !important;
-  white-space: nowrap !important;
-}
-
-  </style>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 
@@ -428,10 +421,13 @@
   </div>
 </header>
 
-<!-- Zone Recherche + Tri -->
+<!-- Zone Recherche avec Croix + Menu Tri -->
 <div class="search-container">
-  <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, chef..." oninput="filterAndRender()">
-  <select id="sortSelect" class="sort-select" onchange="filterAndRender()">
+  <div class="search-input-wrapper">
+    <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, chef..." oninput="handleSearchInput()">
+    <button type="button" id="clearSearchBtn" class="clear-search-btn" onclick="clearSearch()">✖</button>
+  </div>
+  <select id="sortSelect" class="sort-select" onchange="render()">
     <option value="artist">Artiste (A-Z)</option>
     <option value="yearDesc">Année (Récent → Ancien)</option>
     <option value="yearAsc">Année (Ancien → Récent)</option>
@@ -554,7 +550,7 @@
       }
     }
 
-    // --- 1. Statistiques détaillées sous le titre ---
+    // --- 1. Statistiques détaillées sur 2 lignes sans coupures ---
     function updateStats() {
       const statsElem = document.getElementById('statsCount');
       if (!statsElem) return;
@@ -565,7 +561,7 @@
       const sacds = collection.filter(a => (a.support || '').toLowerCase() === 'sacd').length;
       const wishlist = collection.filter(a => a.isWishlist || (a.support || '').toUpperCase() === 'WISHLIST').length;
 
-      statsElem.innerHTML = `<strong>${total}</strong> album${total > 1 ? 's' : ''} • ${vinyles} Vinyles • ${cds} CD • ${sacds} SACD${wishlist ? ` • 💡 ${wishlist} envie` : ''}`;
+      statsElem.innerHTML = `<strong>${total}</strong> albums<br>${vinyles}&nbsp;Vinyles • ${cds}&nbsp;CD • ${sacds}&nbsp;SACD${wishlist ? ` • 💡&nbsp;${wishlist}` : ''}`;
     }
 
     // --- 2. Rendu principal & Filtrage / Tri ---
@@ -658,7 +654,7 @@
       const subMetaParts = [];
       if (album.year) subMetaParts.push(album.year);
       if (album.country) {
-        subMetaParts.push(`<span class="country-tag" onclick="event.stopPropagation(); filterByCountry('${album.country}')" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;" title="Filtrer par ce pays">${album.country}</span>`);
+        subMetaParts.push(`<span class="country-tag" onclick="event.stopPropagation(); filterByCountry('${album.country}')" title="Filtrer par ce pays">${album.country}</span>`);
       }
       const subMetaText = subMetaParts.join(' • ');
 
@@ -682,23 +678,36 @@
       return card;
     }
 
-    // --- Alias & Helpers pour la recherche et les filtres ---
-    function filterAndRender() {
+    // --- Gestion de la recherche, de la croix ✖ et des filtres ---
+    function handleSearchInput() {
+      const input = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) {
+        clearBtn.style.display = (input && input.value) ? 'block' : 'none';
+      }
       render();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (input) input.value = '';
+      if (clearBtn) clearBtn.style.display = 'none';
+      render();
+    }
+
+    function filterByCountry(countryName) {
+      const input = document.getElementById('searchInput');
+      if (input) {
+        input.value = countryName;
+        handleSearchInput();
+      }
     }
 
     function filterSupport(support, btn) {
       activeFilter = support;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
-      render();
-    }
-
-    function filterByCountry(countryName) {
-      const searchInput = document.getElementById('searchInput');
-      if (searchInput) {
-        searchInput.value = countryName;
-      }
       render();
     }
 
@@ -734,7 +743,7 @@
           ${album.country ? `
           <div class="detail-meta-item">
             <span class="detail-meta-label">Pays d'édition :</span>
-            <span class="country-tag" onclick="closeDetailModal(); filterByCountry('${album.country}')" style="cursor:pointer; text-decoration:underline;" title="Filtrer par ce pays"><strong>${album.country}</strong></span>
+            <span class="country-tag" onclick="closeDetailModal(); filterByCountry('${album.country}')" title="Filtrer par ce pays"><strong>${album.country}</strong></span>
           </div>` : ''}
           ${album.discogsId ? `
            <a href="https://www.discogs.com/release/${album.discogsId}" target="_blank" rel="noopener" class="btn btn-secondary" style="width: 100%; text-decoration: none; margin-bottom: 12px; display: inline-flex; justify-content: center; align-items: center; gap: 6px;">
@@ -1124,5 +1133,6 @@
     render();
 </script>
 
-      </body>
+</body>
 </html>
+
