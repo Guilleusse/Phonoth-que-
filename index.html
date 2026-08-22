@@ -562,6 +562,10 @@
           </div>
         </div>
         <div class="form-group">
+          <label>Lieu d'achat</label>
+          <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs France, Fnac, Vide-grenier...">
+        </div>
+        <div class="form-group">
           <label>Support *</label>
           <select id="formSupport" required>
             <option value="Vinyle">Vinyle</option>
@@ -652,7 +656,7 @@
         if (!searchQuery) return true;
 
         const regex = new RegExp(`\\b${escapeRegExp(searchQuery)}\\b`, 'i');
-        const matchText = `${album.artist || ''} ${album.title || ''} ${album.conductor || ''} ${album.year || ''} ${album.country || ''}`;
+        const matchText = `${album.artist || ''} ${album.title || ''} ${album.conductor || ''} ${album.year || ''} ${album.country || ''} ${album.purchaseLocation || ''}`;
         return regex.test(matchText);
       });
 
@@ -820,6 +824,11 @@
             <span class="detail-meta-label">Prix d'achat :</span>
             <span><strong>${album.purchasePrice} €</strong></span>
           </div>` : ''}
+          ${album.purchaseLocation ? `
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Lieu d'achat :</span>
+            <span><strong>${album.purchaseLocation}</strong></span>
+          </div>` : ''}
           ${album.discogsId ? `
            <a href="https://www.discogs.com/release/${album.discogsId}" target="_blank" rel="noopener" class="btn btn-secondary" style="width: 100%; text-decoration: none; margin-top: 8px; margin-bottom: 12px; display: inline-flex; justify-content: center; align-items: center; gap: 6px;">
             🔗 Voir sur Discogs
@@ -845,6 +854,7 @@
       
       const dateElem = document.getElementById('formPurchaseDate');
       const priceElem = document.getElementById('formPurchasePrice');
+      const locationElem = document.getElementById('formPurchaseLocation');
 
       if (index >= 0) {
         const album = collection[index];
@@ -856,6 +866,7 @@
         document.getElementById('formCountry').value = album.country || '';
         if (dateElem) dateElem.value = album.purchaseDate || '';
         if (priceElem) priceElem.value = album.purchasePrice || '';
+        if (locationElem) locationElem.value = album.purchaseLocation || '';
         document.getElementById('formSupport').value = album.support || 'CD';
         document.getElementById('formCover').value = album.cover || '';
         if (document.getElementById('formDiscogsId')) {
@@ -866,6 +877,7 @@
         document.getElementById('albumForm').reset();
         if (dateElem) dateElem.value = '';
         if (priceElem) priceElem.value = '';
+        if (locationElem) locationElem.value = '';
       }
       document.getElementById('formModal').style.display = 'flex';
     }
@@ -884,6 +896,7 @@
 
       const dateElem = document.getElementById('formPurchaseDate');
       const priceElem = document.getElementById('formPurchasePrice');
+      const locationElem = document.getElementById('formPurchaseLocation');
 
       const newAlbum = {
         artist: document.getElementById('formArtist').value.trim(),
@@ -893,6 +906,7 @@
         country: document.getElementById('formCountry').value.trim(),
         purchaseDate: dateElem ? dateElem.value : '',
         purchasePrice: priceElem ? priceElem.value.trim() : '',
+        purchaseLocation: locationElem ? locationElem.value.trim() : '',
         support: supportVal,
         cover: document.getElementById('formCover').value.trim(),
         discogsId: discogsInput ? discogsInput.value.trim() : existingDiscogsId,
@@ -1058,7 +1072,7 @@
         return;
       }
 
-      const headers = ["Artiste", "Titre", "Chef d'orchestre", "Année", "Pays", "DateAchat", "PrixAchat", "Support", "DiscogsID", "Pochette"];
+      const headers = ["Artiste", "Titre", "Chef d'orchestre", "Année", "Pays", "DateAchat", "PrixAchat", "LieuAchat", "Support", "DiscogsID", "Pochette"];
       const rows = list.map(a => [
         `"${(a.artist || '').toString().replace(/"/g, '""')}"`,
         `"${(a.title || '').toString().replace(/"/g, '""')}"`,
@@ -1067,6 +1081,7 @@
         `"${(a.country || '').toString().replace(/"/g, '""')}"`,
         `"${(a.purchaseDate || '').toString().replace(/"/g, '""')}"`,
         `"${(a.purchasePrice || '').toString().replace(/"/g, '""')}"`,
+        `"${(a.purchaseLocation || '').toString().replace(/"/g, '""')}"`,
         `"${(a.support || '').toString().replace(/"/g, '""')}"`,
         `"${(a.discogsId || '').toString().replace(/"/g, '""')}"`,
         `"${(a.cover || '').toString().replace(/"/g, '""')}"`
@@ -1145,9 +1160,10 @@
                   country: cols[4] || '',
                   purchaseDate: cols[5] || '',
                   purchasePrice: cols[6] || '',
-                  support: cols[7] || 'CD',
-                  discogsId: cols[8] || '',
-                  cover: cols[9] || ''
+                  purchaseLocation: cols[7] || '',
+                  support: cols[8] || 'CD',
+                  discogsId: cols[9] || '',
+                  cover: cols[10] || ''
                 });
               }
             }
@@ -1184,6 +1200,7 @@
                 country: countryIdx !== -1 && cols[countryIdx] ? cols[countryIdx].trim() : '',
                 purchaseDate: '',
                 purchasePrice: '',
+                purchaseLocation: '',
                 discogsId: discogsIdx !== -1 && cols[discogsIdx] ? cols[discogsIdx].trim() : '',
                 support: support,
                 cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : ''
