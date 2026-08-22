@@ -129,7 +129,7 @@
       padding: 0 !important;
     }
 
-    /* Menu de tri compact avec flèches blanches sur iOS */
+    /* Menu de tri compact */
     .sort-select {
       flex: 0 0 auto !important;
       width: 115px !important;
@@ -143,7 +143,7 @@
       outline: none;
     }
 
-    /* Filtres et bouton vider sur une seule ligne défilante */
+    /* Filtres et bouton vider */
     .controls {
       width: 100% !important;
       overflow: hidden !important;
@@ -350,7 +350,7 @@
     .form-row { display: flex; gap: 10px; }
     .form-row .form-group { flex: 1; }
     
-    /* Index alphabétique dynamique sur le côté droit */
+    /* Index alphabétique */
     #alphabet-index {
       position: fixed;
       right: 2px;
@@ -388,64 +388,61 @@
       color: #ffffff;
       background: #2563eb;
     }
-</style>
+  </style>
 
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 
 <body>
-<div id="alphabet-index"></div>
+  <div id="alphabet-index"></div>
   
   <header style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
-  <div style="flex: 1 1 auto; min-width: 0;">
-    <h1 style="margin: 0 0 4px 0;">Phonothèque</h1>
-    <!-- Les statistiques détaillées s'afficheront directement ici -->
-    <div class="stats" id="statsCount" style="font-size: 0.8rem; color: #8e8e93; line-height: 1.3;">Chargement...</div>
-  </div>
-
-  <div class="header-actions" style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; margin-left: auto;">
-    <!-- Ligne 1 : + et 🎲 côte à côte -->
-    <div style="display: flex; flex-direction: row; gap: 6px;">
-      <button class="btn" onclick="openFormModal()" title="Ajouter un album" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 18px;">+</button>
-      <button class="btn btn-secondary" onclick="pickRandom()" title="Album aléatoire" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 16px;">🎲</button>
+    <div style="flex: 1 1 auto; min-width: 0;">
+      <h1 style="margin: 0 0 4px 0;">Phonothèque</h1>
+      <div class="stats" id="statsCount" style="font-size: 0.8rem; color: #8e8e93; line-height: 1.3;">Chargement...</div>
     </div>
 
-    <!-- Ligne 2 : Exporter et Importer côte à côte -->
-    <div style="display: flex; flex-direction: row; gap: 6px;">
-      <button class="btn btn-secondary" onclick="exportToCSV()" title="Exporter en CSV" style="height: 34px; padding: 0 8px; display: flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap;">📥 Exporter</button>
-      <label class="btn btn-secondary file-input-label" title="Importer un fichier CSV" style="height: 34px; padding: 0 8px; display: flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap; margin: 0; cursor: pointer;">
-        📤 Importer
-        <input type="file" accept=".csv" onchange="importFromCSV(event)" style="display: none;">
-      </label>
+    <div class="header-actions" style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; margin-left: auto;">
+      <div style="display: flex; flex-direction: row; gap: 6px;">
+        <button class="btn" onclick="openFormModal()" title="Ajouter un album" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 18px;">+</button>
+        <button class="btn btn-secondary" onclick="pickRandom()" title="Album aléatoire" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 16px;">🎲</button>
+      </div>
+
+      <div style="display: flex; flex-direction: row; gap: 6px;">
+        <button class="btn btn-secondary" onclick="exportToCSV()" title="Exporter en CSV" style="height: 34px; padding: 0 8px; display: flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap;">📥 Exporter</button>
+        <label class="btn btn-secondary file-input-label" title="Importer un fichier CSV" style="height: 34px; padding: 0 8px; display: flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap; margin: 0; cursor: pointer;">
+          📤 Importer
+          <input type="file" accept=".csv" onchange="importFromCSV(event)" style="display: none;">
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <!-- Zone Recherche + Tri -->
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, chef..." oninput="handleSearchInput()">
+      <button type="button" id="clearSearchBtn" class="clear-search-btn" onclick="clearSearch()">✖</button>
+    </div>
+    <select id="sortSelect" class="sort-select" onchange="render()">
+      <option value="artist">Artiste (A-Z)</option>
+      <option value="yearDesc">Année (Récent → Ancien)</option>
+      <option value="yearAsc">Année (Ancien → Récent)</option>
+      <option value="dateAdded">Derniers ajoutés</option>
+    </select>
+  </div>
+
+  <!-- Filtres par support -->
+  <div class="controls">
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterSupport('TOUS', this)">Tous</button>
+      <button class="filter-btn" onclick="filterSupport('Vinyle', this)">Vinyles</button>
+      <button class="filter-btn" onclick="filterSupport('CD', this)">CD</button>
+      <button class="filter-btn" onclick="filterSupport('SACD', this)">SACD</button>
+      <button class="filter-btn" onclick="filterSupport('WISHLIST', this)">💡 Envie</button>
+      <button class="filter-btn" style="color: #f87171; border-color: #451a03;" onclick="resetCollection()">🗑️ Vider</button>
     </div>
   </div>
-</header>
-
-<!-- Zone Recherche avec Croix + Menu Tri -->
-<div class="search-container">
-  <div class="search-input-wrapper">
-    <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, chef..." oninput="handleSearchInput()">
-    <button type="button" id="clearSearchBtn" class="clear-search-btn" onclick="clearSearch()">✖</button>
-  </div>
-  <select id="sortSelect" class="sort-select" onchange="render()">
-    <option value="artist">Artiste (A-Z)</option>
-    <option value="yearDesc">Année (Récent → Ancien)</option>
-    <option value="yearAsc">Année (Ancien → Récent)</option>
-    <option value="dateAdded">Derniers ajoutés</option>
-  </select>
-</div>
-
-<!-- Filtres par support + Wishlist + Bouton Vider (Même taille en pilule) -->
-<div class="controls">
-  <div class="filters">
-    <button class="filter-btn active" onclick="filterSupport('TOUS', this)">Tous</button>
-    <button class="filter-btn" onclick="filterSupport('Vinyle', this)">Vinyles</button>
-    <button class="filter-btn" onclick="filterSupport('CD', this)">CD</button>
-    <button class="filter-btn" onclick="filterSupport('SACD', this)">SACD</button>
-    <button class="filter-btn" onclick="filterSupport('WISHLIST', this)">💡 Envie</button>
-    <button class="filter-btn" style="color: #f87171; border-color: #451a03;" onclick="resetCollection()">🗑️ Vider</button>
-  </div>
-</div>
 
   <div id="mainContainer"></div>
 
@@ -469,13 +466,14 @@
       </div>
       <form id="albumForm" onsubmit="handleFormSubmit(event)">
         <input type="hidden" id="editIndex" value="-1">
-                <!-- Bloc Scanner -->
+        
+        <!-- Bloc Scanner -->
         <div class="form-group" style="margin-bottom: 16px;">
           <button type="button" class="btn" style="width: 100%; background: #059669;" onclick="toggleScanner()">📷 Scanner un code-barres</button>
           <div id="qr-reader" style="width: 100%; margin-top: 10px; display: none; border-radius: 8px; overflow: hidden; border: 1px solid var(--border);"></div>
         </div>
         
-        <!-- Recherche manuelle par Code-barres ou Réf. Discogs -->
+        <!-- Recherche auto Discogs -->
         <div class="form-group" style="margin-bottom: 16px;">
           <label>Recherche auto (Code-barres ou Réf. Catalogue)</label>
           <div style="display: flex; gap: 8px;">
@@ -506,6 +504,16 @@
             <input type="text" id="formCountry" placeholder="ex: Japon">
           </div>
         </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date d'achat</label>
+            <input type="date" id="formPurchaseDate">
+          </div>
+          <div class="form-group">
+            <label>Prix d'achat (€)</label>
+            <input type="number" id="formPurchasePrice" step="0.01" placeholder="ex: 25.00">
+          </div>
+        </div>
         <div class="form-group">
           <label>Support *</label>
           <select id="formSupport">
@@ -514,7 +522,7 @@
             <option value="SACD">SACD</option>
           </select>
         </div>
-                <div class="form-group">
+        <div class="form-group">
           <label>URL d'image de la pochette</label>
           <input type="url" id="formCover" placeholder="https://...">
         </div>
@@ -537,9 +545,15 @@
     const DISCOGS_TOKEN = "fOpDVnfmMrEGrhsxwNKmpMWowHnFoXEELIiQCFGj";
     let html5QrCode = null;
 
-    // --- Utilitaire Regex ---
+    // --- Utilitaire Regex & Formotage ---
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function formatDateFR(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
     }
 
     // --- Sauvegarde & Réinitialisation ---
@@ -555,7 +569,7 @@
       }
     }
 
-    // --- 1. Statistiques détaillées sur 2 lignes sans coupures ---
+    // --- 1. Statistiques détaillées sur 2 lignes ---
     function updateStats() {
       const statsElem = document.getElementById('statsCount');
       if (!statsElem) return;
@@ -580,7 +594,6 @@
 
       container.innerHTML = '';
 
-      // Filtrage par support / wishlist & recherche textuelle (mots entiers \b)
       let filtered = collection.map((album, idx) => ({ ...album, _id: idx })).filter(album => {
         if (activeFilter === 'WISHLIST') {
           if (!album.isWishlist && (album.support || '').toUpperCase() !== 'WISHLIST') return false;
@@ -603,9 +616,7 @@
         return;
       }
 
-      // Affichage selon le tri choisi
       if (sortOption === 'artist') {
-        // Groupement par Artiste A-Z
         const grouped = {};
         filtered.forEach(album => {
           const artistKey = album.artist || 'Artiste Inconnu';
@@ -626,10 +637,9 @@
           container.appendChild(section);
         });
       } else {
-        // Tri plat (Années, Derniers ajoutés)
         filtered.sort((a, b) => {
           if (sortOption === 'yearDesc') return (parseInt(b.year) || 0) - (parseInt(a.year) || 0);
-          if (sortOption === 'yearAsc') return (parseInt(a.year) || 0) - (parseInt(a.year) || 0);
+          if (sortOption === 'yearAsc') return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
           if (sortOption === 'dateAdded') return b._id - a._id;
           return 0;
         });
@@ -685,7 +695,7 @@
       return card;
     }
 
-    // --- Gestion de la recherche, de la croix ✖ et des filtres ---
+    // --- Recherche & Filtres ---
     function handleSearchInput() {
       const input = document.getElementById('searchInput');
       const clearBtn = document.getElementById('clearSearchBtn');
@@ -752,8 +762,18 @@
             <span class="detail-meta-label">Pays d'édition :</span>
             <span class="country-tag" onclick="closeDetailModal(); filterByCountry('${album.country}')" title="Filtrer par ce pays"><strong>${album.country}</strong></span>
           </div>` : ''}
+          ${album.purchaseDate ? `
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Date d'achat :</span>
+            <span><strong>${formatDateFR(album.purchaseDate)}</strong></span>
+          </div>` : ''}
+          ${album.purchasePrice ? `
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Prix d'achat :</span>
+            <span><strong>${album.purchasePrice} €</strong></span>
+          </div>` : ''}
           ${album.discogsId ? `
-           <a href="https://www.discogs.com/release/${album.discogsId}" target="_blank" rel="noopener" class="btn btn-secondary" style="width: 100%; text-decoration: none; margin-bottom: 12px; display: inline-flex; justify-content: center; align-items: center; gap: 6px;">
+           <a href="https://www.discogs.com/release/${album.discogsId}" target="_blank" rel="noopener" class="btn btn-secondary" style="width: 100%; text-decoration: none; margin-top: 8px; margin-bottom: 12px; display: inline-flex; justify-content: center; align-items: center; gap: 6px;">
             🔗 Voir sur Discogs
           </a>` : ''}
         </div>
@@ -771,9 +791,13 @@
       document.getElementById('detailModal').style.display = 'none';
     }
 
-    // --- Modal Formulaire (Ajout / Modification) ---
+    // --- Modal Formulaire ---
     function openFormModal(index = -1) {
       document.getElementById('editIndex').value = index;
+      
+      const dateElem = document.getElementById('formPurchaseDate');
+      const priceElem = document.getElementById('formPurchasePrice');
+
       if (index >= 0) {
         const album = collection[index];
         document.getElementById('formModalTitle').innerText = "Modifier l'album";
@@ -782,6 +806,8 @@
         document.getElementById('formConductor').value = album.conductor || '';
         document.getElementById('formYear').value = album.year || '';
         document.getElementById('formCountry').value = album.country || '';
+        if (dateElem) dateElem.value = album.purchaseDate || '';
+        if (priceElem) priceElem.value = album.purchasePrice || '';
         document.getElementById('formSupport').value = album.support || 'CD';
         document.getElementById('formCover').value = album.cover || '';
         if (document.getElementById('formDiscogsId')) {
@@ -790,6 +816,8 @@
       } else {
         document.getElementById('formModalTitle').innerText = "Ajouter un album";
         document.getElementById('albumForm').reset();
+        if (dateElem) dateElem.value = '';
+        if (priceElem) priceElem.value = '';
       }
       document.getElementById('formModal').style.display = 'flex';
     }
@@ -806,19 +834,23 @@
       const existingDiscogsId = (index >= 0 && collection[index]) ? (collection[index].discogsId || '') : '';
       const supportVal = document.getElementById('formSupport').value;
 
+      const dateElem = document.getElementById('formPurchaseDate');
+      const priceElem = document.getElementById('formPurchasePrice');
+
       const newAlbum = {
         artist: document.getElementById('formArtist').value.trim(),
         title: document.getElementById('formTitle').value.trim(),
         conductor: document.getElementById('formConductor').value.trim(),
         year: document.getElementById('formYear').value.trim(),
         country: document.getElementById('formCountry').value.trim(),
+        purchaseDate: dateElem ? dateElem.value : '',
+        purchasePrice: priceElem ? priceElem.value.trim() : '',
         support: supportVal,
         cover: document.getElementById('formCover').value.trim(),
         discogsId: discogsInput ? discogsInput.value.trim() : existingDiscogsId,
         isWishlist: supportVal === 'WISHLIST'
       };
 
-      // Pour un nouvel ajout (index < 0), blocage si doublon
       if (index < 0) {
         const isDuplicate = collection.some(a => 
           (newAlbum.discogsId && a.discogsId && String(a.discogsId) === String(newAlbum.discogsId)) ||
@@ -827,7 +859,7 @@
 
         if (isDuplicate) {
           if (!confirm(`⚠️ "${newAlbum.title}" de ${newAlbum.artist} existe déjà dans ta phonothèque.\n\nVeux-tu quand même l'ajouter à nouveau ?`)) {
-            return; // Annule l'enregistrement
+            return;
           }
         }
       }
@@ -857,7 +889,7 @@
       openDetailModal(randomIndex);
     }
 
-    // --- Discogs & Scanner QR / Code-Barres ---
+    // --- Discogs & Scanner ---
     async function toggleScanner() {
       const readerDiv = document.getElementById('qr-reader');
       if (!readerDiv) return;
@@ -924,7 +956,6 @@
             title = parts.slice(1).join(' - ').trim();
           }
 
-          // Détection de doublon dans la collection existante
           const existing = collection.find(a => 
             (a.discogsId && String(a.discogsId) === String(result.id)) ||
             (a.artist.toLowerCase() === artist.toLowerCase() && a.title.toLowerCase() === title.toLowerCase())
@@ -962,7 +993,7 @@
         });
     }
 
-    // --- Exportation & Importation CSV ---
+    // --- Export / Import CSV ---
     function exportToCSV() {
       let list = [];
       if (typeof collection !== 'undefined' && Array.isArray(collection) && collection.length > 0) {
@@ -979,13 +1010,15 @@
         return;
       }
 
-      const headers = ["Artiste", "Titre", "Chef d'orchestre", "Année", "Pays", "Support", "DiscogsID", "Pochette"];
+      const headers = ["Artiste", "Titre", "Chef d'orchestre", "Année", "Pays", "DateAchat", "PrixAchat", "Support", "DiscogsID", "Pochette"];
       const rows = list.map(a => [
         `"${(a.artist || '').toString().replace(/"/g, '""')}"`,
         `"${(a.title || '').toString().replace(/"/g, '""')}"`,
         `"${(a.conductor || '').toString().replace(/"/g, '""')}"`,
         `"${(a.year || '').toString().replace(/"/g, '""')}"`,
         `"${(a.country || '').toString().replace(/"/g, '""')}"`,
+        `"${(a.purchaseDate || '').toString().replace(/"/g, '""')}"`,
+        `"${(a.purchasePrice || '').toString().replace(/"/g, '""')}"`,
         `"${(a.support || '').toString().replace(/"/g, '""')}"`,
         `"${(a.discogsId || '').toString().replace(/"/g, '""')}"`,
         `"${(a.cover || '').toString().replace(/"/g, '""')}"`
@@ -1062,9 +1095,11 @@
                   conductor: cols[2] || '',
                   year: cols[3] || '',
                   country: cols[4] || '',
-                  support: cols[5] || 'CD',
-                  discogsId: cols[6] || '',
-                  cover: cols[7] || ''
+                  purchaseDate: cols[5] || '',
+                  purchasePrice: cols[6] || '',
+                  support: cols[7] || 'CD',
+                  discogsId: cols[8] || '',
+                  cover: cols[9] || ''
                 });
               }
             }
@@ -1099,6 +1134,8 @@
                 conductor: conductorIdx !== -1 && cols[conductorIdx] ? cols[conductorIdx].trim() : '',
                 year: yearIdx !== -1 && cols[yearIdx] ? cols[yearIdx].trim() : '',
                 country: countryIdx !== -1 && cols[countryIdx] ? cols[countryIdx].trim() : '',
+                purchaseDate: '',
+                purchasePrice: '',
                 discogsId: discogsIdx !== -1 && cols[discogsIdx] ? cols[discogsIdx].trim() : '',
                 support: support,
                 cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : ''
@@ -1161,8 +1198,8 @@
 
     // Premier affichage
     render();
-</script>
-
+  </script>
 </body>
 </html>
+
 
