@@ -792,35 +792,48 @@
     }
 
     function handleFormSubmit(event) {
-      event.preventDefault();
-      const index = parseInt(document.getElementById('editIndex').value, 10);
-      
-      const discogsInput = document.getElementById('formDiscogsId');
-      const existingDiscogsId = (index >= 0 && collection[index]) ? (collection[index].discogsId || '') : '';
+  event.preventDefault();
+  const index = parseInt(document.getElementById('editIndex').value, 10);
+  
+  const discogsInput = document.getElementById('formDiscogsId');
+  const existingDiscogsId = (index >= 0 && collection[index]) ? (collection[index].discogsId || '') : '';
+  const supportVal = document.getElementById('formSupport').value;
 
-      const supportVal = document.getElementById('formSupport').value;
+  const newAlbum = {
+    artist: document.getElementById('formArtist').value.trim(),
+    title: document.getElementById('formTitle').value.trim(),
+    conductor: document.getElementById('formConductor').value.trim(),
+    year: document.getElementById('formYear').value.trim(),
+    country: document.getElementById('formCountry').value.trim(),
+    support: supportVal,
+    cover: document.getElementById('formCover').value.trim(),
+    discogsId: discogsInput ? discogsInput.value.trim() : existingDiscogsId,
+    isWishlist: supportVal === 'WISHLIST'
+  };
 
-      const newAlbum = {
-        artist: document.getElementById('formArtist').value.trim(),
-        title: document.getElementById('formTitle').value.trim(),
-        conductor: document.getElementById('formConductor').value.trim(),
-        year: document.getElementById('formYear').value.trim(),
-        country: document.getElementById('formCountry').value.trim(),
-        support: supportVal,
-        cover: document.getElementById('formCover').value.trim(),
-        discogsId: discogsInput ? discogsInput.value.trim() : existingDiscogsId,
-        isWishlist: supportVal === 'WISHLIST'
-      };
+  // Pour un nouvel ajout (index < 0), blocage si doublon
+  if (index < 0) {
+    const isDuplicate = collection.some(a => 
+      (newAlbum.discogsId && a.discogsId && String(a.discogsId) === String(newAlbum.discogsId)) ||
+      (a.artist.toLowerCase() === newAlbum.artist.toLowerCase() && a.title.toLowerCase() === newAlbum.title.toLowerCase())
+    );
 
-      if (index >= 0) {
-        collection[index] = newAlbum;
-      } else {
-        collection.push(newAlbum);
+    if (isDuplicate) {
+      if (!confirm(`⚠️ "${newAlbum.title}" de ${newAlbum.artist} existe déjà dans ta phonothèque.\n\nVeux-tu quand même l'ajouter à nouveau ?`)) {
+        return; // Annule l'enregistrement
       }
-
-      saveCollection();
-      closeFormModal();
     }
+  }
+
+  if (index >= 0) {
+    collection[index] = newAlbum;
+  } else {
+    collection.push(newAlbum);
+  }
+
+  saveCollection();
+  closeFormModal();
+}
 
     function deleteAlbum(index) {
       const album = collection[index];
@@ -876,61 +889,71 @@
     }
 
     function searchDiscogsAuto(queryOverride) {
-      const manualInput = document.getElementById('manualQuery');
-      const query = queryOverride || (manualInput ? manualInput.value.trim() : '');
-      if (!query) {
-        alert("Veuillez saisir un code-barres ou une référence d'album.");
+  const manualInput = document.getElementById('manualQuery');
+  const query = queryOverride || (manualInput ? manualInput.value.trim() : '');
+  if (!query) {
+    alert("Veuillez saisir un code-barres ou une référence d'album.");
+    return;
+  }
+
+  const url = `https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&token=${DISCOGS_TOKEN}`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.results || data.results.length === 0) {
+        alert(`Aucun album trouvé sur Discogs pour : ${query}`);
         return;
       }
 
-      const url = `https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&token=${DISCOGS_TOKEN}`;
+      const result = data.results[0];
 
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if (!data.results || data.results.length === 0) {
-            alert(`Aucun album trouvé sur Discogs pour : ${query}`);
-            return;
-          }
+      let artist = 'Artiste inconnu';
+      let title = result.title || '';
 
-          const result = data.results[0];
+      if (result.title && result.title.includes(' - ')) {
+        const parts = result.title.split(' - ');
+        artist = parts[0].trim();
+        title = parts.slice(1).join(' - ').trim();
+      }
 
-          let artist = 'Artiste inconnu';
-          let title = result.title || '';
+      // Détection de doublon dans la collection existante
+      const existing = collection.find(a => 
+        (a.discogsId && String(a.discogsId) === String(result.id)) ||
+        (a.artist.toLowerCase() === artist.toLowerCase() && a.title.toLowerCase() === title.toLowerCase())
+      );
 
-          if (result.title && result.title.includes(' - ')) {
-            const parts = result.title.split(' - ');
-            artist = parts[0].trim();
-            title = parts.slice(1).join(' - ').trim();
-          }
+      if (existing) {
+        alert(`⚠️ Cet album est déjà dans ta phonothèque !\n\n"${existing.title}" par ${existing.artist} (${existing.support || 'CD'})`);
+      }
 
-          document.getElementById('formArtist').value = artist;
-          document.getElementById('formTitle').value = title;
-          document.getElementById('formYear').value = result.year || '';
-          document.getElementById('formCountry').value = result.country || '';
-          if (document.getElementById('formDiscogsId')) {
-            document.getElementById('formDiscogsId').value = result.id || '';
-          }
+      document.getElementById('formArtist').value = artist;
+      document.getElementById('formTitle').value = title;
+      document.getElementById('formYear').value = result.year || '';
+      document.getElementById('formCountry').value = result.country || '';
+      if (document.getElementById('formDiscogsId')) {
+        document.getElementById('formDiscogsId').value = result.id || '';
+      }
 
-          if (result.cover_image) {
-            document.getElementById('formCover').value = result.cover_image;
-          }
+      if (result.cover_image) {
+        document.getElementById('formCover').value = result.cover_image;
+      }
 
-          if (result.format && Array.isArray(result.format)) {
-            const fmtStr = result.format.join(' ').toLowerCase();
-            if (fmtStr.includes('vinyl') || fmtStr.includes('vinyle')) {
-              document.getElementById('formSupport').value = 'Vinyle';
-            } else if (fmtStr.includes('sacd')) {
-              document.getElementById('formSupport').value = 'SACD';
-            } else {
-              document.getElementById('formSupport').value = 'CD';
-            }
-          }
-        })
-        .catch(err => {
-          alert("Erreur lors de la recherche Discogs : " + err);
-        });
-    }
+      if (result.format && Array.isArray(result.format)) {
+        const fmtStr = result.format.join(' ').toLowerCase();
+        if (fmtStr.includes('vinyl') || fmtStr.includes('vinyle')) {
+          document.getElementById('formSupport').value = 'Vinyle';
+        } else if (fmtStr.includes('sacd')) {
+          document.getElementById('formSupport').value = 'SACD';
+        } else {
+          document.getElementById('formSupport').value = 'CD';
+        }
+      }
+    })
+    .catch(err => {
+      alert("Erreur lors de la recherche Discogs : " + err);
+    });
+}
 
     // --- Exportation & Importation CSV ---
     function exportToCSV() {
