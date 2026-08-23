@@ -5,14 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Phonothèque</title>
   
-  <!-- PWA & Apple Web App Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Phonothèque">
   <meta name="theme-color" content="#121212">
   <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/vinyl.png">
 
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -47,9 +45,7 @@
       margin: 0 auto;
     }
 
-    header {
-      margin-bottom: 20px;
-    }
+    header { margin-bottom: 20px; }
 
     .top-bar {
       display: flex;
@@ -64,10 +60,7 @@
       letter-spacing: -0.5px;
     }
 
-    .header-actions {
-      display: flex;
-      gap: 10px;
-    }
+    .header-actions { display: flex; gap: 10px; }
 
     .icon-btn {
       background: var(--card-bg);
@@ -90,10 +83,7 @@
       font-weight: bold;
     }
 
-    .stats-line {
-      font-size: 13px;
-      color: var(--text-sub);
-    }
+    .stats-line { font-size: 13px; color: var(--text-sub); }
 
     .io-bar {
       display: flex;
@@ -124,11 +114,7 @@
       color: #fca5a5;
     }
 
-    /* Barre de recherche */
-    .search-box {
-      position: relative;
-      margin-bottom: 12px;
-    }
+    .search-box { position: relative; margin-bottom: 12px; }
 
     input[type="text"], input[type="number"], input[type="date"], input[type="url"], select, textarea {
       width: 100%;
@@ -141,9 +127,7 @@
       outline: none;
     }
 
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent-blue);
-    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent-blue); }
 
     .search-clear-btn {
       position: absolute;
@@ -201,11 +185,7 @@
       align-items: baseline;
     }
 
-    .artist-count {
-      font-size: 13px;
-      color: var(--text-sub);
-      font-weight: normal;
-    }
+    .artist-count { font-size: 13px; color: var(--text-sub); font-weight: normal; }
 
     .album-card {
       background: var(--card-bg);
@@ -234,11 +214,7 @@
       text-align: center;
     }
 
-    .cover-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    .cover-box img { width: 100%; height: 100%; object-fit: cover; }
 
     .album-info {
       flex: 1;
@@ -248,18 +224,8 @@
       padding-right: 40px;
     }
 
-    .album-title {
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 4px;
-    }
-
-    .album-sub {
-      font-size: 13px;
-      color: var(--text-sub);
-      line-height: 1.3;
-    }
+    .album-title { font-size: 15px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+    .album-sub { font-size: 13px; color: var(--text-sub); line-height: 1.3; }
 
     .badge {
       display: inline-block;
@@ -278,19 +244,8 @@
     .badge-sacd { background: var(--badge-sacd); }
     .badge-coffret { background: var(--badge-coffret); }
 
-    .card-actions {
-      position: absolute;
-      right: 12px;
-      bottom: 12px;
-    }
-
-    .card-action-btn {
-      background: none;
-      border: none;
-      color: var(--text-sub);
-      font-size: 16px;
-      cursor: pointer;
-    }
+    .card-actions { position: absolute; right: 12px; bottom: 12px; }
+    .card-action-btn { background: none; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; }
 
     .az-index {
       position: fixed;
@@ -310,14 +265,8 @@
       backdrop-filter: blur(5px);
     }
 
-    .az-index a {
-      color: inherit;
-      text-decoration: none;
-      text-align: center;
-      width: 14px;
-    }
+    .az-index a { color: inherit; text-decoration: none; text-align: center; width: 14px; }
 
-    /* Modales collées plus haut (94vh) */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -329,17 +278,15 @@
       z-index: 1000;
     }
 
-    .modal-overlay.active {
-      display: flex;
-    }
+    .modal-overlay.active { display: flex; }
 
     .modal-content {
       background: #1c1c1e;
       border-radius: 20px 20px 0 0;
       width: 100%;
       max-width: 650px;
-      height: 94vh;
-      max-height: 94dvh;
+      height: 98vh;
+      max-height: 98dvh;
       display: flex;
       flex-direction: column;
       border-top: 1px solid var(--card-border);
@@ -358,11 +305,7 @@
       border-radius: 20px 20px 0 0;
     }
 
-    .modal-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: white;
-    }
+    .modal-title { font-size: 17px; font-weight: 700; color: white; }
 
     .modal-close {
       background: #3a3a3c;
@@ -386,23 +329,8 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    .details-grid {
-      background: #2c2c2e;
-      border-radius: 14px;
-      padding: 14px;
-      margin: 15px 0;
-    }
-
-    .details-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 8px 0;
-      border-bottom: 1px solid #3a3a3c;
-      font-size: 14px;
-    }
-
+    .details-grid { background: #2c2c2e; border-radius: 14px; padding: 14px; margin: 15px 0; }
+    .details-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid #3a3a3c; font-size: 14px; }
     .details-row:last-child { border-bottom: none; }
     .details-label { color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
     .details-val { font-weight: 600; text-align: right; word-break: break-word; }
@@ -416,23 +344,9 @@
       margin-bottom: 15px;
     }
 
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-sub);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 10px;
-    }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-bottom: 6px; }
+    .form-row { display: flex; gap: 10px; }
 
     .checkbox-group {
       display: flex;
@@ -445,11 +359,7 @@
       margin-bottom: 15px;
     }
 
-    .checkbox-group input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      accent-color: var(--accent-blue);
-    }
+    .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent-blue); }
 
     .btn-submit {
       width: 100%;
@@ -465,21 +375,8 @@
     }
 
     .btn-danger { background: var(--danger); }
-
-    .volumes-box {
-      background: #2c2c2e;
-      border-radius: 14px;
-      padding: 12px;
-      margin-top: 10px;
-    }
-
-    .volume-item {
-      background: #1c1c1e;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
+    .volumes-box { background: #2c2c2e; border-radius: 14px; padding: 12px; margin-top: 10px; }
+    .volume-item { background: #1c1c1e; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -516,7 +413,6 @@
   </header>
 
   <main id="collectionContainer"></main>
-
   <div class="az-index" id="azIndex"></div>
 
   <!-- MODALE DETAILS -->
@@ -572,18 +468,16 @@
       <div class="modal-body">
         <form id="albumForm" onsubmit="saveAlbumForm(event)">
           
-          <!-- HAUT : Discogs & Scanner -->
           <div class="form-group" style="background:#2c2c2e; padding:12px; border-radius:14px; margin-bottom:15px;">
-            <label style="color:white; font-size:13px; margin-bottom:8px;">1. Auto-remplissage via Discogs</label>
-            <input type="text" id="formDiscogsId" placeholder="ID Discogs ou Code-barres EAN" style="margin-bottom:8px;">
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              <button type="button" class="btn-secondary" style="background:#3a3a3c;" onclick="triggerCameraScanner()">📷 Scanner un code-barres (Appareil photo)</button>
-              <button type="button" class="btn-secondary" style="background:#3a3a3c;" onclick="fetchDiscogsById()">🔍 Auto-remplir via ID Discogs</button>
+            <label style="color:white; font-size:12px; margin-bottom:8px;">Auto-remplissage via Discogs</label>
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+              <input type="text" id="formDiscogsId" placeholder="ID Discogs ou Code-barres EAN" style="flex:1;">
+              <button type="button" class="btn-secondary" style="background:var(--accent-blue); color:white; width:auto; padding:0 14px; flex-shrink:0;" onclick="fetchDiscogsByInput()">🔍 Chercher</button>
             </div>
+            <button type="button" class="btn-secondary" style="background:#3a3a3c; width:100%;" onclick="startLiveScanner()">📷 Scanner en direct (Caméra)</button>
             <input type="file" id="barcodeCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="scanBarcodeFromCamera(event)">
           </div>
 
-          <!-- MILIEU : Champs principux -->
           <div class="form-group">
             <label>Titre de l'album / du coffret *</label>
             <input type="text" id="formTitle" required placeholder="ex: Les Cantates, Vol. 1 à 45">
@@ -645,7 +539,6 @@
             <input type="url" id="formCover" placeholder="https://...">
           </div>
 
-          <!-- BAS : Option Coffret / Série -->
           <div class="checkbox-group">
             <input type="checkbox" id="isBoxSet" onchange="toggleBoxSetFields()">
             <label for="isBoxSet" style="text-transform:none; font-size:14px; color:white; cursor:pointer;">Il s'agit d'un coffret / série (multi-volumes)</label>
@@ -663,7 +556,23 @@
     </div>
   </div>
 
-  <script>
+  <!-- MODALE CAMERA EN DIRECT -->
+  <div class="modal-overlay" id="scannerModal" style="z-index: 2000;">
+    <div class="modal-content" style="height: 75vh; max-height:75dvh; background: #000;">
+      <div class="modal-header">
+        <span class="modal-title">Scanner un code-barres</span>
+        <button class="modal-close" onclick="stopLiveScanner()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+        <video id="scannerVideo" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+        <div style="position:absolute; width:260px; height:150px; border:2px solid var(--accent-blue); border-radius:16px; box-shadow: 0 0 0 4000px rgba(0,0,0,0.6); pointer-events:none; display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:bold; text-shadow: 0 1px 3px black;">
+          Placer le code-barres dans le cadre
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script>
     const firebaseConfig = {
       apiKey: "AIzaSy_REPLACE_WITH_YOUR_KEY",
       authDomain: "phonotheque-app.firebaseapp.com",
@@ -682,6 +591,8 @@
     let collection = [];
     let currentFilter = 'all';
     let selectedAlbumIndex = -1;
+    let liveStream = null;
+    let scannerAnimationId = null;
 
     function initApp() {
       loadLocal();
@@ -994,9 +905,53 @@
       closeModal("formModal");
     }
 
-    // Fonctions Scanner Appareil photo + API Discogs
-    function triggerCameraScanner() {
-      document.getElementById("barcodeCameraInput").click();
+    async function startLiveScanner() {
+      if (!('BarcodeDetector' in window)) {
+        document.getElementById("barcodeCameraInput").click();
+        return;
+      }
+
+      try {
+        document.getElementById("scannerModal").classList.add("active");
+        const video = document.getElementById("scannerVideo");
+        liveStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: "environment" } }
+        }).catch(() => navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }));
+
+        video.srcObject = liveStream;
+        await video.play();
+
+        const barcodeDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code'] });
+
+        const scanFrame = async () => {
+          if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            try {
+              const barcodes = await barcodeDetector.detect(video);
+              if (barcodes.length > 0) {
+                const code = barcodes[0].rawValue;
+                stopLiveScanner();
+                document.getElementById("formDiscogsId").value = code;
+                await searchDiscogsByBarcode(code);
+                return;
+              }
+            } catch(err) {}
+          }
+          scannerAnimationId = requestAnimationFrame(scanFrame);
+        };
+        scanFrame();
+      } catch(e) {
+        stopLiveScanner();
+        document.getElementById("barcodeCameraInput").click();
+      }
+    }
+
+    function stopLiveScanner() {
+      if (scannerAnimationId) cancelAnimationFrame(scannerAnimationId);
+      if (liveStream) {
+        liveStream.getTracks().forEach(track => track.stop());
+        liveStream = null;
+      }
+      document.getElementById("scannerModal").classList.remove("active");
     }
 
     async function scanBarcodeFromCamera(event) {
@@ -1006,7 +961,7 @@
       try {
         const imageBitmap = await createImageBitmap(file);
         if ('BarcodeDetector' in window) {
-          const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code'] });
+          const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
           const barcodes = await detector.detect(imageBitmap);
           if (barcodes.length > 0) {
             const code = barcodes[0].rawValue;
@@ -1015,15 +970,26 @@
             return;
           }
         }
-        
-        // Fallback si pas de détection automatique
-        const codePrompt = prompt("Photo reçue ! Si le code n'a pas été lu automatiquement, saisissez le code-barres (EAN) :");
+        const codePrompt = prompt("Saisissez le code-barres (EAN) de la photo :");
         if (codePrompt) {
           document.getElementById("formDiscogsId").value = codePrompt.trim();
           await searchDiscogsByBarcode(codePrompt.trim());
         }
       } catch(e) {
-        alert("Impossible de lire la photo. Saisissez directement le code-barres ou l'ID.");
+        alert("Erreur de lecture photo.");
+      }
+    }
+
+    async function fetchDiscogsByInput() {
+      const val = document.getElementById("formDiscogsId").value.trim();
+      if (!val) {
+        alert("Saisissez un ID Discogs ou un code-barres.");
+        return;
+      }
+      if (val.length >= 11 && /^\d+$/.test(val)) {
+        await searchDiscogsByBarcode(val);
+      } else {
+        await fetchDiscogsById(val);
       }
     }
 
@@ -1037,7 +1003,7 @@
           document.getElementById("formDiscogsId").value = item.id;
           await fetchDiscogsById(item.id);
         } else {
-          alert(`Aucun résultat sur Discogs pour le code-barres : ${barcode}`);
+          alert(`Aucun résultat Discogs trouvé pour le code-barres ${barcode}`);
         }
       } catch(e) {
         alert("Erreur de recherche Discogs.");
@@ -1045,14 +1011,7 @@
     }
 
     async function fetchDiscogsById(idParam) {
-      const cleanId = idParam || document.getElementById("formDiscogsId").value.trim();
-      if (!cleanId) {
-        const input = prompt("Saisissez un ID de sortie Discogs ou un code-barres :");
-        if (!input) return;
-        document.getElementById("formDiscogsId").value = input.trim();
-      }
-      
-      const id = document.getElementById("formDiscogsId").value.trim();
+      const id = idParam || document.getElementById("formDiscogsId").value.trim();
       if (!id) return;
 
       try {
@@ -1069,7 +1028,7 @@
         if (data.country) document.getElementById("formCountry").value = data.country;
         if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
 
-        alert("Album renseigné depuis Discogs avec succès !");
+        alert("Données remplies depuis Discogs avec succès !");
       } catch(e) {
         alert("Impossible de charger les données pour cet ID Discogs.");
       }
@@ -1234,7 +1193,7 @@
           if (confirm(`Voulez-vous importer les ${newAlbums.length} références avec leurs éditeurs ?`)) {
             collection = newAlbums;
             saveCollection();
-            alert("Importation réussie avec éditeurs !");
+            alert("Importation réussie !");
           }
         }
       };
