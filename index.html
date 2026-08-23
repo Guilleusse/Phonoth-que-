@@ -59,6 +59,8 @@
     .album-info { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-right: 40px; }
     .album-title { font-size: 15px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
     .album-sub { font-size: 13px; color: var(--text-sub); line-height: 1.3; }
+    .clickable-tag { color: var(--text-sub); text-decoration: underline; cursor: pointer; }
+    .clickable-tag:hover { color: var(--text-main); }
     .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: white; margin-bottom: 4px; width: fit-content; }
     .badge-vinyle { background: var(--badge-vinyle); }
     .badge-cd { background: var(--badge-cd); }
@@ -115,7 +117,7 @@
     </div>
 
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, éditeur, chef, BWV..." oninput="onSearchInput()">
+      <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, éditeur, chef, BWV..." oninput="onSearchInput()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">✕</button>
     </div>
 
@@ -156,7 +158,7 @@
 
         <div id="volumesSection" style="display:none; margin-bottom: 15px;">
           <h3 style="font-size: 15px; margin-bottom: 8px;">Contenu du coffret / Liste des volumes :</h3>
-          <input type="text" id="volumeSearch" placeholder="Filtrer un volume, cantate, BWV..." oninput="filterVolumes()" style="margin-bottom: 8px; font-size: 13px;">
+          <input type="text" id="volumeSearch" placeholder="Filtrer un volume, cantate, BWV..." oninput="filterVolumes()" style="margin-bottom: 8px; font-size: 13px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <div class="volumes-box" id="volumesList"></div>
         </div>
 
@@ -175,12 +177,12 @@
         <button class="modal-close" onclick="closeModal('formModal')">✕</button>
       </div>
       <div class="modal-body">
-        <form id="albumForm" onsubmit="saveAlbumForm(event)">
+        <form id="albumForm" onsubmit="saveAlbumForm(event)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           
           <div class="form-group" style="background:#2c2c2e; padding:12px; border-radius:14px; margin-bottom:15px;">
             <label style="color:white; font-size:12px; margin-bottom:8px;">Auto-remplissage via Discogs</label>
             <div style="display:flex; gap:8px; margin-bottom:8px;">
-              <input type="text" id="formDiscogsId" placeholder="ID Discogs ou Code-barres EAN" style="flex:1;">
+              <input type="text" id="formDiscogsId" name="discogs_code_no_autofill" placeholder="ID Discogs ou Code-barres EAN" style="flex:1;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
               <button type="button" class="btn-secondary" style="background:var(--accent-blue); color:white; width:auto; padding:0 14px; flex-shrink:0;" onclick="fetchDiscogsByInput()">🔍 Chercher</button>
             </div>
             <button type="button" class="btn-secondary" style="background:#3a3a3c; width:100%;" onclick="startLiveScanner()">📷 Scanner en direct (Caméra)</button>
@@ -188,22 +190,22 @@
 
           <div class="form-group">
             <label>Titre de l'album / du coffret *</label>
-            <input type="text" id="formTitle" required placeholder="ex: Les Cantates, Vol. 1 à 45">
+            <input type="text" id="formTitle" name="album_title_no_autofill" required placeholder="ex: Les Cantates, Vol. 1 à 45" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>Artiste *</label>
-            <input type="text" id="formArtist" required placeholder="ex: Johann Sebastian Bach">
+            <input type="text" id="formArtist" name="artist_name_no_autofill" required placeholder="ex: Johann Sebastian Bach" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>Éditeur / Label</label>
-            <input type="text" id="formLabel" placeholder="ex: Telefunken, Mofi, Barclay, Deutsche Grammophon...">
+            <input type="text" id="formLabel" name="publisher_label_no_autofill" placeholder="ex: Telefunken, Mofi, Barclay, Deutsche Grammophon..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>Chef d'orchestre / Interprète</label>
-            <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt">
+            <input type="text" id="formConductor" name="conductor_no_autofill" placeholder="ex: Nikolaus Harnoncourt" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-row">
@@ -217,34 +219,34 @@
             </div>
             <div class="form-group" style="flex:1">
               <label>Année</label>
-              <input type="text" id="formYear" placeholder="ex: 1972">
+              <input type="text" id="formYear" name="release_year_no_autofill" placeholder="ex: 1972" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
 
           <div class="form-group">
             <label>Pays d'édition</label>
-            <input type="text" id="formCountry" placeholder="ex: Allemagne">
+            <input type="text" id="formCountry" name="press_country_no_autofill" placeholder="ex: Allemagne" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-row">
             <div class="form-group" style="flex:1">
               <label>Date d'achat</label>
-              <input type="text" id="formPurchaseDate" placeholder="ex: 2026-08-23">
+              <input type="text" id="formPurchaseDate" name="buy_date_no_autofill" placeholder="ex: 2026-08-23" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div class="form-group" style="flex:1">
               <label>Prix d'achat (€)</label>
-              <input type="text" id="formPurchasePrice" placeholder="ex: 120">
+              <input type="text" id="formPurchasePrice" name="buy_price_no_autofill" placeholder="ex: 120" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
 
           <div class="form-group">
             <label>Lieu d'achat</label>
-            <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, FNAC St Lazare...">
+            <input type="text" id="formPurchaseLocation" name="buy_store_no_autofill" placeholder="ex: Discogs, FNAC St Lazare..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>URL de la pochette</label>
-            <input type="url" id="formCover" placeholder="https://...">
+            <input type="url" id="formCover" name="cover_url_no_autofill" placeholder="https://..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="checkbox-group">
@@ -254,7 +256,7 @@
 
           <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
             <label>Liste des volumes (Un volume par ligne)</label>
-            <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11"></textarea>
+            <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
 
           <button type="submit" class="btn-submit">Enregistrer dans la Phonothèque</button>
@@ -276,8 +278,8 @@
       </div>
     </div>
   </div>
-  
-  <script>
+
+    <script>
     const firebaseConfig = {
       apiKey: "AIzaSy_REPLACE_WITH_YOUR_KEY",
       authDomain: "phonotheque-app.firebaseapp.com",
@@ -360,8 +362,9 @@
           const matchArtist = (album.artist || '').toLowerCase().includes(search);
           const matchLabel = (album.label || '').toLowerCase().includes(search);
           const matchConductor = (album.conductor || '').toLowerCase().includes(search);
+          const matchCountry = (album.country || '').toLowerCase().includes(search);
           const matchVolumes = album.volumes && album.volumes.some(v => v.toLowerCase().includes(search));
-          return matchTitle || matchArtist || matchLabel || matchConductor || matchVolumes;
+          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchVolumes;
         }
         return true;
       });
@@ -390,7 +393,9 @@
           const card = document.createElement("div");
           card.className = "album-card";
           card.onclick = (e) => {
-            if (!e.target.classList.contains('card-action-btn')) showDetails(realIndex);
+            if (!e.target.classList.contains('card-action-btn') && !e.target.classList.contains('clickable-tag')) {
+              showDetails(realIndex);
+            }
           };
 
           let badgeClass = 'badge-cd';
@@ -406,7 +411,10 @@
           let subParts = [];
           if (album.label) subParts.push(album.label);
           if (album.year) subParts.push(album.year);
-          if (album.country) subParts.push(album.country);
+          if (album.country) {
+            const countryHtml = `<span class="clickable-tag" onclick="filterByTag('${album.country.replace(/'/g, "\\'")}', event)">${album.country}</span>`;
+            subParts.push(countryHtml);
+          }
           const subText = subParts.join(' • ');
 
           card.innerHTML = `
@@ -425,6 +433,13 @@
           container.appendChild(card);
         });
       });
+    }
+
+    function filterByTag(tag, e) {
+      if (e) e.stopPropagation();
+      const searchInput = document.getElementById("searchInput");
+      searchInput.value = tag;
+      onSearchInput();
     }
 
     function renderAZIndex(artists) {
