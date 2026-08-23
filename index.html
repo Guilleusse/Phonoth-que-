@@ -317,7 +317,7 @@
       width: 14px;
     }
 
-    /* Fenêtres Modales avec en-tête STRICTEMENT FIXE */
+    /* Modales collées plus haut (94vh) */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -338,8 +338,8 @@
       border-radius: 20px 20px 0 0;
       width: 100%;
       max-width: 650px;
-      height: 82vh;
-      max-height: 82dvh;
+      height: 94vh;
+      max-height: 94dvh;
       display: flex;
       flex-direction: column;
       border-top: 1px solid var(--card-border);
@@ -441,6 +441,7 @@
       background: #2c2c2e;
       padding: 12px;
       border-radius: 12px;
+      margin-top: 15px;
       margin-bottom: 15px;
     }
 
@@ -571,11 +572,18 @@
       <div class="modal-body">
         <form id="albumForm" onsubmit="saveAlbumForm(event)">
           
-          <div class="checkbox-group">
-            <input type="checkbox" id="isBoxSet" onchange="toggleBoxSetFields()">
-            <label for="isBoxSet" style="text-transform:none; font-size:14px; color:white; cursor:pointer;">Il s'agit d'un coffret / série (multi-volumes)</label>
+          <!-- HAUT : Discogs & Scanner -->
+          <div class="form-group" style="background:#2c2c2e; padding:12px; border-radius:14px; margin-bottom:15px;">
+            <label style="color:white; font-size:13px; margin-bottom:8px;">1. Auto-remplissage via Discogs</label>
+            <input type="text" id="formDiscogsId" placeholder="ID Discogs ou Code-barres EAN" style="margin-bottom:8px;">
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button type="button" class="btn-secondary" style="background:#3a3a3c;" onclick="triggerCameraScanner()">📷 Scanner un code-barres (Appareil photo)</button>
+              <button type="button" class="btn-secondary" style="background:#3a3a3c;" onclick="fetchDiscogsById()">🔍 Auto-remplir via ID Discogs</button>
+            </div>
+            <input type="file" id="barcodeCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="scanBarcodeFromCamera(event)">
           </div>
 
+          <!-- MILIEU : Champs principux -->
           <div class="form-group">
             <label>Titre de l'album / du coffret *</label>
             <input type="text" id="formTitle" required placeholder="ex: Les Cantates, Vol. 1 à 45">
@@ -633,14 +641,14 @@
           </div>
 
           <div class="form-group">
-            <label>ID Discogs</label>
-            <input type="text" id="formDiscogsId" placeholder="ex: 6083236">
-            <button type="button" class="btn-secondary" style="margin-top:8px; width:100%;" onclick="scanBarcodeOrFetchDiscogs()">📷 Scanner / Auto-remplir Discogs</button>
-          </div>
-
-          <div class="form-group">
             <label>URL de la pochette</label>
             <input type="url" id="formCover" placeholder="https://...">
+          </div>
+
+          <!-- BAS : Option Coffret / Série -->
+          <div class="checkbox-group">
+            <input type="checkbox" id="isBoxSet" onchange="toggleBoxSetFields()">
+            <label for="isBoxSet" style="text-transform:none; font-size:14px; color:white; cursor:pointer;">Il s'agit d'un coffret / série (multi-volumes)</label>
           </div>
 
           <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
@@ -986,18 +994,70 @@
       closeModal("formModal");
     }
 
-    async function scanBarcodeOrFetchDiscogs() {
-      const id = document.getElementById("formDiscogsId").value.trim();
-      if (!id) {
-        const input = prompt("Saisissez un ID de sortie Discogs ou un code-barres (EAN) :");
+    // Fonctions Scanner Appareil photo + API Discogs
+    function triggerCameraScanner() {
+      document.getElementById("barcodeCameraInput").click();
+    }
+
+    async function scanBarcodeFromCamera(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        const imageBitmap = await createImageBitmap(file);
+        if ('BarcodeDetector' in window) {
+          const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code'] });
+          const barcodes = await detector.detect(imageBitmap);
+          if (barcodes.length > 0) {
+            const code = barcodes[0].rawValue;
+            document.getElementById("formDiscogsId").value = code;
+            await searchDiscogsByBarcode(code);
+            return;
+          }
+        }
+        
+        // Fallback si pas de détection automatique
+        const codePrompt = prompt("Photo reçue ! Si le code n'a pas été lu automatiquement, saisissez le code-barres (EAN) :");
+        if (codePrompt) {
+          document.getElementById("formDiscogsId").value = codePrompt.trim();
+          await searchDiscogsByBarcode(codePrompt.trim());
+        }
+      } catch(e) {
+        alert("Impossible de lire la photo. Saisissez directement le code-barres ou l'ID.");
+      }
+    }
+
+    async function searchDiscogsByBarcode(barcode) {
+      try {
+        const res = await fetch(`https://api.discogs.com/database/search?q=${encodeURIComponent(barcode)}&type=release`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          const item = data.results[0];
+          document.getElementById("formDiscogsId").value = item.id;
+          await fetchDiscogsById(item.id);
+        } else {
+          alert(`Aucun résultat sur Discogs pour le code-barres : ${barcode}`);
+        }
+      } catch(e) {
+        alert("Erreur de recherche Discogs.");
+      }
+    }
+
+    async function fetchDiscogsById(idParam) {
+      const cleanId = idParam || document.getElementById("formDiscogsId").value.trim();
+      if (!cleanId) {
+        const input = prompt("Saisissez un ID de sortie Discogs ou un code-barres :");
         if (!input) return;
         document.getElementById("formDiscogsId").value = input.trim();
       }
       
-      const cleanId = document.getElementById("formDiscogsId").value.trim();
+      const id = document.getElementById("formDiscogsId").value.trim();
+      if (!id) return;
+
       try {
-        const res = await fetch(`https://api.discogs.com/releases/${cleanId}`);
-        if (!res.ok) throw new Error("Erreur");
+        const res = await fetch(`https://api.discogs.com/releases/${id}`);
+        if (!res.ok) throw new Error();
         const data = await res.json();
 
         if (data.title) document.getElementById("formTitle").value = data.title;
@@ -1009,9 +1069,9 @@
         if (data.country) document.getElementById("formCountry").value = data.country;
         if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
 
-        alert("Données récupérées depuis Discogs avec succès !");
+        alert("Album renseigné depuis Discogs avec succès !");
       } catch(e) {
-        alert("Impossible de charger les données automatiquement. Vérifiez l'ID Discogs.");
+        alert("Impossible de charger les données pour cet ID Discogs.");
       }
     }
 
