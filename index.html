@@ -124,7 +124,7 @@
       color: #fca5a5;
     }
 
-    /* Barre de recherche avec bouton d'effacement */
+    /* Barre de recherche */
     .search-box {
       position: relative;
       margin-bottom: 12px;
@@ -317,7 +317,7 @@
       width: 14px;
     }
 
-    /* Fenêtres Modales avec en-tête fixe (Sticky) */
+    /* Fenêtres Modales avec en-tête STRICTEMENT FIXE */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -326,7 +326,7 @@
       display: none;
       align-items: flex-end;
       justify-content: center;
-      z-index: 100;
+      z-index: 1000;
     }
 
     .modal-overlay.active {
@@ -335,41 +335,55 @@
 
     .modal-content {
       background: #1c1c1e;
-      border-radius: 24px 24px 0 0;
+      border-radius: 20px 20px 0 0;
       width: 100%;
       max-width: 650px;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 0 20px 30px 20px;
+      height: 82vh;
+      max-height: 82dvh;
+      display: flex;
+      flex-direction: column;
       border-top: 1px solid var(--card-border);
-      position: relative;
+      overflow: hidden;
     }
 
     .modal-header {
-      position: sticky;
-      top: 0;
-      background: #1c1c1e;
-      z-index: 20;
-      padding: 20px 0 12px 0;
-      margin-bottom: 15px;
+      flex-shrink: 0;
+      height: 58px;
+      padding: 0 20px;
+      background: #2c2c2e;
       border-bottom: 1px solid var(--card-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: white;
     }
 
     .modal-close {
-      background: #2c2c2e;
+      background: #3a3a3c;
       border: none;
-      color: var(--text-sub);
+      color: white;
       width: 32px;
       height: 32px;
       border-radius: 50%;
       font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      -webkit-overflow-scrolling: touch;
     }
 
     .details-grid {
@@ -395,7 +409,7 @@
 
     .modal-cover {
       width: 100%;
-      max-height: 280px;
+      max-height: 250px;
       object-fit: contain;
       border-radius: 16px;
       background: #121212;
@@ -508,37 +522,41 @@
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="modalDetailTitle">Détails de l'album</h2>
+        <span class="modal-title" id="modalDetailTitle">Détails de l'album</span>
         <button class="modal-close" onclick="closeModal('detailsModal')">✕</button>
       </div>
-      <img id="modalDetailCover" class="modal-cover" src="" alt="Pochette">
-      <h2 id="modalDetailAlbumName" style="font-size: 20px;"></h2>
-      <h3 id="modalDetailArtist" style="font-size: 15px; color: var(--accent-blue); margin-bottom: 10px;"></h3>
+      <div class="modal-body">
+        <img id="modalDetailCover" class="modal-cover" src="" alt="Pochette">
+        <h2 id="modalDetailAlbumName" style="font-size: 20px;"></h2>
+        <h3 id="modalDetailArtist" style="font-size: 15px; color: var(--accent-blue); margin-bottom: 10px;"></h3>
 
-      <div class="details-grid">
-        <div class="details-row"><span class="details-label">Support :</span><span class="details-val" id="modalDetailSupport"></span></div>
-        <div class="details-row" id="rowLabel"><span class="details-label">Éditeur / Label :</span><span class="details-val" id="modalDetailLabel"></span></div>
-        <div class="details-row"><span class="details-label">Année de sortie :</span><span class="details-val" id="modalDetailYear"></span></div>
-        <div class="details-row"><span class="details-label">Pays d'édition :</span><span class="details-val" id="modalDetailCountry"></span></div>
-        <div class="details-row" id="rowConductor"><span class="details-label">Chef d'orchestre :</span><span class="details-val" id="modalDetailConductor"></span></div>
-        <div class="details-row"><span class="details-label">Date d'achat :</span><span class="details-val" id="modalDetailDate"></span></div>
-        <div class="details-row"><span class="details-label">Prix d'achat :</span><span class="details-val" id="modalDetailPrice"></span></div>
-        <div class="details-row"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
-      </div>
+        <div class="details-grid">
+          <div class="details-row"><span class="details-label">Support :</span><span class="details-val" id="modalDetailSupport"></span></div>
+          <div class="details-row" id="rowLabel"><span class="details-label">Éditeur / Label :</span><span class="details-val" id="modalDetailLabel"></span></div>
+          <div class="details-row"><span class="details-label">Année de sortie :</span><span class="details-val" id="modalDetailYear"></span></div>
+          <div class="details-row"><span class="details-label">Pays d'édition :</span><span class="details-val" id="modalDetailCountry"></span></div>
+          <div class="details-row" id="rowConductor"><span class="details-label">Chef d'orchestre :</span><span class="details-val" id="modalDetailConductor"></span></div>
+          <div class="details-row"><span class="details-label">Date d'achat :</span><span class="details-val" id="modalDetailDate"></span></div>
+          <div class="details-row"><span class="details-label">Prix d'achat :</span><span class="details-val" id="modalDetailPrice"></span></div>
+          <div class="details-row"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
+        </div>
 
-      <div id="volumesSection" style="display:none; margin-bottom: 15px;">
-        <h3 style="font-size: 15px; margin-bottom: 8px;">Contenu du coffret / Liste des volumes :</h3>
-        <input type="text" id="volumeSearch" placeholder="Filtrer un volume, cantate, BWV..." oninput="filterVolumes()" style="margin-bottom: 8px; font-size: 13px;">
-        <div class="volumes-box" id="volumesList"></div>
-      </div>
+        <div id="volumesSection" style="display:none; margin-bottom: 15px;">
+          <h3 style="font-size: 15px; margin-bottom: 8px;">Contenu du coffret / Liste des volumes :</h3>
+          <input type="text" id="volumeSearch" placeholder="Filtrer un volume, cantate, BWV..." oninput="filterVolumes()" style="margin-bottom: 8px; font-size: 13px;">
+          <div class="volumes-box" id="volumesList"></div>
+        </div>
 
-      <div style="display:flex; gap: 10px; margin-top: 15px;">
-        <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none;">🔗 Voir sur Discogs</a>
-      </div>
+        <div style="display:flex; gap: 10px; margin-top: 15px;">
+          <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none;">🔗 Voir sur Discogs</a>
+        </div>
 
-      <div style="display:flex; gap: 10px; margin-top: 20px;">
-        <button class="btn-secondary" style="flex:1" onclick="editCurrentAlbum()">✏️ Modifier</button>
-        <button class="btn-secondary btn-danger" style="color:white;" onclick="deleteCurrentAlbum()">🗑️ Supprimer</button>
+        <div style="display:flex; gap: 10px; margin-top: 20px;">
+          <button class="btn-secondary" style="flex:1" onclick="editCurrentAlbum()">✏️ Modifier</button>
+          <button class="btn-secondary btn-danger" style="color:white;" onclick="deleteCurrentAlbum()">🗑️ Supprimer</button>
+        </div>
+
+        <button class="btn-secondary" style="width:100%; margin-top:15px;" onclick="closeModal('detailsModal')">✕ Fermer la fenêtre</button>
       </div>
     </div>
   </div>
@@ -547,89 +565,93 @@
   <div class="modal-overlay" id="formModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="formModalTitle">Ajouter un album</h2>
+        <span class="modal-title" id="formModalTitle">Ajouter un album</span>
         <button class="modal-close" onclick="closeModal('formModal')">✕</button>
       </div>
-      <form id="albumForm" onsubmit="saveAlbumForm(event)">
-        
-        <div class="checkbox-group">
-          <input type="checkbox" id="isBoxSet" onchange="toggleBoxSetFields()">
-          <label for="isBoxSet" style="text-transform:none; font-size:14px; color:white; cursor:pointer;">Il s'agit d'un coffret / série (multi-volumes)</label>
-        </div>
-
-        <div class="form-group">
-          <label>Titre de l'album / du coffret *</label>
-          <input type="text" id="formTitle" required placeholder="ex: Les Cantates, Vol. 1 à 45">
-        </div>
-
-        <div class="form-group">
-          <label>Artiste *</label>
-          <input type="text" id="formArtist" required placeholder="ex: Johann Sebastian Bach">
-        </div>
-
-        <div class="form-group">
-          <label>Éditeur / Label</label>
-          <input type="text" id="formLabel" placeholder="ex: Telefunken, Mofi, Barclay, Deutsche Grammophon...">
-        </div>
-
-        <div class="form-group">
-          <label>Chef d'orchestre / Interprète</label>
-          <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group" style="flex:1">
-            <label>Support</label>
-            <select id="formSupport">
-              <option value="Vinyle">Vinyle</option>
-              <option value="CD">CD</option>
-              <option value="SACD">SACD</option>
-            </select>
+      <div class="modal-body">
+        <form id="albumForm" onsubmit="saveAlbumForm(event)">
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="isBoxSet" onchange="toggleBoxSetFields()">
+            <label for="isBoxSet" style="text-transform:none; font-size:14px; color:white; cursor:pointer;">Il s'agit d'un coffret / série (multi-volumes)</label>
           </div>
-          <div class="form-group" style="flex:1">
-            <label>Année</label>
-            <input type="text" id="formYear" placeholder="ex: 1972">
+
+          <div class="form-group">
+            <label>Titre de l'album / du coffret *</label>
+            <input type="text" id="formTitle" required placeholder="ex: Les Cantates, Vol. 1 à 45">
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>Pays d'édition</label>
-          <input type="text" id="formCountry" placeholder="ex: Allemagne">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group" style="flex:1">
-            <label>Date d'achat</label>
-            <input type="text" id="formPurchaseDate" placeholder="ex: 2026-08-23">
+          <div class="form-group">
+            <label>Artiste *</label>
+            <input type="text" id="formArtist" required placeholder="ex: Johann Sebastian Bach">
           </div>
-          <div class="form-group" style="flex:1">
-            <label>Prix d'achat (€)</label>
-            <input type="text" id="formPurchasePrice" placeholder="ex: 120">
+
+          <div class="form-group">
+            <label>Éditeur / Label</label>
+            <input type="text" id="formLabel" placeholder="ex: Telefunken, Mofi, Barclay, Deutsche Grammophon...">
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>Lieu d'achat</label>
-          <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, FNAC St Lazare...">
-        </div>
+          <div class="form-group">
+            <label>Chef d'orchestre / Interprète</label>
+            <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt">
+          </div>
 
-        <div class="form-group">
-          <label>ID Discogs</label>
-          <input type="text" id="formDiscogsId" placeholder="ex: 6083236">
-        </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1">
+              <label>Support</label>
+              <select id="formSupport">
+                <option value="Vinyle">Vinyle</option>
+                <option value="CD">CD</option>
+                <option value="SACD">SACD</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label>Année</label>
+              <input type="text" id="formYear" placeholder="ex: 1972">
+            </div>
+          </div>
 
-        <div class="form-group">
-          <label>URL de la pochette</label>
-          <input type="url" id="formCover" placeholder="https://...">
-        </div>
+          <div class="form-group">
+            <label>Pays d'édition</label>
+            <input type="text" id="formCountry" placeholder="ex: Allemagne">
+          </div>
 
-        <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
-          <label>Liste des volumes (Un volume par ligne)</label>
-          <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11"></textarea>
-        </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1">
+              <label>Date d'achat</label>
+              <input type="text" id="formPurchaseDate" placeholder="ex: 2026-08-23">
+            </div>
+            <div class="form-group" style="flex:1">
+              <label>Prix d'achat (€)</label>
+              <input type="text" id="formPurchasePrice" placeholder="ex: 120">
+            </div>
+          </div>
 
-        <button type="submit" class="btn-submit">Enregistrer dans la Phonothèque</button>
-      </form>
+          <div class="form-group">
+            <label>Lieu d'achat</label>
+            <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, FNAC St Lazare...">
+          </div>
+
+          <div class="form-group">
+            <label>ID Discogs</label>
+            <input type="text" id="formDiscogsId" placeholder="ex: 6083236">
+            <button type="button" class="btn-secondary" style="margin-top:8px; width:100%;" onclick="scanBarcodeOrFetchDiscogs()">📷 Scanner / Auto-remplir Discogs</button>
+          </div>
+
+          <div class="form-group">
+            <label>URL de la pochette</label>
+            <input type="url" id="formCover" placeholder="https://...">
+          </div>
+
+          <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
+            <label>Liste des volumes (Un volume par ligne)</label>
+            <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11"></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">Enregistrer dans la Phonothèque</button>
+          <button type="button" class="btn-secondary" style="width:100%; margin-top:10px;" onclick="closeModal('formModal')">✕ Annuler</button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -647,14 +669,13 @@
     try {
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
-    } catch(e) { console.log("Mode offline actif"); }
+    } catch(e) { console.log("Mode local"); }
 
     let collection = [];
     let currentFilter = 'all';
     let selectedAlbumIndex = -1;
 
     function initApp() {
-      // Chargement instantané depuis la mémoire locale
       loadLocal();
 
       if (db) {
@@ -664,9 +685,7 @@
             localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
             renderCollection();
           }
-        }, err => {
-          console.log("Lecture Firebase impossible, conservation des données locales");
-        });
+        }, err => console.log("Données locales conservées"));
       }
     }
 
@@ -680,7 +699,7 @@
       localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
       if (db) {
         db.collection("phonotheque").doc("main").set({ list: collection })
-          .catch(err => console.log("Sauvegarde locale uniquement"));
+          .catch(err => console.log("Erreur synchro cloud"));
       }
       renderCollection();
     }
@@ -965,6 +984,35 @@
 
       saveCollection();
       closeModal("formModal");
+    }
+
+    async function scanBarcodeOrFetchDiscogs() {
+      const id = document.getElementById("formDiscogsId").value.trim();
+      if (!id) {
+        const input = prompt("Saisissez un ID de sortie Discogs ou un code-barres (EAN) :");
+        if (!input) return;
+        document.getElementById("formDiscogsId").value = input.trim();
+      }
+      
+      const cleanId = document.getElementById("formDiscogsId").value.trim();
+      try {
+        const res = await fetch(`https://api.discogs.com/releases/${cleanId}`);
+        if (!res.ok) throw new Error("Erreur");
+        const data = await res.json();
+
+        if (data.title) document.getElementById("formTitle").value = data.title;
+        if (data.artists && data.artists.length) {
+          document.getElementById("formArtist").value = data.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ');
+        }
+        if (data.labels && data.labels.length) document.getElementById("formLabel").value = data.labels[0].name;
+        if (data.year) document.getElementById("formYear").value = data.year;
+        if (data.country) document.getElementById("formCountry").value = data.country;
+        if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
+
+        alert("Données récupérées depuis Discogs avec succès !");
+      } catch(e) {
+        alert("Impossible de charger les données automatiquement. Vérifiez l'ID Discogs.");
+      }
     }
 
     function editCurrentAlbum() {
