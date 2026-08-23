@@ -2,1188 +2,974 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Ma Phonothèque</title>
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Phonothèque</title>
+  
+  <!-- PWA & Apple Web App Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Phonothèque">
+  <meta name="theme-color" content="#121212">
+  <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/vinyl.png">
+
+  <!-- Firebase SDKs (Compat version pour PWA monopage) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
     :root {
-      --bg: #09090b;
-      --card-bg: #18181b;
-      --card-border: #27272a;
-      --accent: #2563eb;
-      --text: #f4f4f5;
-      --text-muted: #a1a1aa;
-      --border: #27272a;
-      --danger: #dc2626;
-      --badge-vinyle-bg: #451a03; --badge-vinyle-text: #fde68a;
-      --badge-cd-bg: #1e3a8a;     --badge-cd-text: #bfdbfe;
-      --badge-sacd-bg: #581c87;   --badge-sacd-text: #e9d5ff;
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --card-border: #2a2a2a;
+      --accent-blue: #2563eb;
+      --accent-blue-hover: #1d4ed8;
+      --text-main: #f3f4f6;
+      --text-sub: #9ca3af;
+      --badge-vinyle: #d97706;
+      --badge-cd: #2563eb;
+      --badge-sacd: #0d9488;
+      --badge-coffret: #8b5cf6;
+      --danger: #ef4444;
     }
 
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Roboto, sans-serif; 
-      -webkit-tap-highlight-color: transparent; 
-    }
-    
-    html, body {
-      max-width: 100vw;
-      overflow-x: hidden;
-      background-color: var(--bg); 
-      color: var(--text);
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    body { 
-      padding: 16px; 
-      padding-top: calc(16px + env(safe-area-inset-top)); 
-      padding-bottom: calc(40px + env(safe-area-inset-bottom)); 
-      max-width: 900px; 
-      margin: 0 auto; 
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px 15px 80px 15px;
+      max-width: 650px;
+      margin: 0 auto;
     }
 
-    header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: flex-start; 
-      margin-bottom: 16px; 
-      padding-bottom: 12px; 
-      border-bottom: 1px solid var(--border); 
-    }
-    
-    h1 { font-size: 1.5rem; font-weight: 700; }
-    .stats { 
-      font-size: 0.78rem; 
-      color: var(--text-muted); 
-      margin-top: 2px; 
-      line-height: 1.35;
+    /* En-tête */
+    header {
+      margin-bottom: 20px;
     }
 
-    .header-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-
-    .btn { 
-      background: var(--accent); 
-      color: white; 
-      border: none; 
-      padding: 8px 12px; 
-      border-radius: 8px; 
-      font-weight: 600; 
-      cursor: pointer; 
-      font-size: 0.85rem; 
-      display: inline-flex; 
-      align-items: center; 
-      justify-content: center; 
-      text-decoration: none;
-      gap: 4px;
-    }
-    .btn:active { transform: scale(0.96); }
-    .btn-secondary { background: #27272a; color: var(--text); border: 1px solid #3f3f46; }
-    .btn-danger { background: var(--danger); color: white; }
-
-    .toolbar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-
-    /* Zone de recherche avec croix d'effacement + Menu de tri */
-    .search-container {
-      display: flex !important;
-      align-items: center !important;
-      position: relative !important;
-      gap: 8px !important;
-      margin-bottom: 12px !important;
-      width: 100% !important;
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
     }
 
-    .search-input-wrapper {
-      position: relative !important;
-      flex: 1 1 auto !important;
-      display: flex !important;
-      align-items: center !important;
-      min-width: 0 !important;
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
     }
 
-    .search-input-wrapper input {
-      width: 100% !important;
-      padding: 8px 32px 8px 10px !important;
-      font-size: 0.85rem !important;
-      border-radius: 10px !important;
-      border: 1px solid var(--border) !important;
-      background: var(--card-bg) !important;
-      color: var(--text) !important;
-      box-sizing: border-box !important;
+    .header-actions {
+      display: flex;
+      gap: 10px;
     }
 
-    .clear-search-btn {
-      position: absolute !important;
-      right: 10px !important;
-      background: none !important;
-      border: none !important;
-      color: #8e8e93 !important;
-      font-size: 14px !important;
-      cursor: pointer !important;
-      display: none;
-      padding: 0 !important;
+    .icon-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
     }
 
-    /* Menu de tri compact */
-    .sort-select {
-      flex: 0 0 auto !important;
-      width: 115px !important;
-      padding: 8px 4px !important;
-      font-size: 0.78rem !important;
-      color: #ffffff !important;
-      background-color: #1c1c1e !important;
-      color-scheme: dark !important;
-      border: 1px solid #3a3a3c !important;
-      border-radius: 8px !important;
+    .btn-add {
+      background: var(--accent-blue);
+      border: none;
+      color: white;
+      font-weight: bold;
+    }
+
+    .stats-line {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    /* Actions Import / Export */
+    .io-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    /* Recherche et filtres */
+    .search-box {
+      margin-bottom: 12px;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 15px;
       outline: none;
     }
 
-    /* Filtres et bouton vider */
-    .controls {
-      width: 100% !important;
-      overflow: hidden !important;
-      margin-bottom: 20px !important;
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent-blue);
     }
 
-    .controls .filters {
-      display: flex !important;
-      align-items: center !important;
-      flex-wrap: nowrap !important;
-      overflow-x: auto !important;
-      -webkit-overflow-scrolling: touch;
-      gap: 6px !important;
-      width: 100% !important;
-      padding-bottom: 4px;
+    .filters-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
       scrollbar-width: none;
     }
+    .filters-scroll::-webkit-scrollbar { display: none; }
 
-    .controls .filters::-webkit-scrollbar {
-      display: none;
-    }
-
-    .filter-btn { 
-      padding: 6px 14px; 
-      border-radius: 20px; 
-      border: 1px solid var(--border); 
-      background: var(--card-bg); 
-      color: var(--text-muted); 
-      cursor: pointer; 
-      font-size: 0.85rem; 
-      font-weight: 500; 
-      flex-shrink: 0 !important;
-      white-space: nowrap !important;
-    }
-    .filter-btn.active { background: var(--text); color: var(--bg); font-weight: 700; }
-
-    .artist-section { margin-bottom: 28px; scroll-margin-top: 40px; }
-    .artist-header { 
-      font-size: 1.15rem; 
-      font-weight: 700; 
-      padding-bottom: 6px; 
-      margin-bottom: 12px; 
-      border-bottom: 1px solid var(--border); 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      color: #38bdf8; 
-      word-break: break-word;
-      overflow-wrap: anywhere;
-    }
-    .artist-count { font-size: 0.8rem; color: var(--text-muted); font-weight: 400; flex-shrink: 0; }
-
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
-    
-    .card { 
-      position: relative; 
-      background: var(--card-bg); 
-      border-radius: 12px; 
-      padding: 10px; 
-      border: 1px solid var(--card-border); 
-      display: flex; 
-      align-items: center; 
-      gap: 12px; 
-      cursor: pointer; 
-      overflow: hidden;
-    }
-    .card:active { background: #27272a; }
-    
-    .card img { width: 85px; height: 85px; object-fit: cover; border-radius: 8px; background: #27272a; flex-shrink: 0; }
-    
-    .card-info { 
-      flex: 1; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between; 
-      min-width: 0; 
-      height: 85px; 
-    }
-    
-    .card .title { 
-      font-weight: 700; 
-      font-size: 0.92rem; 
-      line-height: 1.2; 
-      color: var(--text); 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
-    }
-    
-    .card .conductor { 
-      font-size: 0.78rem; 
-      color: var(--text-muted); 
-      font-style: italic; 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
-    }
-
-    .card .meta-sub {
-      font-size: 0.76rem;
-      color: var(--text-muted);
+    .filter-chip {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-sub);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      cursor: pointer;
     }
-    
-    .card-actions {
+
+    .filter-chip.active {
+      background: var(--text-main);
+      color: var(--bg-color);
+      border-color: var(--text-main);
+    }
+
+    /* Séparateur Artiste */
+    .artist-group-header {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin: 20px 0 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .artist-count {
+      font-size: 13px;
+      color: var(--text-sub);
+      font-weight: normal;
+    }
+
+    /* Cartes Albums */
+    .album-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 12px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .cover-box {
+      width: 75px;
+      height: 75px;
+      border-radius: 10px;
+      background: #2a2a2a;
+      overflow: hidden;
+      flex-shrink: 0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-top: 2px;
+      justify-content: center;
+      color: var(--text-sub);
+      font-size: 10px;
+      text-align: center;
     }
 
-    .badge { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 5px; font-weight: 700; text-transform: uppercase; width: fit-content; }
-    .badge-vinyle { background: var(--badge-vinyle-bg); color: var(--badge-vinyle-text); }
-    .badge-cd { background: var(--badge-cd-bg); color: var(--badge-cd-text); }
-    .badge-sacd { background: var(--badge-sacd-bg); color: var(--badge-sacd-text); }
+    .cover-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-    .card-btn-icon {
+    .album-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: 45px;
+    }
+
+    .album-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .album-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.3;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: white;
+      margin-bottom: 4px;
+      width: fit-content;
+    }
+
+    .badge-vinyle { background: var(--badge-vinyle); }
+    .badge-cd { background: var(--badge-cd); }
+    .badge-sacd { background: var(--badge-sacd); }
+    .badge-coffret { background: var(--badge-coffret); }
+
+    .card-actions {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .card-action-btn {
       background: none;
       border: none;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      padding: 4px 6px;
+      color: var(--text-sub);
+      font-size: 16px;
       cursor: pointer;
-      border-radius: 4px;
-    }
-    .card-btn-icon:hover { color: var(--text); background: #27272a; }
-
-    .file-input-label { cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
-
-    /* Étiquette pays cliquable */
-    .country-tag {
-      cursor: pointer !important;
-      text-decoration: underline !important;
-      text-decoration-style: dotted !important;
-    }
-    .country-tag:hover {
-      color: #0a84ff !important;
     }
 
-    /* Modals - Hauteur agrandie (92dvh) pour effleurer les barres Safari */
-    .modal { 
-      display: none; 
-      position: fixed; 
-      top: 0; left: 0; 
-      width: 100%; height: 100%; 
-      background: rgba(0,0,0,0.85); 
-      backdrop-filter: blur(8px); 
-      -webkit-backdrop-filter: blur(8px); 
-      z-index: 1000; 
-      justify-content: center; 
-      align-items: center; 
-      padding: 8px 12px !important; 
-      padding-top: calc(8px + env(safe-area-inset-top)) !important;
-      padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
-    }
-    
-    .modal-content { 
-      background: #18181b; 
-      border: 1px solid #27272a; 
-      border-radius: 16px; 
-      width: 100%; 
-      max-width: 440px; 
-      padding: 16px; 
-      padding-bottom: 20px !important;
-      max-height: 92vh !important;
-      max-height: 92dvh !important;
-      overflow-y: auto; 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-      word-break: break-word;
-    }
-    
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .detail-cover { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; margin-bottom: 14px; background: #27272a; }
-    .detail-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2; word-break: break-word; }
-    .detail-artist { font-size: 1.05rem; color: #38bdf8; font-weight: 600; margin-bottom: 6px; word-break: break-word; }
-    .detail-conductor { font-size: 0.9rem; color: var(--text-muted); font-style: italic; margin-bottom: 14px; word-break: break-word; }
-    
-    .detail-meta { 
-      background: #09090b; 
-      border: 1px solid #27272a; 
-      border-radius: 10px; 
-      padding: 12px; 
-      margin-bottom: 16px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 10px; 
-      font-size: 0.88rem; 
-    }
-    .detail-meta-item { display: flex; justify-content: space-between; align-items: center; }
-    .detail-meta-label { color: var(--text-muted); }
-
-    .modal-actions { 
-      display: flex; 
-      gap: 8px; 
-      justify-content: flex-end; 
-      margin-top: 16px; 
-      padding-bottom: 4px;
-    }
-
-    /* Form Styles - Alignement et hauteur stricte pour iOS Safari */
-    .modal-content form {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 12px !important;
-    }
-
-    .form-group {
-      margin-bottom: 0 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      width: 100% !important;
-    }
-
-    .form-group label {
-      display: block !important;
-      font-size: 0.8rem !important;
-      color: var(--text-muted) !important;
-      margin-bottom: 4px !important;
-      font-weight: 600 !important;
-    }
-
-    .form-group input, 
-    .form-group select {
-      width: 100% !important;
-      height: 38px !important;
-      max-height: 38px !important;
-      padding: 6px 8px !important;
-      border-radius: 8px !important;
-      border: 1px solid #3f3f46 !important;
-      background: #09090b !important;
-      color: var(--text) !important;
-      font-size: 0.85rem !important;
-      box-sizing: border-box !important;
-      -webkit-appearance: none !important;
-    }
-
-    /* Correctif spécifique iOS Safari pour forcer la date à tenir sur une ligne */
-    input[type="date"] {
-      font-size: 0.78rem !important;
-    }
-
-    input[type="date"]::-webkit-date-and-time-value {
-      text-align: left !important;
-      line-height: 24px !important;
-      height: 24px !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-
-    .form-row {
-      display: flex !important;
-      gap: 10px !important;
-      width: 100% !important;
-      align-items: flex-end !important;
-    }
-
-    .form-row .form-group {
-      flex: 1 1 0% !important;
-      min-width: 0 !important;
-    }
-
-    /* Index alphabétique */
-    #alphabet-index {
+    /* Index A-Z latéral */
+    .az-index {
       position: fixed;
-      right: 2px;
+      right: 4px;
       top: 50%;
       transform: translateY(-50%);
-      margin-top: 22px !important;
       display: flex;
       flex-direction: column;
       gap: 1px;
-      z-index: 1000;
-      background: rgba(24, 24, 27, 0.85);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      z-index: 10;
+      font-size: 9px;
+      font-weight: bold;
+      color: var(--text-sub);
+      background: rgba(18, 18, 18, 0.7);
       padding: 4px 2px;
       border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      max-height: 85vh;
-      overflow-y: auto;
+      backdrop-filter: blur(5px);
     }
 
-    .index-letter {
-      background: none;
-      border: none;
-      color: #a1a1aa;
-      font-size: 11px;
-      font-weight: bold;
-      padding: 2px 4px;
-      cursor: pointer;
-      border-radius: 4px;
+    .az-index a {
+      color: inherit;
+      text-decoration: none;
       text-align: center;
-      line-height: 1;
+      width: 14px;
     }
 
-    .index-letter:active {
-      color: #ffffff;
-      background: #2563eb;
+    /* Modales */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #1c1c1e;
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 650px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-close {
+      background: #2c2c2e;
+      border: none;
+      color: var(--text-sub);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* Table de détails */
+    .details-grid {
+      background: #2c2c2e;
+      border-radius: 14px;
+      padding: 14px;
+      margin: 15px 0;
+    }
+
+    .details-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #3a3a3c;
+      font-size: 14px;
+    }
+
+    .details-row:last-child { border-bottom: none; }
+    .details-label { color: var(--text-sub); }
+    .details-val { font-weight: 600; text-align: right; }
+
+    .modal-cover {
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      border-radius: 16px;
+      background: #121212;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #2c2c2e;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent-blue);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+    }
+
+    .volumes-box {
+      background: #2c2c2e;
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+
+    .volume-item {
+      background: #1c1c1e;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
     }
   </style>
-
-  <!-- HTML5 QR Code Scanner -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
-  <!-- Firebase SDK (Compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
-  <div id="alphabet-index"></div>
-  
-  <header style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
-    <div style="flex: 1 1 auto; min-width: 0;">
-      <h1 style="margin: 0 0 4px 0;">Phonothèque</h1>
-      <div class="stats" id="statsCount" style="font-size: 0.8rem; color: #8e8e93; line-height: 1.3;">Chargement...</div>
+
+  <header>
+    <div class="top-bar">
+      <h1>Phonothèque</h1>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="getRandomAlbum()" title="Album au hasard">🎲</button>
+        <button class="icon-btn btn-add" onclick="openAddModal()">+</button>
+      </div>
+    </div>
+    <div class="stats-line" id="statsLine">Chargement des albums...</div>
+
+    <div class="io-bar">
+      <button class="btn-secondary" onclick="exportToCSV()">📤 Exporter</button>
+      <button class="btn-secondary" onclick="document.getElementById('csvInput').click()">📥 Importer</button>
+      <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="importFromCSV(event)">
     </div>
 
-    <div class="header-actions" style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; margin-left: auto;">
-      <div style="display: flex; flex-direction: row; gap: 6px;">
-        <button class="btn" onclick="openFormModal()" title="Ajouter un album" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 18px;">+</button>
-        <button class="btn btn-secondary" onclick="pickRandom()" title="Album aléatoire" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 16px;">🎲</button>
-      </div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, éditeur, chef, BWV..." oninput="renderCollection()">
+    </div>
 
-      <div style="display: flex; flex-direction: row; gap: 6px;">
-        <button class="btn btn-secondary" onclick="exportToCSV()" title="Exporter en CSV" style="height: 34px; padding: 0 8px; display: flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap;">📥 Exporter</button>
-        <label class="btn btn-secondary file-input-label" title="Importer un fichier CSV" style="height: 34px; padding: 0 8px; display: flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap; margin: 0; cursor: pointer;">
-          📤 Importer
-          <input type="file" accept=".csv" onchange="importFromCSV(event)" style="display: none;">
-        </label>
-      </div>
+    <div class="filters-scroll">
+      <button class="filter-chip active" onclick="setFilter('all', this)">Tous</button>
+      <button class="filter-chip" onclick="setFilter('Vinyle', this)">Vinyles</button>
+      <button class="filter-chip" onclick="setFilter('CD', this)">CD</button>
+      <button class="filter-chip" onclick="setFilter('SACD', this)">SACD</button>
+      <button class="filter-chip" onclick="setFilter('Coffret', this)">📦 Coffrets</button>
     </div>
   </header>
 
-  <!-- Zone Recherche + Tri -->
-  <div class="search-container">
-    <div class="search-input-wrapper">
-      <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, chef..." oninput="handleSearchInput()">
-      <button type="button" id="clearSearchBtn" class="clear-search-btn" onclick="clearSearch()">✖</button>
-    </div>
-    <select id="sortSelect" class="sort-select" onchange="render()">
-      <option value="artist">Artiste (A-Z)</option>
-      <option value="yearDesc">Année (Récent → Ancien)</option>
-      <option value="yearAsc">Année (Ancien → Récent)</option>
-      <option value="dateAdded">Derniers ajoutés</option>
-    </select>
-  </div>
+  <main id="collectionContainer"></main>
 
-  <!-- Filtres par support -->
-  <div class="controls">
-    <div class="filters">
-      <button class="filter-btn active" onclick="filterSupport('TOUS', this)">Tous</button>
-      <button class="filter-btn" onclick="filterSupport('Vinyle', this)">Vinyles</button>
-      <button class="filter-btn" onclick="filterSupport('CD', this)">CD</button>
-      <button class="filter-btn" onclick="filterSupport('SACD', this)">SACD</button>
-      <button class="filter-btn" onclick="filterSupport('WISHLIST', this)">💡 Envie</button>
-      <button class="filter-btn" style="color: #f87171; border-color: #451a03;" onclick="resetCollection()">🗑️ Vider</button>
-    </div>
-  </div>
+  <div class="az-index" id="azIndex"></div>
 
-  <div id="mainContainer"></div>
-
-  <!-- Modal Fiche Détaillée -->
-  <div id="detailModal" class="modal" onclick="closeDetailModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
+  <!-- MODALE DETAILS -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-content">
       <div class="modal-header">
-        <h3 style="font-size: 1.1rem;">Détails de l'album</h3>
-        <button class="btn btn-secondary" style="padding: 4px 10px;" onclick="closeDetailModal()">&times;</button>
+        <h2 id="modalDetailTitle">Détails de l'album</h2>
+        <button class="modal-close" onclick="closeModal('detailsModal')">✕</button>
       </div>
-      <div id="detailBody"></div>
+      <img id="modalDetailCover" class="modal-cover" src="" alt="Pochette">
+      <h2 id="modalDetailAlbumName" style="font-size: 20px;"></h2>
+      <h3 id="modalDetailArtist" style="font-size: 15px; color: var(--accent-blue); margin-bottom: 10px;"></h3>
+
+      <div class="details-grid">
+        <div class="details-row"><span class="details-label">Support :</span><span class="details-val" id="modalDetailSupport"></span></div>
+        <div class="details-row" id="rowLabel"><span class="details-label">Éditeur / Label :</span><span class="details-val" id="modalDetailLabel"></span></div>
+        <div class="details-row"><span class="details-label">Année de sortie :</span><span class="details-val" id="modalDetailYear"></span></div>
+        <div class="details-row"><span class="details-label">Pays d'édition :</span><span class="details-val" id="modalDetailCountry"></span></div>
+        <div class="details-row" id="rowConductor"><span class="details-label">Chef d'orchestre :</span><span class="details-val" id="modalDetailConductor"></span></div>
+        <div class="details-row"><span class="details-label">Date d'achat :</span><span class="details-val" id="modalDetailDate"></span></div>
+        <div class="details-row"><span class="details-label">Prix d'achat :</span><span class="details-val" id="modalDetailPrice"></span></div>
+        <div class="details-row"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
+      </div>
+
+      <!-- Section des volumes si Coffret -->
+      <div id="volumesSection" style="display:none; margin-bottom: 15px;">
+        <h3 style="font-size: 15px; margin-bottom: 8px;">Contenu du coffret / Liste des volumes :</h3>
+        <input type="text" id="volumeSearch" placeholder="Filtrer un volume, cantate, BWV..." oninput="filterVolumes()" style="margin-bottom: 8px; font-size: 13px;">
+        <div class="volumes-box" id="volumesList"></div>
+      </div>
+
+      <div style="display:flex; gap: 10px; margin-top: 15px;">
+        <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none;">🔗 Voir sur Discogs</a>
+      </div>
+
+      <div style="display:flex; gap: 10px; margin-top: 20px;">
+        <button class="btn-secondary" style="flex:1" onclick="editCurrentAlbum()">✏️ Modifier</button>
+        <button class="btn-secondary btn-danger" style="color:white;" onclick="deleteCurrentAlbum()">🗑️ Supprimer</button>
+      </div>
     </div>
   </div>
 
-  <!-- Modal Formulaire (Ajout / Édition) -->
-  <div id="formModal" class="modal" onclick="closeFormModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
+  <!-- MODALE AJOUT / EDITION -->
+  <div class="modal-overlay" id="formModal">
+    <div class="modal-content">
       <div class="modal-header">
-        <h3 id="formModalTitle" style="font-size: 1.1rem;">Ajouter un album</h3>
-        <button class="btn btn-secondary" style="padding: 4px 10px;" onclick="closeFormModal()">&times;</button>
+        <h2 id="formModalTitle">Ajouter un album</h2>
+        <button class="modal-close" onclick="closeModal('formModal')">✕</button>
       </div>
-      <form id="albumForm" onsubmit="handleFormSubmit(event)">
-        <input type="hidden" id="editIndex" value="-1">
+      <form id="albumForm" onsubmit="saveAlbumForm(event)">
         
-        <!-- Bloc Scanner -->
-        <div class="form-group" style="margin-bottom: 16px;">
-          <button type="button" class="btn" style="width: 100%; background: #059669;" onclick="toggleScanner()">📷 Scanner un code-barres</button>
-          <div id="qr-reader" style="width: 100%; margin-top: 10px; display: none; border-radius: 8px; overflow: hidden; border: 1px solid var(--border);"></div>
-        </div>
-        
-        <!-- Recherche auto Discogs -->
-        <div class="form-group" style="margin-bottom: 16px;">
-          <label>Recherche auto (Code-barres ou Réf. Catalogue)</label>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="manualQuery" placeholder="ex: 060253712345 ou SD 19129" style="flex: 1;">
-            <button type="button" class="btn btn-secondary" onclick="searchDiscogsAuto()">🔍 Chercher</button>
-          </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="isBoxSet" onchange="toggleBoxSetFields()">
+          <label for="isBoxSet" style="text-transform:none; font-size:14px; color:white; cursor:pointer;">Il s'agit d'un coffret / série (multi-volumes)</label>
         </div>
 
         <div class="form-group">
-          <label>Artiste / Compositeur *</label>
-          <input type="text" id="formArtist" required placeholder="ex: Genesis">
+          <label>Titre de l'album / du coffret *</label>
+          <input type="text" id="formTitle" required placeholder="ex: Les Cantates, Vol. 1 à 45">
         </div>
+
         <div class="form-group">
-          <label>Titre de l'album *</label>
-          <input type="text" id="formTitle" required placeholder="ex: Foxtrot">
+          <label>Artiste *</label>
+          <input type="text" id="formArtist" required placeholder="ex: Johann Sebastian Bach">
         </div>
+
+        <div class="form-group">
+          <label>Éditeur / Label</label>
+          <input type="text" id="formLabel" placeholder="ex: Telefunken, Mofi, Barclay, Deutsche Grammophon...">
+        </div>
+
         <div class="form-group">
           <label>Chef d'orchestre / Interprète</label>
-          <input type="text" id="formConductor" placeholder="ex: Herbert von Karajan">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Année de sortie</label>
-            <input type="text" id="formYear" placeholder="ex: 1973">
-          </div>
-          <div class="form-group">
-            <label>Pays d'édition</label>
-            <input type="text" id="formCountry" placeholder="ex: Japon">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Date d'achat</label>
-            <input type="date" id="formPurchaseDate">
-          </div>
-          <div class="form-group">
-            <label>Prix d'achat (€)</label>
-            <input type="number" id="formPurchasePrice" step="0.01" placeholder="ex: 25.00">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Lieu d'achat</label>
-          <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs France, Fnac, Vide-grenier...">
-        </div>
-        <div class="form-group">
-          <label>Support *</label>
-          <select id="formSupport" required>
-            <option value="Vinyle">Vinyle</option>
-            <option value="CD" selected>CD</option>
-            <option value="SACD">SACD</option>
-            <option value="WISHLIST">💡 Envie (Wishlist)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>URL d'image de la pochette</label>
-          <input type="url" id="formCover" placeholder="https://...">
-        </div>
-        <div class="form-group">
-          <label>ID Discogs (numéro de release)</label>
-          <input type="text" id="formDiscogsId" placeholder="ex: 1234567">
+          <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt">
         </div>
 
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeFormModal()">Annuler</button>
-          <button type="submit" class="btn">Enregistrer</button>
+        <div class="form-row">
+          <div class="form-group" style="flex:1">
+            <label>Support</label>
+            <select id="formSupport">
+              <option value="Vinyle">Vinyle</option>
+              <option value="CD">CD</option>
+              <option value="SACD">SACD</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Année</label>
+            <input type="text" id="formYear" placeholder="ex: 1972">
+          </div>
         </div>
+
+        <div class="form-group">
+          <label>Pays d'édition</label>
+          <input type="text" id="formCountry" placeholder="ex: Allemagne">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex:1">
+            <label>Date d'achat</label>
+            <input type="text" id="formPurchaseDate" placeholder="ex: 2026-08-23">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Prix d'achat (€)</label>
+            <input type="text" id="formPurchasePrice" placeholder="ex: 120">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Lieu d'achat</label>
+          <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, FNAC St Lazare...">
+        </div>
+
+        <div class="form-group">
+          <label>ID Discogs</label>
+          <input type="text" id="formDiscogsId" placeholder="ex: 6083236">
+        </div>
+
+        <div class="form-group">
+          <label>URL de la pochette</label>
+          <input type="url" id="formCover" placeholder="https://...">
+        </div>
+
+        <!-- Zone Saisie de volumes si Coffret -->
+        <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
+          <label>Liste des volumes (Un volume par ligne)</label>
+          <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Enregistrer dans la Phonothèque</button>
       </form>
     </div>
   </div>
 
   <script>
-    // --- Initialisation Firebase ---
+    // Configuration Firebase Firestore
     const firebaseConfig = {
-      apiKey: "AIzaSyADp8kgtHBqXUx2PF4z1Up5Kn-o73bh_P4",
-      authDomain: "phonotheque-264a6.firebaseapp.com",
-      projectId: "phonotheque-264a6",
-      storageBucket: "phonotheque-264a6.firebasestorage.app",
-      messagingSenderId: "535162805091",
-      appId: "1:535162805091:web:e0933e8e203c5323ee9156"
+      apiKey: "AIzaSy_REPLACE_WITH_YOUR_KEY",
+      authDomain: "phonotheque-app.firebaseapp.com",
+      projectId: "phonotheque-app",
+      storageBucket: "phonotheque-app.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abc123def456"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    let db = null;
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+    } catch(e) { console.log("Mode offline ou Firebase non configuré"); }
 
-    let collection = JSON.parse(localStorage.getItem('phonotheque_data')) || [];
-    let activeFilter = 'TOUS';
-    const DISCOGS_TOKEN = "fOpDVnfmMrEGrhsxwNKmpMWowHnFoXEELIiQCFGj";
-    let html5QrCode = null;
+    let collection = [];
+    let currentFilter = 'all';
+    let selectedAlbumIndex = -1;
 
-    // --- Synchronisation Cloud en temps réel ---
-    db.collection('phonotheque').doc('main').onSnapshot((doc) => {
-      if (doc.exists) {
-        collection = doc.data().list || [];
-        localStorage.setItem('phonotheque_data', JSON.stringify(collection));
-        render();
+    // Chargement initial & Synchro Firebase
+    function initApp() {
+      if (db) {
+        db.collection("phonotheque").doc("main").onSnapshot(doc => {
+          if (doc.exists && doc.data().list) {
+            collection = doc.data().list;
+            localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+            renderCollection();
+          }
+        }, err => { loadLocal(); });
       } else {
-        // Migration initiale de la mémoire locale vers Firebase
-        if (collection.length > 0) {
-          saveCollection();
-        }
+        loadLocal();
       }
-    }, (error) => {
-      console.error("Erreur de synchronisation Firebase :", error);
-    });
-
-    // --- Utilitaire Regex & Formotage ---
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    function formatDateFR(dateStr) {
-      if (!dateStr) return '';
-      const parts = dateStr.split('-');
-      return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
+    function loadLocal() {
+      const data = localStorage.getItem("phonotheque_backup");
+      if (data) collection = JSON.parse(data);
+      renderCollection();
     }
 
-    // --- Sauvegarde & Réinitialisation ---
     function saveCollection() {
-      localStorage.setItem('phonotheque_data', JSON.stringify(collection));
-      db.collection('phonotheque').doc('main').set({ list: collection })
-        .catch(err => console.error("Erreur d'enregistrement Firebase :", err));
-      render();
-    }
-
-    function resetCollection() {
-      if (confirm("Effacer TOUS les albums de l'application ?")) {
-        collection = [];
-        saveCollection();
+      localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+      if (db) {
+        db.collection("phonotheque").doc("main").set({ list: collection })
+          .catch(err => console.error("Erreur d'écriture Firebase:", err));
       }
+      renderCollection();
     }
 
-    // --- 1. Statistiques détaillées sur 2 lignes ---
-    function updateStats() {
-      const statsElem = document.getElementById('statsCount');
-      if (!statsElem) return;
+    // Affichage principal
+    function renderCollection() {
+      const container = document.getElementById("collectionContainer");
+      const search = document.getElementById("searchInput").value.toLowerCase().trim();
+      container.innerHTML = "";
 
-      const total = collection.length;
-      const vinyles = collection.filter(a => (a.support || '').toLowerCase() === 'vinyle').length;
-      const cds = collection.filter(a => (a.support || '').toLowerCase() === 'cd').length;
-      const sacds = collection.filter(a => (a.support || '').toLowerCase() === 'sacd').length;
-      const wishlist = collection.filter(a => a.isWishlist || (a.support || '').toUpperCase() === 'WISHLIST').length;
-
-      statsElem.innerHTML = `<strong>${total}</strong> albums<br>${vinyles}&nbsp;Vinyles • ${cds}&nbsp;CD • ${sacds}&nbsp;SACD${wishlist ? ` • 💡&nbsp;${wishlist}` : ''}`;
-    }
-
-    // --- 2. Rendu principal & Filtrage / Tri ---
-    function render() {
-      const container = document.getElementById('mainContainer');
-      const searchInput = document.getElementById('searchInput');
-      const sortSelect = document.getElementById('sortSelect');
-      
-      const searchQuery = searchInput ? searchInput.value.trim() : '';
-      const sortOption = sortSelect ? sortSelect.value : 'artist';
-
-      container.innerHTML = '';
-
-      let filtered = collection.map((album, idx) => ({ ...album, _id: idx })).filter(album => {
-        if (activeFilter === 'WISHLIST') {
-          if (!album.isWishlist && (album.support || '').toUpperCase() !== 'WISHLIST') return false;
-        } else if (activeFilter !== 'TOUS') {
-          if ((album.support || '').toLowerCase() !== activeFilter.toLowerCase()) return false;
-        }
-
-        if (!searchQuery) return true;
-
-        const regex = new RegExp(`\\b${escapeRegExp(searchQuery)}\\b`, 'i');
-        const matchText = `${album.artist || ''} ${album.title || ''} ${album.conductor || ''} ${album.year || ''} ${album.country || ''} ${album.purchaseLocation || ''}`;
-        return regex.test(matchText);
+      let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0;
+      collection.forEach(a => {
+        if (a.isBoxSet) countCoffret++;
+        else if (a.support === 'Vinyle') countVinyle++;
+        else if (a.support === 'CD') countCD++;
+        else if (a.support === 'SACD') countSACD++;
       });
 
-      updateStats();
+      document.getElementById("statsLine").innerHTML = 
+        `${collection.length} références • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets`;
 
-      if (filtered.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted, #a1a1aa); padding: 40px 0; text-align: center;">Aucun album trouvé.<br><br>Clique sur <strong>📤 Importer</strong> pour charger ton CSV ou sur <strong>+</strong> pour ajouter un album.</p>';
-        updateAlphabetIndex();
-        return;
-      }
+      // Filtrage
+      let filtered = collection.filter((album) => {
+        if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
+        if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
 
-      if (sortOption === 'artist') {
-        const grouped = {};
-        filtered.forEach(album => {
-          const artistKey = album.artist || 'Artiste Inconnu';
-          if (!grouped[artistKey]) grouped[artistKey] = [];
-          grouped[artistKey].push(album);
-        });
-
-        Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' })).forEach(artistName => {
-          const artistAlbums = grouped[artistName];
-          artistAlbums.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' }));
-
-          const section = document.createElement('div');
-          section.className = 'artist-section';
-          section.innerHTML = `<div class="artist-header"><span>${artistName}</span><span class="artist-count">(${artistAlbums.length})</span></div><div class="grid"></div>`;
-          
-          const grid = section.querySelector('.grid');
-          artistAlbums.forEach(album => grid.appendChild(createCardElement(album)));
-          container.appendChild(section);
-        });
-      } else {
-        filtered.sort((a, b) => {
-          if (sortOption === 'yearDesc') return (parseInt(b.year) || 0) - (parseInt(a.year) || 0);
-          if (sortOption === 'yearAsc') return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
-          if (sortOption === 'dateAdded') return b._id - a._id;
-          return 0;
-        });
-
-        const section = document.createElement('div');
-        section.className = 'artist-section';
-        section.innerHTML = `<div class="grid"></div>`;
-        const grid = section.querySelector('.grid');
-        filtered.forEach(album => grid.appendChild(createCardElement(album)));
-        container.appendChild(section);
-      }
-
-      updateAlphabetIndex();
-    }
-
-    // --- Génération d'une carte d'album ---
-    function createCardElement(album) {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.onclick = () => openDetailModal(album._id);
-
-      const coverSrc = album.cover 
-        ? `https://images.weserv.nl/?url=${encodeURIComponent(album.cover)}` 
-        : 'https://via.placeholder.com/150/27272a/a1a1aa?text=Pas+d%27image';
-
-      const supportName = album.support || 'CD';
-      const badgeClass = 'badge-' + supportName.toLowerCase();
-
-      const subMetaParts = [];
-      if (album.year) subMetaParts.push(album.year);
-      if (album.country) {
-        subMetaParts.push(`<span class="country-tag" onclick="event.stopPropagation(); filterByCountry('${album.country}')" title="Filtrer par ce pays">${album.country}</span>`);
-      }
-      const subMetaText = subMetaParts.join(' • ');
-
-      card.innerHTML = `
-        <img src="${coverSrc}" alt="Pochette" onerror="this.src='https://via.placeholder.com/150/27272a/a1a1aa?text=Erreur'">
-        <div class="card-info">
-          <div>
-            <span class="badge ${badgeClass}">${supportName}</span>
-            <div class="title" title="${album.title}">${album.title}</div>
-            ${album.conductor ? `<div class="conductor" title="${album.conductor}">Dir. : ${album.conductor}</div>` : ''}
-          </div>
-          <div class="card-actions">
-            <span class="meta-sub">${subMetaText}</span>
-            <div>
-              <button class="card-btn-icon" onclick="event.stopPropagation(); openFormModal(${album._id})" title="Modifier">✏️</button>
-              <button class="card-btn-icon" onclick="event.stopPropagation(); deleteAlbum(${album._id})" title="Supprimer">🗑️</button>
-            </div>
-          </div>
-        </div>
-      `;
-      return card;
-    }
-
-    // --- Recherche & Filtres ---
-    function handleSearchInput() {
-      const input = document.getElementById('searchInput');
-      const clearBtn = document.getElementById('clearSearchBtn');
-      if (clearBtn) {
-        clearBtn.style.display = (input && input.value) ? 'block' : 'none';
-      }
-      render();
-    }
-
-    function clearSearch() {
-      const input = document.getElementById('searchInput');
-      const clearBtn = document.getElementById('clearSearchBtn');
-      if (input) input.value = '';
-      if (clearBtn) clearBtn.style.display = 'none';
-      render();
-    }
-
-    function filterByCountry(countryName) {
-      const input = document.getElementById('searchInput');
-      if (input) {
-        input.value = countryName;
-        handleSearchInput();
-      }
-    }
-
-    function filterSupport(support, btn) {
-      activeFilter = support;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      render();
-    }
-
-    // --- Modal Détails ---
-    function openDetailModal(index) {
-      const album = collection[index];
-      if (!album) return;
-
-      const coverSrc = album.cover 
-        ? `https://images.weserv.nl/?url=${encodeURIComponent(album.cover)}` 
-        : 'https://via.placeholder.com/300/27272a/a1a1aa?text=Pas+d%27image';
-
-      const supportName = album.support || 'CD';
-      const badgeClass = 'badge-' + supportName.toLowerCase();
-
-      const detailBody = document.getElementById('detailBody');
-      detailBody.innerHTML = `
-        <img src="${coverSrc}" class="detail-cover" alt="Pochette" onerror="this.src='https://via.placeholder.com/300/27272a/a1a1aa?text=Erreur'">
-        <div class="detail-title">${album.title}</div>
-        <div class="detail-artist">${album.artist}</div>
-        ${album.conductor ? `<div class="detail-conductor">Dir. : ${album.conductor}</div>` : ''}
-        
-        <div class="detail-meta">
-          <div class="detail-meta-item">
-            <span class="detail-meta-label">Support :</span>
-            <span class="badge ${badgeClass}">${supportName}</span>
-          </div>
-          ${album.year ? `
-          <div class="detail-meta-item">
-            <span class="detail-meta-label">Année de sortie :</span>
-            <span><strong>${album.year}</strong></span>
-          </div>` : ''}
-          ${album.country ? `
-          <div class="detail-meta-item">
-            <span class="detail-meta-label">Pays d'édition :</span>
-            <span class="country-tag" onclick="closeDetailModal(); filterByCountry('${album.country}')" title="Filtrer par ce pays"><strong>${album.country}</strong></span>
-          </div>` : ''}
-          ${album.purchaseDate ? `
-          <div class="detail-meta-item">
-            <span class="detail-meta-label">Date d'achat :</span>
-            <span><strong>${formatDateFR(album.purchaseDate)}</strong></span>
-          </div>` : ''}
-          ${album.purchasePrice ? `
-          <div class="detail-meta-item">
-            <span class="detail-meta-label">Prix d'achat :</span>
-            <span><strong>${album.purchasePrice} €</strong></span>
-          </div>` : ''}
-          ${album.purchaseLocation ? `
-          <div class="detail-meta-item">
-            <span class="detail-meta-label">Lieu d'achat :</span>
-            <span><strong>${album.purchaseLocation}</strong></span>
-          </div>` : ''}
-          ${album.discogsId ? `
-           <a href="https://www.discogs.com/release/${album.discogsId}" target="_blank" rel="noopener" class="btn btn-secondary" style="width: 100%; text-decoration: none; margin-top: 8px; margin-bottom: 12px; display: inline-flex; justify-content: center; align-items: center; gap: 6px;">
-            🔗 Voir sur Discogs
-          </a>` : ''}
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn btn-secondary" onclick="closeDetailModal(); openFormModal(${index})">✏️ Modifier</button>
-          <button class="btn btn-danger" onclick="deleteAlbum(${index}); closeDetailModal();">🗑️ Supprimer</button>
-        </div>
-      `;
-
-      document.getElementById('detailModal').style.display = 'flex';
-    }
-
-    function closeDetailModal() {
-      document.getElementById('detailModal').style.display = 'none';
-    }
-
-    // --- Modal Formulaire ---
-    function openFormModal(index = -1) {
-      document.getElementById('editIndex').value = index;
-      
-      const dateElem = document.getElementById('formPurchaseDate');
-      const priceElem = document.getElementById('formPurchasePrice');
-      const locationElem = document.getElementById('formPurchaseLocation');
-
-      if (index >= 0) {
-        const album = collection[index];
-        document.getElementById('formModalTitle').innerText = "Modifier l'album";
-        document.getElementById('formArtist').value = album.artist || '';
-        document.getElementById('formTitle').value = album.title || '';
-        document.getElementById('formConductor').value = album.conductor || '';
-        document.getElementById('formYear').value = album.year || '';
-        document.getElementById('formCountry').value = album.country || '';
-        if (dateElem) dateElem.value = album.purchaseDate || '';
-        if (priceElem) priceElem.value = album.purchasePrice || '';
-        if (locationElem) locationElem.value = album.purchaseLocation || '';
-        document.getElementById('formSupport').value = album.support || 'CD';
-        document.getElementById('formCover').value = album.cover || '';
-        if (document.getElementById('formDiscogsId')) {
-          document.getElementById('formDiscogsId').value = album.discogsId || '';
+        if (search) {
+          const matchTitle = (album.title || '').toLowerCase().includes(search);
+          const matchArtist = (album.artist || '').toLowerCase().includes(search);
+          const matchLabel = (album.label || '').toLowerCase().includes(search);
+          const matchConductor = (album.conductor || '').toLowerCase().includes(search);
+          const matchVolumes = album.volumes && album.volumes.some(v => v.toLowerCase().includes(search));
+          return matchTitle || matchArtist || matchLabel || matchConductor || matchVolumes;
         }
-      } else {
-        document.getElementById('formModalTitle').innerText = "Ajouter un album";
-        document.getElementById('albumForm').reset();
-        if (dateElem) dateElem.value = '';
-        if (priceElem) priceElem.value = '';
-        if (locationElem) locationElem.value = '';
-      }
-      document.getElementById('formModal').style.display = 'flex';
+        return true;
+      });
+
+      // Tri par artiste A-Z
+      filtered.sort((a, b) => (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'}));
+
+      // Regroupement par Artiste
+      let groups = {};
+      filtered.forEach((album) => {
+        const artist = album.artist || 'Artiste inconnu';
+        if (!groups[artist]) groups[artist] = [];
+        groups[artist].push(album);
+      });
+
+      // Génération de l'index A-Z
+      renderAZIndex(Object.keys(groups));
+
+      Object.keys(groups).forEach(artist => {
+        const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
+        const groupHeader = document.createElement("div");
+        groupHeader.className = "artist-group-header";
+        groupHeader.id = artistId;
+        groupHeader.innerHTML = `${artist} <span class="artist-count">(${groups[artist].length})</span>`;
+        container.appendChild(groupHeader);
+
+        groups[artist].forEach((album) => {
+          const realIndex = collection.indexOf(album);
+          const card = document.createElement("div");
+          card.className = "album-card";
+          card.onclick = (e) => {
+            if (!e.target.classList.contains('card-action-btn')) showDetails(realIndex);
+          };
+
+          let badgeClass = 'badge-cd';
+          let badgeText = album.support || 'CD';
+          if (album.isBoxSet) {
+            badgeClass = 'badge-coffret';
+            badgeText = `COFFRET (${album.volumes ? album.volumes.length : 0} VOL.)`;
+          } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
+          else if (album.support === 'SACD') badgeClass = 'badge-sacd';
+
+          const coverSrc = album.cover && album.cover.startsWith('http') ? album.cover : '';
+
+          // Ligne d'info : Éditeur • Année • Pays
+          let subParts = [];
+          if (album.label) subParts.push(album.label);
+          if (album.year) subParts.push(album.year);
+          if (album.country) subParts.push(album.country);
+          const subText = subParts.join(' • ');
+
+          card.innerHTML = `
+            <div class="cover-box">
+              ${coverSrc ? `<img src="${coverSrc}" alt="cover" onerror="this.style.display='none'">` : 'Pochette'}
+            </div>
+            <div class="album-info">
+              <span class="badge ${badgeClass}">${badgeText}</span>
+              <div class="album-title">${album.title || 'Sans titre'}</div>
+              <div class="album-sub">${subText}</div>
+            </div>
+            <div class="card-actions">
+              <button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      });
     }
 
-    function closeFormModal() {
-      document.getElementById('formModal').style.display = 'none';
+    function renderAZIndex(artists) {
+      const az = document.getElementById("azIndex");
+      az.innerHTML = "";
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      letters.forEach(l => {
+        const matching = artists.find(a => a.toUpperCase().startsWith(l));
+        const a = document.createElement("a");
+        a.textContent = l;
+        if (matching) {
+          a.href = "#artist-" + matching.replace(/[^a-zA-Z0-9]/g, '');
+          a.style.opacity = "1";
+        } else {
+          a.style.opacity = "0.2";
+        }
+        az.appendChild(a);
+      });
     }
 
-    function handleFormSubmit(event) {
-      event.preventDefault();
-      const index = parseInt(document.getElementById('editIndex').value, 10);
+    function setFilter(filter, el) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      renderCollection();
+    }
+
+    // Affichage des Détails
+    function showDetails(index) {
+      selectedAlbumIndex = index;
+      const album = collection[index];
+
+      document.getElementById("modalDetailTitle").textContent = album.isBoxSet ? "Détails du Coffret" : "Détails de l'album";
+      document.getElementById("modalDetailAlbumName").textContent = album.title || '';
+      document.getElementById("modalDetailArtist").textContent = album.artist || '';
+      document.getElementById("modalDetailSupport").textContent = album.isBoxSet ? `Coffret (${album.support})` : album.support;
       
-      const discogsInput = document.getElementById('formDiscogsId');
-      const existingDiscogsId = (index >= 0 && collection[index]) ? (collection[index].discogsId || '') : '';
-      const supportVal = document.getElementById('formSupport').value;
+      const labelRow = document.getElementById("rowLabel");
+      if (album.label) {
+        labelRow.style.display = 'flex';
+        document.getElementById("modalDetailLabel").textContent = album.label;
+      } else { labelRow.style.display = 'none'; }
 
-      const dateElem = document.getElementById('formPurchaseDate');
-      const priceElem = document.getElementById('formPurchasePrice');
-      const locationElem = document.getElementById('formPurchaseLocation');
+      document.getElementById("modalDetailYear").textContent = album.year || '-';
+      document.getElementById("modalDetailCountry").textContent = album.country || '-';
+      
+      const condRow = document.getElementById("rowConductor");
+      if (album.conductor) {
+        condRow.style.display = 'flex';
+        document.getElementById("modalDetailConductor").textContent = album.conductor;
+      } else { condRow.style.display = 'none'; }
 
-      const newAlbum = {
-        artist: document.getElementById('formArtist').value.trim(),
-        title: document.getElementById('formTitle').value.trim(),
-        conductor: document.getElementById('formConductor').value.trim(),
-        year: document.getElementById('formYear').value.trim(),
-        country: document.getElementById('formCountry').value.trim(),
-        purchaseDate: dateElem ? dateElem.value : '',
-        purchasePrice: priceElem ? priceElem.value.trim() : '',
-        purchaseLocation: locationElem ? locationElem.value.trim() : '',
-        support: supportVal,
-        cover: document.getElementById('formCover').value.trim(),
-        discogsId: discogsInput ? discogsInput.value.trim() : existingDiscogsId,
-        isWishlist: supportVal === 'WISHLIST'
+      document.getElementById("modalDetailDate").textContent = album.purchaseDate || '-';
+      document.getElementById("modalDetailPrice").textContent = album.purchasePrice ? `${album.purchasePrice} €` : '-';
+      document.getElementById("modalDetailLocation").textContent = album.purchaseLocation || '-';
+
+      const coverImg = document.getElementById("modalDetailCover");
+      if (album.cover && album.cover.startsWith('http')) {
+        coverImg.src = album.cover;
+        coverImg.style.display = 'block';
+      } else { coverImg.style.display = 'none'; }
+
+      const discogsBtn = document.getElementById("discogsLink");
+      if (album.discogsId) {
+        discogsBtn.href = `https://www.discogs.com/release/${album.discogsId}`;
+        discogsBtn.style.display = 'inline-flex';
+      } else { discogsBtn.style.display = 'none'; }
+
+      const volSection = document.getElementById("volumesSection");
+      if (album.isBoxSet && album.volumes && album.volumes.length > 0) {
+        volSection.style.display = 'block';
+        renderVolumesList(album.volumes);
+      } else { volSection.style.display = 'none'; }
+
+      document.getElementById("detailsModal").classList.add("active");
+    }
+
+    function renderVolumesList(vols) {
+      const box = document.getElementById("volumesList");
+      const search = document.getElementById("volumeSearch").value.toLowerCase();
+      box.innerHTML = "";
+      vols.forEach((v) => {
+        if (!search || v.toLowerCase().includes(search)) {
+          const item = document.createElement("div");
+          item.className = "volume-item";
+          item.textContent = v;
+          box.appendChild(item);
+        }
+      });
+    }
+
+    function filterVolumes() {
+      if (selectedAlbumIndex !== -1 && collection[selectedAlbumIndex].volumes) {
+        renderVolumesList(collection[selectedAlbumIndex].volumes);
+      }
+    }
+
+    // Gestion de la modale d'ajout/édition
+    function toggleBoxSetFields() {
+      const isChecked = document.getElementById("isBoxSet").checked;
+      document.getElementById("boxSetFieldsGroup").style.display = isChecked ? 'block' : 'none';
+    }
+
+    function openAddModal() {
+      selectedAlbumIndex = -1;
+      document.getElementById("formModalTitle").textContent = "Ajouter un album / coffret";
+      document.getElementById("albumForm").reset();
+      document.getElementById("isBoxSet").checked = false;
+      toggleBoxSetFields();
+      document.getElementById("formModal").classList.add("active");
+    }
+
+    function openEditModal(index) {
+      selectedAlbumIndex = index;
+      const album = collection[index];
+      document.getElementById("formModalTitle").textContent = "Modifier la référence";
+      
+      document.getElementById("isBoxSet").checked = !!album.isBoxSet;
+      toggleBoxSetFields();
+
+      document.getElementById("formTitle").value = album.title || '';
+      document.getElementById("formArtist").value = album.artist || '';
+      document.getElementById("formLabel").value = album.label || '';
+      document.getElementById("formConductor").value = album.conductor || '';
+      document.getElementById("formSupport").value = album.support || 'Vinyle';
+      document.getElementById("formYear").value = album.year || '';
+      document.getElementById("formCountry").value = album.country || '';
+      document.getElementById("formPurchaseDate").value = album.purchaseDate || '';
+      document.getElementById("formPurchasePrice").value = album.purchasePrice || '';
+      document.getElementById("formPurchaseLocation").value = album.purchaseLocation || '';
+      document.getElementById("formDiscogsId").value = album.discogsId || '';
+      document.getElementById("formCover").value = album.cover || '';
+
+      if (album.volumes) {
+        document.getElementById("formVolumesText").value = album.volumes.join('\n');
+      } else { document.getElementById("formVolumesText").value = ''; }
+
+      closeModal("detailsModal");
+      document.getElementById("formModal").classList.add("active");
+    }
+
+    function saveAlbumForm(e) {
+      e.preventDefault();
+      const isBoxSet = document.getElementById("isBoxSet").checked;
+      const volsRaw = document.getElementById("formVolumesText").value;
+      const volumes = isBoxSet ? volsRaw.split('\n').map(v => v.trim()).filter(v => v.length > 0) : [];
+
+      const albumData = {
+        title: document.getElementById("formTitle").value,
+        artist: document.getElementById("formArtist").value,
+        label: document.getElementById("formLabel").value,
+        conductor: document.getElementById("formConductor").value,
+        support: document.getElementById("formSupport").value,
+        year: document.getElementById("formYear").value,
+        country: document.getElementById("formCountry").value,
+        purchaseDate: document.getElementById("formPurchaseDate").value,
+        purchasePrice: document.getElementById("formPurchasePrice").value,
+        purchaseLocation: document.getElementById("formPurchaseLocation").value,
+        discogsId: document.getElementById("formDiscogsId").value,
+        cover: document.getElementById("formCover").value,
+        isBoxSet: isBoxSet,
+        volumes: volumes
       };
 
-      if (index < 0) {
-        const isDuplicate = collection.some(a => 
-          (newAlbum.discogsId && a.discogsId && String(a.discogsId) === String(newAlbum.discogsId)) ||
-          (a.artist.toLowerCase() === newAlbum.artist.toLowerCase() && a.title.toLowerCase() === newAlbum.title.toLowerCase())
-        );
-
-        if (isDuplicate) {
-          if (!confirm(`⚠️ "${newAlbum.title}" de ${newAlbum.artist} existe déjà dans ta phonothèque.\n\nVeux-tu quand même l'ajouter à nouveau ?`)) {
-            return;
-          }
-        }
-      }
-
-      if (index >= 0) {
-        collection[index] = newAlbum;
+      if (selectedAlbumIndex >= 0) {
+        collection[selectedAlbumIndex] = albumData;
       } else {
-        collection.push(newAlbum);
+        collection.unshift(albumData);
       }
 
       saveCollection();
-      closeFormModal();
+      closeModal("formModal");
     }
 
-    function deleteAlbum(index) {
-      const album = collection[index];
-      if (!album) return;
-      if (confirm(`Supprimer "${album.title}" de ${album.artist} ?`)) {
-        collection.splice(index, 1);
+    function editCurrentAlbum() {
+      if (selectedAlbumIndex !== -1) openEditModal(selectedAlbumIndex);
+    }
+
+    function deleteCurrentAlbum() {
+      if (selectedAlbumIndex !== -1 && confirm("Voulez-vous vraiment supprimer cette référence ?")) {
+        collection.splice(selectedAlbumIndex, 1);
         saveCollection();
+        closeModal("detailsModal");
       }
     }
 
-    function pickRandom() {
-      if (!collection.length) return alert("Collection vide !");
-      const randomIndex = Math.floor(Math.random() * collection.length);
-      openDetailModal(randomIndex);
+    function getRandomAlbum() {
+      if (collection.length === 0) return;
+      const idx = Math.floor(Math.random() * collection.length);
+      showDetails(idx);
     }
 
-    // --- Discogs & Scanner ---
-    async function toggleScanner() {
-      const readerDiv = document.getElementById('qr-reader');
-      if (!readerDiv) return;
-
-      if (html5QrCode && html5QrCode.isScanning) {
-        await stopScanner();
-        return;
-      }
-
-      readerDiv.style.display = 'block';
-      html5QrCode = new Html5Qrcode("qr-reader");
-
-      const config = { fps: 10, qrbox: { width: 250, height: 150 } };
-
-      html5QrCode.start(
-        { facingMode: "environment" }, 
-        config, 
-        onScanSuccess
-      ).catch(err => {
-        alert("Impossible d'accéder à la caméra : " + err);
-        readerDiv.style.display = 'none';
-      });
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("active");
     }
 
-    async function stopScanner() {
-      if (html5QrCode && html5QrCode.isScanning) {
-        await html5QrCode.stop();
-        const readerDiv = document.getElementById('qr-reader');
-        if (readerDiv) readerDiv.style.display = 'none';
-      }
-    }
-
-    function onScanSuccess(decodedText) {
-      stopScanner();
-      searchDiscogsAuto(decodedText.trim());
-    }
-
-    function searchDiscogsAuto(queryOverride) {
-      const manualInput = document.getElementById('manualQuery');
-      const query = queryOverride || (manualInput ? manualInput.value.trim() : '');
-      if (!query) {
-        alert("Veuillez saisir un code-barres ou une référence d'album.");
-        return;
-      }
-
-      const url = `https://api.discogs.com/database/search?q=${encodeURIComponent(query)}&token=${DISCOGS_TOKEN}`;
-
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if (!data.results || data.results.length === 0) {
-            alert(`Aucun album trouvé sur Discogs pour : ${query}`);
-            return;
-          }
-
-          const result = data.results[0];
-
-          let artist = 'Artiste inconnu';
-          let title = result.title || '';
-
-          if (result.title && result.title.includes(' - ')) {
-            const parts = result.title.split(' - ');
-            artist = parts[0].trim();
-            title = parts.slice(1).join(' - ').trim();
-          }
-
-          const existing = collection.find(a => 
-            (a.discogsId && String(a.discogsId) === String(result.id)) ||
-            (a.artist.toLowerCase() === artist.toLowerCase() && a.title.toLowerCase() === title.toLowerCase())
-          );
-
-          if (existing) {
-            alert(`⚠️ Cet album est déjà dans ta phonothèque !\n\n"${existing.title}" par ${existing.artist} (${existing.support || 'CD'})`);
-          }
-
-          document.getElementById('formArtist').value = artist;
-          document.getElementById('formTitle').value = title;
-          document.getElementById('formYear').value = result.year || '';
-          document.getElementById('formCountry').value = result.country || '';
-          if (document.getElementById('formDiscogsId')) {
-            document.getElementById('formDiscogsId').value = result.id || '';
-          }
-
-          if (result.cover_image) {
-            document.getElementById('formCover').value = result.cover_image;
-          }
-
-          if (result.format && Array.isArray(result.format)) {
-            const fmtStr = result.format.join(' ').toLowerCase();
-            if (fmtStr.includes('vinyl') || fmtStr.includes('vinyle')) {
-              document.getElementById('formSupport').value = 'Vinyle';
-            } else if (fmtStr.includes('sacd')) {
-              document.getElementById('formSupport').value = 'SACD';
-            } else {
-              document.getElementById('formSupport').value = 'CD';
-            }
-          }
-        })
-        .catch(err => {
-          alert("Erreur lors de la recherche Discogs : " + err);
-        });
-    }
-
-    // --- Export / Import CSV ---
-    function exportToCSV() {
-      let list = [];
-      if (typeof collection !== 'undefined' && Array.isArray(collection) && collection.length > 0) {
-        list = collection;
-      } else {
-        const stored = localStorage.getItem('phonotheque_data') || localStorage.getItem('phonotheque');
-        if (stored) {
-          try { list = JSON.parse(stored); } catch(e) {}
-        }
-      }
-
-      if (!list || list.length === 0) {
-        alert("Votre phonothèque est vide, aucun album à exporter.");
-        return;
-      }
-
-      const headers = ["Artiste", "Titre", "Chef d'orchestre", "Année", "Pays", "DateAchat", "PrixAchat", "LieuAchat", "Support", "DiscogsID", "Pochette"];
-      const rows = list.map(a => [
-        `"${(a.artist || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.title || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.conductor || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.year || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.country || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.purchaseDate || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.purchasePrice || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.purchaseLocation || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.support || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.discogsId || '').toString().replace(/"/g, '""')}"`,
-        `"${(a.cover || '').toString().replace(/"/g, '""')}"`
-      ]);
-
-      const csvContent = "\uFEFF" + [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      
-      const today = new Date().toISOString().split('T')[0];
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", `phonotheque_backup_${today}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
+    // Fonctions d'importation CSV compatibles MusicBuddy & Éditeurs
     function parseCSV(text) {
-      const rows = [];
-      let currentRow = [];
-      let currentVal = '';
-      let inQuotes = false;
-      
+      let rows = [], currentRow = [], currentVal = '', inQuotes = false;
       for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        const nextC = text[i+1];
-        
-        if (c === '"' && inQuotes && nextC === '"') {
-          currentVal += '"';
-          i++;
-        } else if (c === '"') {
-          inQuotes = !inQuotes;
-        } else if (c === ',' && !inQuotes) {
-          currentRow.push(currentVal);
-          currentVal = '';
-        } else if ((c === '\r' || c === '\n') && !inQuotes) {
-          if (c === '\r' && nextC === '\n') { i++; }
-          currentRow.push(currentVal);
-          currentVal = '';
-          if (currentRow.length > 1 || (currentRow.length === 1 && currentRow[0] !== '')) {
-            rows.push(currentRow);
-          }
+        let c = text[i], nextC = text[i+1] || '';
+        if (c === '"' && inQuotes && nextC === '"') { currentVal += '"'; i++; }
+        else if (c === '"') { inQuotes = !inQuotes; }
+        else if (c === ',' && !inQuotes) { currentRow.push(currentVal); currentVal = ''; }
+        else if ((c === '\r' || c === '\n') && !inQuotes) {
+          if (c === '\r' && nextC === '\n') i++;
+          currentRow.push(currentVal); currentVal = '';
+          if (currentRow.length > 1 || (currentRow.length === 1 && currentRow[0] !== '')) rows.push(currentRow);
           currentRow = [];
-        } else {
-          currentVal += c;
-        }
+        } else { currentVal += c; }
       }
-      if (currentVal !== '' || currentRow.length > 0) {
-        currentRow.push(currentVal);
-        rows.push(currentRow);
-      }
+      if (currentVal !== '' || currentRow.length > 0) { currentRow.push(currentVal); rows.push(currentRow); }
       return rows;
     }
 
-            function cleanImportDate(val) {
+    function cleanImportDate(val) {
       if (!val) return '';
       val = val.trim().replace(/\//g, '-');
       const parts = val.split(' ')[0].split('-');
@@ -1208,7 +994,6 @@
         const text = e.target.result;
         let newAlbums = [];
 
-        // 1. Cas du CSV exporté par notre propre application (séparateur ;)
         if (text.includes(";") && !text.includes("Title,Artist")) {
           const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
           if (lines.length > 1) {
@@ -1219,24 +1004,25 @@
                   artist: cols[0] || '',
                   title: cols[1] || '',
                   conductor: cols[2] || '',
-                  year: cols[3] || '',
-                  country: cols[4] || '',
-                  purchaseDate: cols[5] || '',
-                  purchasePrice: cols[6] || '',
-                  purchaseLocation: cols[7] || '',
-                  support: cols[8] || 'CD',
-                  discogsId: cols[9] || '',
-                  cover: cols[10] || ''
+                  label: cols[3] || '',
+                  year: cols[4] || '',
+                  country: cols[5] || '',
+                  purchaseDate: cols[6] || '',
+                  purchasePrice: cols[7] || '',
+                  purchaseLocation: cols[8] || '',
+                  support: cols[9] || 'CD',
+                  discogsId: cols[10] || '',
+                  cover: cols[11] || '',
+                  isBoxSet: cols[12] === 'true',
+                  volumes: cols[13] ? cols[13].split('||') : []
                 });
               }
             }
           }
         } else {
-          // 2. Cas du CSV MusicBuddy (séparateur , avec guillemets complexes)
           const rows = parseCSV(text);
           if (rows.length > 1) {
             const headers = rows[0].map(h => h.trim().toLowerCase());
-
             const findIdx = (exactKeywords, fallbackKeywords = []) => {
               for (const kw of exactKeywords) {
                 const idx = headers.findIndex(h => h === kw.toLowerCase());
@@ -1251,15 +1037,16 @@
 
             const titleIdx = findIdx(['title'], ['titre']);
             const artistIdx = findIdx(['artist'], ['artiste']);
+            const labelIdx = findIdx(['labels', 'label'], ['éditeur', 'editeur']);
             const mediaIdx = findIdx(['media'], ['format', 'support']);
-            const conductorIdx = findIdx(['conductors'], ['conductor', 'chef', 'interprète']);
+            const conductorIdx = findIdx(['conductors'], ['conductor', 'chef']);
             const yearIdx = findIdx(['release year'], ['year', 'année']);
             const countryIdx = findIdx(['country'], ['pays']);
-            const pdateIdx = findIdx(['purchase date'], ['bought date', 'date']);
-            const pplaceIdx = findIdx(['purchase place', 'purchase location'], ['place', 'store', 'lieu']);
-            const ppriceIdx = findIdx(['purchase price'], ['price', 'prix', 'cost']);
-            const discogsIdx = findIdx(['discogs release id'], ['discogs id', 'discogs']);
-            const coverIdx = findIdx(['uploaded image url'], ['cover url', 'pochette', 'cover', 'image']);
+            const pdateIdx = findIdx(['purchase date'], ['bought date']);
+            const pplaceIdx = findIdx(['purchase place'], ['store', 'lieu']);
+            const ppriceIdx = findIdx(['purchase price'], ['price', 'prix']);
+            const discogsIdx = findIdx(['discogs release id'], ['discogs']);
+            const coverIdx = findIdx(['uploaded image url'], ['cover', 'image']);
 
             for (let i = 1; i < rows.length; i++) {
               const cols = rows[i];
@@ -1271,11 +1058,8 @@
 
               const rawMedia = mediaIdx !== -1 && cols[mediaIdx] ? cols[mediaIdx].trim().toLowerCase() : '';
               let support = 'CD';
-              if (rawMedia.includes('vinyl') || rawMedia.includes('vinyle') || rawMedia.includes('lp')) {
-                support = 'Vinyle';
-              } else if (rawMedia.includes('sacd')) {
-                support = 'SACD';
-              }
+              if (rawMedia.includes('vinyl') || rawMedia.includes('vinyle') || rawMedia.includes('lp')) support = 'Vinyle';
+              else if (rawMedia.includes('sacd')) support = 'SACD';
 
               let discogsId = discogsIdx !== -1 && cols[discogsIdx] ? cols[discogsIdx].trim() : '';
               if (discogsId.endsWith('.0')) discogsId = discogsId.slice(0, -2);
@@ -1283,6 +1067,7 @@
               newAlbums.push({
                 title: title || 'Sans titre',
                 artist: artist || 'Artiste inconnu',
+                label: labelIdx !== -1 && cols[labelIdx] ? cols[labelIdx].trim() : '',
                 conductor: conductorIdx !== -1 && cols[conductorIdx] ? cols[conductorIdx].trim() : '',
                 year: yearIdx !== -1 && cols[yearIdx] ? cols[yearIdx].trim() : '',
                 country: countryIdx !== -1 && cols[countryIdx] ? cols[countryIdx].trim() : '',
@@ -1291,67 +1076,41 @@
                 purchaseLocation: pplaceIdx !== -1 && cols[pplaceIdx] ? cols[pplaceIdx].trim() : '',
                 discogsId: discogsId,
                 support: support,
-                cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : ''
+                cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : '',
+                isBoxSet: false,
+                volumes: []
               });
             }
           }
         }
 
         if (newAlbums.length > 0) {
-          if (confirm(`Voulez-vous importer les ${newAlbums.length} albums de MusicBuddy ?`)) {
+          if (confirm(`Voulez-vous importer les ${newAlbums.length} références avec leurs éditeurs ?`)) {
             collection = newAlbums;
             saveCollection();
-            alert(`Succès ! ${newAlbums.length} albums importés avec leurs prix, dates et lieux d'achat.`);
+            alert("Importation réussie avec éditeurs/labels !");
           }
-        } else {
-          alert("Aucun album valide trouvé dans le fichier.");
         }
       };
       reader.readAsText(file, "UTF-8");
       event.target.value = '';
     }
 
-
-    // --- Index alphabétique A-Z ---
-    function updateAlphabetIndex() {
-      const container = document.getElementById('alphabet-index');
-      if (!container) return;
-
-      if (!collection || collection.length === 0) {
-        container.innerHTML = '';
-        container.style.display = 'none';
-        return;
-      }
-      container.style.display = 'flex';
-
-      const activeLetters = [...new Set(collection.map(album => {
-        const artistName = (album.artist || '').trim();
-        const firstChar = artistName.charAt(0).toUpperCase();
-        return /[A-Z]/.test(firstChar) ? firstChar : '#';
-      }))].sort();
-
-      container.innerHTML = activeLetters.map(letter => `
-        <button class="index-letter" onclick="scrollToLetter('${letter}')">${letter}</button>
-      `).join('');
-    }
-
-    function scrollToLetter(letter) {
-      const headers = Array.from(document.querySelectorAll('.artist-section, h2, h3'));
-      const target = headers.find(el => {
-        const text = el.textContent.trim().toUpperCase();
-        if (letter === '#') {
-          return !/^[A-Z]/.test(text.charAt(0));
-        }
-        return text.startsWith(letter);
+    function exportToCSV() {
+      let csv = "Artiste;Titre;Chef;Éditeur;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;Volumes\n";
+      collection.forEach(a => {
+        const vols = a.volumes ? a.volumes.join('||') : '';
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${vols}"\n`;
       });
-
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "phonotheque_export.csv";
+      link.click();
     }
 
-    // Premier affichage
-    render();
+    // Démarrage
+    window.onload = initApp;
   </script>
 </body>
 </html>
