@@ -118,7 +118,7 @@
     </div>
 
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, éditeur, chef, BWV..." oninput="onSearchInput()" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, éditeur, chef, BWV..." oninput="onSearchInput()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">✕</button>
     </div>
 
@@ -159,7 +159,7 @@
 
         <div id="volumesSection" style="display:none; margin-bottom: 15px;">
           <h3 style="font-size: 15px; margin-bottom: 8px;">Contenu du coffret / Liste des volumes :</h3>
-          <input type="text" id="volumeSearch" placeholder="Filtrer un volume, cantate, BWV..." oninput="filterVolumes()" style="margin-bottom: 8px; font-size: 13px;" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="text" id="volumeSearch" placeholder="Filtrer un volume, cantate, BWV..." oninput="filterVolumes()" style="margin-bottom: 8px; font-size: 13px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <div class="volumes-box" id="volumesList"></div>
         </div>
 
@@ -178,12 +178,12 @@
         <button class="modal-close" onclick="closeModal('formModal')">✕</button>
       </div>
       <div class="modal-body">
-        <form id="albumForm" onsubmit="saveAlbumForm(event)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <div id="albumFormContainer">
           
           <div class="form-group" style="background:#2c2c2e; padding:12px; border-radius:14px; margin-bottom:15px;">
             <label style="color:white; font-size:12px; margin-bottom:8px;">Auto-remplissage via Discogs</label>
             <div style="display:flex; gap:8px; margin-bottom:8px;">
-              <input type="text" id="formDiscogsId" placeholder="ID Discogs ou Code-barres EAN" style="flex:1;" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formDiscogsId" placeholder="ID Discogs ou Code-barres EAN" style="flex:1;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
               <button type="button" class="btn-secondary" style="background:var(--accent-blue); color:white; width:auto; padding:0 14px; flex-shrink:0;" onclick="fetchDiscogsByInput()">🔍 Chercher</button>
             </div>
             <button type="button" class="btn-secondary" style="background:#3a3a3c; width:100%;" onclick="startLiveScanner()">📷 Scanner en direct (Caméra)</button>
@@ -191,22 +191,22 @@
 
           <div class="form-group">
             <label>Titre de l'album / du coffret *</label>
-            <input type="text" id="formTitle" required placeholder="ex: Les Cantates, Vol. 1 à 45" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formTitle" placeholder="ex: Les Cantates, Vol. 1 à 45" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>Artiste *</label>
-            <input type="text" id="formArtist" required placeholder="ex: Johann Sebastian Bach" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formArtist" placeholder="ex: Johann Sebastian Bach" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>Éditeur / Label</label>
-            <input type="text" id="formLabel" placeholder="ex: Telefunken, Mofi, Barclay, Deutsche Grammophon..." autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formLabel" placeholder="ex: Telefunken, Mofi, Barclay, Deutsche Grammophon..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>Chef d'orchestre / Interprète</label>
-            <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-row">
@@ -220,34 +220,34 @@
             </div>
             <div class="form-group" style="flex:1">
               <label>Année</label>
-              <input type="text" id="formYear" placeholder="ex: 1972" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formYear" placeholder="ex: 1972" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
 
           <div class="form-group">
             <label>Pays d'édition</label>
-            <input type="text" id="formCountry" placeholder="ex: Allemagne" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formCountry" placeholder="ex: Allemagne" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-row">
             <div class="form-group" style="flex:1">
               <label>Date d'achat</label>
-              <input type="text" id="formPurchaseDate" placeholder="ex: 2026-08-23" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formPurchaseDate" placeholder="ex: 2026-08-23" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div class="form-group" style="flex:1">
               <label>Prix d'achat (€)</label>
-              <input type="text" id="formPurchasePrice" placeholder="ex: 120" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formPurchasePrice" placeholder="ex: 120" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
 
           <div class="form-group">
             <label>Lieu d'achat</label>
-            <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, FNAC St Lazare..." autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, FNAC St Lazare..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>URL de la pochette</label>
-            <input type="url" id="formCover" placeholder="https://..." autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="url" id="formCover" placeholder="https://..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="checkbox-group">
@@ -257,12 +257,12 @@
 
           <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
             <label>Liste des volumes (Un volume par ligne)</label>
-            <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
 
-          <button type="submit" class="btn-submit">Enregistrer dans la Phonothèque</button>
+          <button type="button" class="btn-submit" onclick="saveAlbumForm()">Enregistrer dans la Phonothèque</button>
           <button type="button" class="btn-secondary" style="width:100%; margin-top:10px;" onclick="closeModal('formModal')">✕ Annuler</button>
-        </form>
+        </div>
       </div>
     </div>
   </div>
@@ -280,7 +280,7 @@
     </div>
   </div>
 
-  <script>
+    <script>
     const firebaseConfig = {
       apiKey: "AIzaSy_REPLACE_WITH_YOUR_KEY",
       authDomain: "phonotheque-app.firebaseapp.com",
@@ -585,7 +585,21 @@
     function openAddModal() {
       selectedAlbumIndex = -1;
       document.getElementById("formModalTitle").textContent = "Ajouter un album / coffret";
-      document.getElementById("albumForm").reset();
+      
+      document.getElementById("formTitle").value = '';
+      document.getElementById("formArtist").value = '';
+      document.getElementById("formLabel").value = '';
+      document.getElementById("formConductor").value = '';
+      document.getElementById("formSupport").value = 'Vinyle';
+      document.getElementById("formYear").value = '';
+      document.getElementById("formCountry").value = '';
+      document.getElementById("formPurchaseDate").value = '';
+      document.getElementById("formPurchasePrice").value = '';
+      document.getElementById("formPurchaseLocation").value = '';
+      document.getElementById("formDiscogsId").value = '';
+      document.getElementById("formCover").value = '';
+      document.getElementById("formVolumesText").value = '';
+      
       document.getElementById("isBoxSet").checked = false;
       toggleBoxSetFields();
       document.getElementById("formModal").classList.add("active");
@@ -620,25 +634,32 @@
       document.getElementById("formModal").classList.add("active");
     }
 
-    function saveAlbumForm(e) {
-      e.preventDefault();
+    function saveAlbumForm() {
+      const title = document.getElementById("formTitle").value.trim();
+      const artist = document.getElementById("formArtist").value.trim();
+
+      if (!title || !artist) {
+        alert("Veuillez renseigner au moins le titre et l'artiste.");
+        return;
+      }
+
       const isBoxSet = document.getElementById("isBoxSet").checked;
       const volsRaw = document.getElementById("formVolumesText").value;
       const volumes = isBoxSet ? volsRaw.split('\n').map(v => v.trim()).filter(v => v.length > 0) : [];
 
       const albumData = {
-        title: document.getElementById("formTitle").value,
-        artist: document.getElementById("formArtist").value,
-        label: document.getElementById("formLabel").value,
-        conductor: document.getElementById("formConductor").value,
+        title: title,
+        artist: artist,
+        label: document.getElementById("formLabel").value.trim(),
+        conductor: document.getElementById("formConductor").value.trim(),
         support: document.getElementById("formSupport").value,
-        year: document.getElementById("formYear").value,
-        country: document.getElementById("formCountry").value,
-        purchaseDate: document.getElementById("formPurchaseDate").value,
-        purchasePrice: document.getElementById("formPurchasePrice").value,
-        purchaseLocation: document.getElementById("formPurchaseLocation").value,
-        discogsId: document.getElementById("formDiscogsId").value,
-        cover: document.getElementById("formCover").value,
+        year: document.getElementById("formYear").value.trim(),
+        country: document.getElementById("formCountry").value.trim(),
+        purchaseDate: document.getElementById("formPurchaseDate").value.trim(),
+        purchasePrice: document.getElementById("formPurchasePrice").value.trim(),
+        purchaseLocation: document.getElementById("formPurchaseLocation").value.trim(),
+        discogsId: document.getElementById("formDiscogsId").value.trim(),
+        cover: document.getElementById("formCover").value.trim(),
         isBoxSet: isBoxSet,
         volumes: volumes
       };
@@ -909,17 +930,31 @@
       event.target.value = '';
     }
 
-    function exportToCSV() {
+    async function exportToCSV() {
       let csv = "Artiste;Titre;Chef;Éditeur;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;Volumes\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.join('||') : '';
         csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${vols}"\n`;
       });
+
+      const today = new Date().toISOString().split('T')[0];
+      const filename = `phonotheque_backup_${today}.csv`;
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "phonotheque_export.csv";
-      link.click();
+      const file = new File([blob], filename, { type: "text/csv" });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: filename
+          });
+        } catch (err) {}
+      } else {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+      }
     }
 
     window.onload = initApp;
