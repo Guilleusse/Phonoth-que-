@@ -1183,7 +1183,23 @@
       return rows;
     }
 
-        function importFromCSV(event) {
+            function cleanImportDate(val) {
+      if (!val) return '';
+      val = val.trim().replace(/\//g, '-');
+      const parts = val.split(' ')[0].split('-');
+      if (parts.length === 3) {
+        if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+        if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+      return val;
+    }
+
+    function cleanImportPrice(val) {
+      if (!val) return '';
+      return val.replace(/[^0-9.,]/g, '').replace(',', '.').trim();
+    }
+
+    function importFromCSV(event) {
       const file = event.target.files[0];
       if (!file) return;
 
@@ -1192,7 +1208,8 @@
         const text = e.target.result;
         let newAlbums = [];
 
-        if (text.includes(";")) {
+        // 1. Cas du CSV exporté par notre propre application (séparateur ;)
+        if (text.includes(";") && !text.includes("Title,Artist")) {
           const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
           if (lines.length > 1) {
             for (let i = 1; i < lines.length; i++) {
@@ -1215,37 +1232,53 @@
             }
           }
         } else {
+          // 2. Cas du CSV MusicBuddy (séparateur , avec guillemets complexes)
           const rows = parseCSV(text);
           if (rows.length > 1) {
             const headers = rows[0].map(h => h.trim().toLowerCase());
-            
-            // Helper de recherche d'index d'entêtes (français / anglais / MusicBuddy)
-            const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k)));
 
-            const titleIdx = findIdx(['title', 'titre']);
-            const artistIdx = findIdx(['artist', 'artiste']);
-            const mediaIdx = findIdx(['media', 'format', 'support']);
-            const conductorIdx = findIdx(['conductor', 'chef', 'interprète']);
-            const yearIdx = findIdx(['release year', 'year', 'année']);
-            const countryIdx = findIdx(['country', 'pays']);
-            const discogsIdx = findIdx(['discogs release id', 'discogs']);
-            const coverIdx = findIdx(['uploaded image url', 'cover', 'pochette', 'image']);
-            
-            // Nouveaux champs d'achat (MusicBuddy & génériques)
-            const priceIdx = findIdx(['price', 'prix', 'cost', 'cout']);
-            const dateIdx = findIdx(['purchase date', 'date d\'achat', 'bought date', 'date']);
-            const locationIdx = findIdx(['store', 'location', 'lieu', 'magasin', 'place']);
+            const findIdx = (exactKeywords, fallbackKeywords = []) => {
+              for (const kw of exactKeywords) {
+                const idx = headers.findIndex(h => h === kw.toLowerCase());
+                if (idx !== -1) return idx;
+              }
+              for (const kw of fallbackKeywords) {
+                const idx = headers.findIndex(h => h.includes(kw.toLowerCase()));
+                if (idx !== -1) return idx;
+              }
+              return -1;
+            };
+
+            const titleIdx = findIdx(['title'], ['titre']);
+            const artistIdx = findIdx(['artist'], ['artiste']);
+            const mediaIdx = findIdx(['media'], ['format', 'support']);
+            const conductorIdx = findIdx(['conductors'], ['conductor', 'chef', 'interprète']);
+            const yearIdx = findIdx(['release year'], ['year', 'année']);
+            const countryIdx = findIdx(['country'], ['pays']);
+            const pdateIdx = findIdx(['purchase date'], ['bought date', 'date']);
+            const pplaceIdx = findIdx(['purchase place', 'purchase location'], ['place', 'store', 'lieu']);
+            const ppriceIdx = findIdx(['purchase price'], ['price', 'prix', 'cost']);
+            const discogsIdx = findIdx(['discogs release id'], ['discogs id', 'discogs']);
+            const coverIdx = findIdx(['uploaded image url'], ['cover url', 'pochette', 'cover', 'image']);
 
             for (let i = 1; i < rows.length; i++) {
               const cols = rows[i];
-              const title = titleIdx !== -1 && cols[titleIdx] ? cols[titleIdx].trim() : (cols[1] || '');
-              const artist = artistIdx !== -1 && cols[artistIdx] ? cols[artistIdx].trim() : (cols[0] || '');
+              if (!cols || cols.length < 2) continue;
+
+              const title = titleIdx !== -1 && cols[titleIdx] ? cols[titleIdx].trim() : '';
+              const artist = artistIdx !== -1 && cols[artistIdx] ? cols[artistIdx].trim() : '';
               if (!title && !artist) continue;
 
-              let support = (mediaIdx !== -1 && cols[mediaIdx]) ? cols[mediaIdx] : 'CD';
-              if (support.toLowerCase().includes('vinyl') || support.toLowerCase().includes('vinyle')) support = 'Vinyle';
-              else if (support.toLowerCase().includes('sacd')) support = 'SACD';
-              else support = 'CD';
+              const rawMedia = mediaIdx !== -1 && cols[mediaIdx] ? cols[mediaIdx].trim().toLowerCase() : '';
+              let support = 'CD';
+              if (rawMedia.includes('vinyl') || rawMedia.includes('vinyle') || rawMedia.includes('lp')) {
+                support = 'Vinyle';
+              } else if (rawMedia.includes('sacd')) {
+                support = 'SACD';
+              }
+
+              let discogsId = discogsIdx !== -1 && cols[discogsIdx] ? cols[discogsIdx].trim() : '';
+              if (discogsId.endsWith('.0')) discogsId = discogsId.slice(0, -2);
 
               newAlbums.push({
                 title: title || 'Sans titre',
@@ -1253,10 +1286,10 @@
                 conductor: conductorIdx !== -1 && cols[conductorIdx] ? cols[conductorIdx].trim() : '',
                 year: yearIdx !== -1 && cols[yearIdx] ? cols[yearIdx].trim() : '',
                 country: countryIdx !== -1 && cols[countryIdx] ? cols[countryIdx].trim() : '',
-                purchaseDate: dateIdx !== -1 && cols[dateIdx] ? cols[dateIdx].trim() : '',
-                purchasePrice: priceIdx !== -1 && cols[priceIdx] ? cols[priceIdx].trim().replace('€', '').replace(',', '.') : '',
-                purchaseLocation: locationIdx !== -1 && cols[locationIdx] ? cols[locationIdx].trim() : '',
-                discogsId: discogsIdx !== -1 && cols[discogsIdx] ? cols[discogsIdx].trim() : '',
+                purchaseDate: pdateIdx !== -1 ? cleanImportDate(cols[pdateIdx]) : '',
+                purchasePrice: ppriceIdx !== -1 ? cleanImportPrice(cols[ppriceIdx]) : '',
+                purchaseLocation: pplaceIdx !== -1 && cols[pplaceIdx] ? cols[pplaceIdx].trim() : '',
+                discogsId: discogsId,
                 support: support,
                 cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : ''
               });
@@ -1265,10 +1298,10 @@
         }
 
         if (newAlbums.length > 0) {
-          if (confirm(`Voulez-vous importer ${newAlbums.length} album(s) ?`)) {
+          if (confirm(`Voulez-vous importer les ${newAlbums.length} albums de MusicBuddy ?`)) {
             collection = newAlbums;
             saveCollection();
-            alert("Importation réussie !");
+            alert(`Succès ! ${newAlbums.length} albums importés avec leurs prix, dates et lieux d'achat.`);
           }
         } else {
           alert("Aucun album valide trouvé dans le fichier.");
