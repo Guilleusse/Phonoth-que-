@@ -64,9 +64,23 @@
     .io-bar { display: flex; gap: 8px; margin-top: 15px; margin-bottom: 15px; }
     .btn-secondary { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
     .btn-danger-soft { background: transparent; border: 1px solid rgba(239, 68, 68, 0.3); color: var(--text-sub); }
-    .search-row { display: flex; gap: 8px; margin-bottom: 12px; }
-    .search-box { position: relative; flex: 1; }
-    .sort-select { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 0 8px; border-radius: 12px; font-size: 13px; font-weight: 600; outline: none; }
+    .search-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+    .search-box { position: relative; flex: 1; min-width: 0; }
+    .sort-select { 
+      flex: 0 0 140px; 
+      width: 140px; 
+      height: 45px;
+      background: var(--card-bg); 
+      border: 1px solid var(--card-border); 
+      color: var(--text-main); 
+      padding: 0 8px; 
+      border-radius: 12px; 
+      font-size: 12px; 
+      font-weight: 600; 
+      outline: none; 
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     input[type="text"], input[type="number"], input[type="date"], input[type="url"], select, textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
     input:focus, select:focus, textarea:focus { border-color: var(--accent-blue); }
     .search-clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #3a3a3c; color: var(--text-sub); border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; }
@@ -152,9 +166,9 @@
         <option value="artist-az">Artiste (A-Z)</option>
         <option value="artist-za">Artiste (Z-A)</option>
         <option value="title-az">Titre (A-Z)</option>
-        <option value="year-desc">Année (Récents)</option>
-        <option value="year-asc">Année (Anciens)</option>
-        <option value="recent">Ajouts récents</option>
+        <option value="purchase-desc">Date d'achat (Récents)</option>
+        <option value="year-desc">Année sortie (Récents)</option>
+        <option value="year-asc">Année sortie (Anciens)</option>
       </select>
     </div>
 
@@ -432,6 +446,21 @@
       return clean;
     }
 
+    function parsePurchaseTimestamp(str) {
+      if (!str) return 0;
+      const clean = str.trim().replace(/\//g, '-');
+      const parts = clean.split('-');
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          return new Date(`${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`).getTime() || 0;
+        }
+        if (parts[2].length === 4) {
+          return new Date(`${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`).getTime() || 0;
+        }
+      }
+      return 0;
+    }
+
     function onCountryClick(el, e) {
       if (e) e.stopPropagation();
       const country = el.getAttribute('data-country');
@@ -473,7 +502,6 @@
         return true;
       });
 
-      // Tri dynamique selon la sélection
       const sortVal = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : 'artist-az';
 
       filtered.sort((a, b) => {
@@ -481,83 +509,95 @@
           return (b.artist || '').localeCompare(a.artist || '', 'fr', {sensitivity: 'base'});
         } else if (sortVal === 'title-az') {
           return (a.title || '').localeCompare(b.title || '', 'fr', {sensitivity: 'base'});
+        } else if (sortVal === 'purchase-desc') {
+          return parsePurchaseTimestamp(b.purchaseDate) - parsePurchaseTimestamp(a.purchaseDate);
         } else if (sortVal === 'year-desc') {
           return (parseInt(b.year) || 0) - (parseInt(a.year) || 0);
         } else if (sortVal === 'year-asc') {
           return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
-        } else if (sortVal === 'recent') {
-          return 0; // Conserve l'ordre chronologique d'ajout
         } else {
           return (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
         }
       });
 
-      let groups = {};
-      filtered.forEach((album) => {
-        const artist = album.artist || 'Artiste inconnu';
-        if (!groups[artist]) groups[artist] = [];
-        groups[artist].push(album);
-      });
+      const isArtistGroup = (sortVal === 'artist-az' || sortVal === 'artist-za');
 
-      renderAZIndex(Object.keys(groups));
-
-      Object.keys(groups).forEach(artist => {
-        const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
-        const groupHeader = document.createElement("div");
-        groupHeader.className = "artist-group-header";
-        groupHeader.id = artistId;
-        groupHeader.innerHTML = `${artist} <span class="artist-count">(${groups[artist].length})</span>`;
-        container.appendChild(groupHeader);
-
-        groups[artist].forEach((album) => {
-          const realIndex = collection.indexOf(album);
-          const card = document.createElement("div");
-          card.className = "album-card";
-          card.onclick = (e) => {
-            if (!e.target.classList.contains('card-action-btn') && !e.target.classList.contains('clickable-tag')) {
-              showDetails(realIndex);
-            }
-          };
-
-          let badgeClass = 'badge-cd';
-          let badgeText = album.support || 'CD';
-          if (album.isBoxSet) {
-            badgeClass = 'badge-coffret';
-            badgeText = `COFFRET (${album.volumes ? album.volumes.length : 0} VOL.)`;
-          } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
-          else if (album.support === 'SACD') badgeClass = 'badge-sacd';
-
-          const coverSrc = album.cover && album.cover.startsWith('http') ? album.cover : '';
-
-          let subParts = [];
-          if (album.label) subParts.push(album.label);
-          if (album.year) subParts.push(album.year);
-          if (album.country) {
-            const cleanCountry = (album.country || '').replace(/"/g, '&quot;');
-            const countryHtml = `<span class="clickable-tag" data-country="${cleanCountry}" onclick="onCountryClick(this, event)">${album.country}</span>`;
-            subParts.push(countryHtml);
-          }
-          const subText = subParts.join(' • ');
-
-          card.innerHTML = `
-            <div class="card-delete-top">
-              <button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)" title="Supprimer">🗑️</button>
-            </div>
-            <div class="cover-box">
-              ${coverSrc ? `<img src="${coverSrc}" alt="cover" onerror="this.style.display='none'">` : 'Pochette'}
-            </div>
-            <div class="album-info">
-              <span class="badge ${badgeClass}">${badgeText}</span>
-              <div class="album-title">${album.title || 'Sans titre'}</div>
-              <div class="album-sub">${subText}</div>
-            </div>
-            <div class="card-actions">
-              <button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button>
-            </div>
-          `;
-          container.appendChild(card);
+      if (isArtistGroup) {
+        let groups = {};
+        filtered.forEach((album) => {
+          const artist = album.artist || 'Artiste inconnu';
+          if (!groups[artist]) groups[artist] = [];
+          groups[artist].push(album);
         });
-      });
+
+        renderAZIndex(Object.keys(groups));
+
+        Object.keys(groups).forEach(artist => {
+          const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
+          const groupHeader = document.createElement("div");
+          groupHeader.className = "artist-group-header";
+          groupHeader.id = artistId;
+          groupHeader.innerHTML = `${artist} <span class="artist-count">(${groups[artist].length})</span>`;
+          container.appendChild(groupHeader);
+
+          groups[artist].forEach(album => renderAlbumCard(album, container));
+        });
+      } else {
+        document.getElementById("azIndex").innerHTML = "";
+        filtered.forEach(album => renderAlbumCard(album, container));
+      }
+    }
+
+    function renderAlbumCard(album, container) {
+      const realIndex = collection.indexOf(album);
+      const card = document.createElement("div");
+      card.className = "album-card";
+      card.onclick = (e) => {
+        if (!e.target.classList.contains('card-action-btn') && !e.target.classList.contains('clickable-tag')) {
+          showDetails(realIndex);
+        }
+      };
+
+      let badgeClass = 'badge-cd';
+      let badgeText = album.support || 'CD';
+      if (album.isBoxSet) {
+        badgeClass = 'badge-coffret';
+        badgeText = `COFFRET (${album.volumes ? album.volumes.length : 0} VOL.)`;
+      } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
+      else if (album.support === 'SACD') badgeClass = 'badge-sacd';
+
+      const coverSrc = album.cover && album.cover.startsWith('http') ? album.cover : '';
+
+      let subParts = [];
+      if (album.artist && (document.getElementById("sortSelect").value !== 'artist-az' && document.getElementById("sortSelect").value !== 'artist-za')) {
+        subParts.push(`<b>${album.artist}</b>`);
+      }
+      if (album.label) subParts.push(album.label);
+      if (album.year) subParts.push(album.year);
+      if (album.country) {
+        const cleanCountry = (album.country || '').replace(/"/g, '&quot;');
+        const countryHtml = `<span class="clickable-tag" data-country="${cleanCountry}" onclick="onCountryClick(this, event)">${album.country}</span>`;
+        subParts.push(countryHtml);
+      }
+      const subText = subParts.join(' • ');
+
+      card.innerHTML = `
+        <div class="card-delete-top">
+          <button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)" title="Supprimer">🗑️</button>
+        </div>
+        <div class="cover-box">
+          ${coverSrc ? `<img src="${coverSrc}" alt="cover" onerror="this.style.display='none'">` : 'Pochette'}
+        </div>
+        <div class="album-info">
+          <span class="badge ${badgeClass}">${badgeText}</span>
+          <div class="album-title">${album.title || 'Sans titre'}</div>
+          <div class="album-sub">${subText}</div>
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button>
+        </div>
+      `;
+      container.appendChild(card);
     }
 
     function renderAZIndex(artists) {
@@ -882,7 +922,6 @@
       const id = idParam || document.getElementById("formDiscogsId").value.trim();
       if (!id) return;
 
-      // --- CONTRÔLE ANTI-DOUBLONS SUR L'ID DISCOGS ---
       if (selectedAlbumIndex === -1) {
         const existing = collection.find(a => a.discogsId && a.discogsId.toString() === id.toString());
         if (existing) {
@@ -899,7 +938,6 @@
         const title = data.title || '';
         const artist = (data.artists && data.artists.length) ? data.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ') : '';
 
-        // --- CONTRÔLE ANTI-DOUBLONS SUR ARTISTE + TITRE ---
         if (selectedAlbumIndex === -1 && artist && title) {
           const existingTitleArtist = collection.find(a => 
             a.artist && a.title && 
