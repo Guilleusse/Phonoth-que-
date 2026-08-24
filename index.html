@@ -9,7 +9,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Phonothèque">
   <meta name="theme-color" content="#121212">
-  <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/vinyl.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+  <link rel="icon" type="image/png" sizes="180x180" href="icon-180.png">
 
   <!-- Firebase & Scanner HTML5 -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -48,6 +49,17 @@
     .header-actions { display: flex; gap: 10px; }
     .icon-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
     .btn-add { background: var(--accent-blue); border: none; color: white; font-weight: bold; }
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--card-border);
+      border-top-color: var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
     .stats-line { font-size: 13px; color: var(--text-sub); }
     .io-bar { display: flex; gap: 8px; margin-top: 15px; margin-bottom: 15px; }
     .btn-secondary { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
@@ -111,7 +123,10 @@
 
   <header>
     <div class="top-bar">
-      <h1>Phonothèque</h1>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <h1>Phonothèque</h1>
+        <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation avec Firebase..."></div>
+      </div>
       <div class="header-actions">
         <button class="icon-btn" onclick="getRandomAlbum()" title="Album au hasard">🎲</button>
         <button class="icon-btn btn-add" onclick="openAddModal()">+</button>
@@ -290,7 +305,7 @@
   </div>
 
     <script>
-        const firebaseConfig = {
+    const firebaseConfig = {
       apiKey: "AIzaSyADp8kgtHBqXUx2PF4z1Up5Kn-o73bh_P4",
       authDomain: "phonotheque-264a6.firebaseapp.com",
       projectId: "phonotheque-264a6",
@@ -334,11 +349,28 @@
       renderCollection();
     }
 
+    function showSpinner() {
+      const s = document.getElementById("syncSpinner");
+      if (s) s.style.display = "inline-block";
+    }
+
+    function hideSpinner() {
+      const s = document.getElementById("syncSpinner");
+      if (s) s.style.display = "none";
+    }
+
     function saveCollection() {
       localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
       if (db) {
+        showSpinner();
         db.collection("phonotheque").doc("main").set({ list: collection })
-          .catch(err => console.log("Erreur synchro cloud"));
+          .then(() => {
+            setTimeout(hideSpinner, 400);
+          })
+          .catch(err => {
+            console.log("Erreur synchro cloud", err);
+            hideSpinner();
+          });
       }
       renderCollection();
     }
