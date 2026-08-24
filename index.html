@@ -256,17 +256,17 @@
           <div class="form-row">
             <div class="form-group" style="flex:1">
               <label>Date d'achat</label>
-              <input type="text" id="formPurchaseDate" placeholder="ex: 23/08/2026" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formPurchaseDate" placeholder="ex: 2026-08-23 ou 23/08/2026" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div class="form-group" style="flex:1">
               <label>Prix d'achat (€)</label>
-              <input type="text" id="formPurchasePrice" placeholder="ex: 20.00" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formPurchasePrice" placeholder="ex: 120" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
 
           <div class="form-group">
             <label>Lieu d'achat</label>
-            <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, FNAC, JPC..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, FNAC St Lazare..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
@@ -697,10 +697,27 @@
     function saveAlbumForm() {
       const title = document.getElementById("formTitle").value.trim();
       const artist = document.getElementById("formArtist").value.trim();
+      const discogsId = document.getElementById("formDiscogsId").value.trim();
 
       if (!title || !artist) {
         alert("Veuillez renseigner au moins le titre et l'artiste.");
         return;
+      }
+
+      // --- CONTRÔLE ANTI-DOUBLONS ---
+      if (selectedAlbumIndex === -1) {
+        const duplicate = collection.find(item => {
+          const matchDiscogs = discogsId && item.discogsId && (item.discogsId.toString() === discogsId.toString());
+          const matchTitleArtist = item.artist && item.title && 
+            (item.artist.trim().toLowerCase() === artist.toLowerCase()) && 
+            (item.title.trim().toLowerCase() === title.toLowerCase());
+          return matchDiscogs || matchTitleArtist;
+        });
+
+        if (duplicate) {
+          alert(`⚠️ Cet album existe déjà dans votre phonothèque !\n\n"${duplicate.title}" par ${duplicate.artist}`);
+          return;
+        }
       }
 
       const isBoxSet = document.getElementById("isBoxSet").checked;
@@ -718,7 +735,7 @@
         purchaseDate: document.getElementById("formPurchaseDate").value.trim(),
         purchasePrice: document.getElementById("formPurchasePrice").value.trim(),
         purchaseLocation: document.getElementById("formPurchaseLocation").value.trim(),
-        discogsId: document.getElementById("formDiscogsId").value.trim(),
+        discogsId: discogsId,
         cover: document.getElementById("formCover").value.trim(),
         isBoxSet: isBoxSet,
         volumes: volumes
@@ -814,15 +831,38 @@
       const id = idParam || document.getElementById("formDiscogsId").value.trim();
       if (!id) return;
 
+      // --- CONTRÔLE ANTI-DOUBLONS SUR L'ID DISCOGS ---
+      if (selectedAlbumIndex === -1) {
+        const existing = collection.find(a => a.discogsId && a.discogsId.toString() === id.toString());
+        if (existing) {
+          alert(`⚠️ Cet album est déjà présent dans votre phonothèque !\n\n"${existing.title}" par ${existing.artist}`);
+          return;
+        }
+      }
+
       try {
         const res = await fetch(`https://api.discogs.com/releases/${id}`);
         if (!res.ok) throw new Error();
         const data = await res.json();
 
-        if (data.title) document.getElementById("formTitle").value = data.title;
-        if (data.artists && data.artists.length) {
-          document.getElementById("formArtist").value = data.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ');
+        const title = data.title || '';
+        const artist = (data.artists && data.artists.length) ? data.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ') : '';
+
+        // --- CONTRÔLE ANTI-DOUBLONS SUR ARTISTE + TITRE ---
+        if (selectedAlbumIndex === -1 && artist && title) {
+          const existingTitleArtist = collection.find(a => 
+            a.artist && a.title && 
+            a.artist.trim().toLowerCase() === artist.trim().toLowerCase() && 
+            a.title.trim().toLowerCase() === title.trim().toLowerCase()
+          );
+          if (existingTitleArtist) {
+            alert(`⚠️ Cet album existe déjà dans votre phonothèque !\n\n"${existingTitleArtist.title}" par ${existingTitleArtist.artist}`);
+            return;
+          }
         }
+
+        if (title) document.getElementById("formTitle").value = title;
+        if (artist) document.getElementById("formArtist").value = artist;
         if (data.labels && data.labels.length) document.getElementById("formLabel").value = data.labels[0].name;
         if (data.year) document.getElementById("formYear").value = data.year;
         if (data.country) document.getElementById("formCountry").value = data.country;
