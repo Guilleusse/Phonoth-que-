@@ -63,7 +63,7 @@
     .stats-line { font-size: 13px; color: var(--text-sub); }
     .io-bar { display: flex; gap: 8px; margin-top: 15px; margin-bottom: 15px; }
     .btn-secondary { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
-    .btn-danger-soft { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
+    .btn-danger-soft { background: transparent; border: 1px solid var(--danger); color: white; }
     .search-box { position: relative; margin-bottom: 12px; }
     input[type="text"], input[type="number"], input[type="date"], input[type="url"], select, textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
     input:focus, select:focus, textarea:focus { border-color: var(--accent-blue); }
@@ -110,7 +110,7 @@
     .form-row { display: flex; gap: 10px; }
     .checkbox-group { display: flex; align-items: center; gap: 10px; background: #2c2c2e; padding: 12px; border-radius: 12px; margin-top: 15px; margin-bottom: 15px; }
     .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent-blue); }
-    .btn-submit { width: 100%; background: var(--accent-blue); color: white; border: none; padding: 14px; border-radius: 14px; font-size: 16px; font-weight: 700; margin-top: 10px; cursor: pointer; }
+    .btn-submit { width: 100%; background: var(--accent-blue); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
     .btn-danger { background: var(--danger); }
     .volumes-box { background: #2c2c2e; border-radius: 14px; padding: 12px; margin-top: 10px; }
     .volume-item { background: #1c1c1e; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
@@ -214,13 +214,13 @@
           </div>
 
           <div class="form-group">
-            <label>Titre de l'album / du coffret *</label>
-            <input type="text" id="formTitle" placeholder="ex: Les Cantates, Vol. 1 à 45" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <label>Artiste / Compositeur *</label>
+            <input type="text" id="formArtist" placeholder="ex: Johann Sebastian Bach" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
-            <label>Artiste *</label>
-            <input type="text" id="formArtist" placeholder="ex: Johann Sebastian Bach" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <label>Titre de l'album *</label>
+            <input type="text" id="formTitle" placeholder="ex: Les Cantates, Vol. 1 à 45" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
@@ -235,28 +235,28 @@
 
           <div class="form-row">
             <div class="form-group" style="flex:1">
-              <label>Support</label>
-              <select id="formSupport">
-                <option value="Vinyle">Vinyle</option>
-                <option value="CD">CD</option>
-                <option value="SACD">SACD</option>
-              </select>
+              <label>Année de sortie</label>
+              <input type="text" id="formYear" placeholder="ex: 1972" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div class="form-group" style="flex:1">
-              <label>Année</label>
-              <input type="text" id="formYear" placeholder="ex: 1972" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <label>Pays d'édition</label>
+              <input type="text" id="formCountry" placeholder="ex: Allemagne" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
 
           <div class="form-group">
-            <label>Pays d'édition</label>
-            <input type="text" id="formCountry" placeholder="ex: Allemagne" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <label>Support *</label>
+            <select id="formSupport">
+              <option value="Vinyle">Vinyle</option>
+              <option value="CD">CD</option>
+              <option value="SACD">SACD</option>
+            </select>
           </div>
 
           <div class="form-row">
             <div class="form-group" style="flex:1">
               <label>Date d'achat</label>
-              <input type="text" id="formPurchaseDate" placeholder="ex: 2026-08-23" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formPurchaseDate" placeholder="ex: 2026-08-23 ou 23/08/2026" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div class="form-group" style="flex:1">
               <label>Prix d'achat (€)</label>
@@ -284,8 +284,10 @@
             <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
 
-          <button type="button" class="btn-submit" onclick="saveAlbumForm()">Enregistrer dans la Phonothèque</button>
-          <button type="button" class="btn-secondary" style="width:100%; margin-top:10px;" onclick="closeModal('formModal')">✕ Annuler</button>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button type="button" class="btn-secondary" style="width:auto; padding:10px 20px;" onclick="closeModal('formModal')">Annuler</button>
+            <button type="button" class="btn-submit" style="width:auto; padding:10px 20px;" onclick="saveAlbumForm()">Enregistrer</button>
+          </div>
         </div>
       </div>
     </div>
@@ -406,6 +408,16 @@
         return regex.test(t);
       }
       return t.includes(s);
+    }
+
+    function formatDateFR(str) {
+      if (!str) return '-';
+      const clean = str.trim();
+      const parts = clean.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return clean;
     }
 
     function onCountryClick(el, e) {
@@ -580,7 +592,7 @@
         document.getElementById("modalDetailConductor").textContent = album.conductor;
       } else { condRow.style.display = 'none'; }
 
-      document.getElementById("modalDetailDate").textContent = album.purchaseDate || '-';
+      document.getElementById("modalDetailDate").textContent = formatDateFR(album.purchaseDate);
       document.getElementById("modalDetailPrice").textContent = album.purchasePrice ? `${album.purchasePrice} €` : '-';
       document.getElementById("modalDetailLocation").textContent = album.purchaseLocation || '-';
 
