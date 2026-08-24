@@ -798,17 +798,41 @@
     }
 
     async function fetchDiscogsByInput() {
-      const val = document.getElementById("formDiscogsId").value.trim();
-      if (!val) {
-        alert("Saisissez un ID Discogs ou un code-barres.");
-        return;
-      }
-      if (val.length >= 11 && /^\d+$/.test(val)) {
-        await searchDiscogsByBarcode(val);
-      } else {
-        await fetchDiscogsById(val);
-      }
+  const val = document.getElementById("formDiscogsId").value.trim();
+  if (!val) {
+    alert("Saisissez un ID Discogs, un code-barres ou une référence catalogue (ex: ST-84031).");
+    return;
+  }
+  
+  if (/^\d+$/.test(val)) {
+    // Si uniquement des chiffres
+    if (val.length >= 11) {
+      await searchDiscogsByBarcode(val);
+    } else {
+      await fetchDiscogsById(val);
     }
+  } else {
+    // Si contient des lettres ou tirets (ex: ST-84031) -> Recherche par référence catalogue
+    await searchDiscogsByCatalogNumber(val);
+  }
+}
+
+      async function searchDiscogsByCatalogNumber(catno) {
+  try {
+    const res = await fetch(`https://api.discogs.com/database/search?catno=${encodeURIComponent(catno)}&type=release`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      const item = data.results[0];
+      document.getElementById("formDiscogsId").value = item.id;
+      await fetchDiscogsById(item.id);
+    } else {
+      alert(`Aucun résultat Discogs trouvé pour la référence catalogue : ${catno}`);
+    }
+  } catch(e) {
+    alert("Erreur de recherche Discogs.");
+  }
+}
 
     async function searchDiscogsByBarcode(barcode) {
       try {
