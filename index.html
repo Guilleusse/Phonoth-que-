@@ -475,28 +475,39 @@
       }
     }
 
-    function renderCollection() {
+        function renderCollection() {
       const container = document.getElementById("collectionContainer");
-      const search = document.getElementById("searchInput").value.toLowerCase().trim();
+      if (!container) return;
+      const searchInput = document.getElementById("searchInput");
+      const search = searchInput ? searchInput.value.toLowerCase().trim() : "";
       container.innerHTML = "";
 
       let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, totalPrice = 0;
+      
       collection.forEach(a => {
+        if (!a) return;
         if (a.isBoxSet) countCoffret++;
         else if (a.support === 'Vinyle') countVinyle++;
         else if (a.support === 'CD') countCD++;
         else if (a.support === 'SACD') countSACD++;
 
-        const price = parseFloat((a.purchasePrice || '').toString().replace(',', '.')) || 0;
-        totalPrice += price;
+        let p = 0;
+        if (a.purchasePrice !== undefined && a.purchasePrice !== null) {
+          p = parseFloat(a.purchasePrice.toString().replace(',', '.')) || 0;
+        }
+        totalPrice += p;
       });
 
       const formattedTotal = totalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
-      document.getElementById("statsLine").innerHTML = 
-        `${collection.length} références • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} €`;
+      const statsElem = document.getElementById("statsLine");
+      if (statsElem) {
+        statsElem.innerHTML = 
+          `${collection.length} références • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} €`;
+      }
 
       let filtered = collection.filter((album) => {
+        if (!album) return false;
         if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
         if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
 
@@ -512,7 +523,8 @@
         return true;
       });
 
-      const sortVal = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : 'artist-az';
+      const sortSelect = document.getElementById("sortSelect");
+      const sortVal = sortSelect ? sortSelect.value : 'artist-az';
 
       filtered.sort((a, b) => {
         if (sortVal === 'artist-za') {
@@ -553,7 +565,8 @@
           groups[artist].forEach(album => renderAlbumCard(album, container));
         });
       } else {
-        document.getElementById("azIndex").innerHTML = "";
+        const az = document.getElementById("azIndex");
+        if (az) az.innerHTML = "";
         filtered.forEach(album => renderAlbumCard(album, container));
       }
     }
