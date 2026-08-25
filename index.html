@@ -475,21 +475,26 @@
       }
     }
 
-    function renderCollection() {
+        function renderCollection() {
       const container = document.getElementById("collectionContainer");
       const search = document.getElementById("searchInput").value.toLowerCase().trim();
       container.innerHTML = "";
 
-      let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0;
+      let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, totalPrice = 0;
       collection.forEach(a => {
         if (a.isBoxSet) countCoffret++;
         else if (a.support === 'Vinyle') countVinyle++;
         else if (a.support === 'CD') countCD++;
         else if (a.support === 'SACD') countSACD++;
+
+        const price = parseFloat((a.purchasePrice || '').toString().replace(',', '.')) || 0;
+        totalPrice += price;
       });
 
+      const formattedTotal = totalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
       document.getElementById("statsLine").innerHTML = 
-        `${collection.length} références • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets`;
+        `${collection.length} références • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} €`;
 
       let filtered = collection.filter((album) => {
         if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
