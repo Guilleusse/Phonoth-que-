@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Phonothèque</title>
+  <title>Phonothèque (Labo SOS)</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -29,6 +29,7 @@
       --badge-cd: #2563eb;
       --badge-sacd: #0d9488;
       --badge-coffret: #8b5cf6;
+      --badge-wantlist: #f59e0b;
       --danger: #ef4444;
     }
 
@@ -108,6 +109,7 @@
     .badge-cd { background: var(--badge-cd); }
     .badge-sacd { background: var(--badge-sacd); }
     .badge-coffret { background: var(--badge-coffret); }
+    .badge-wantlist { background: var(--badge-wantlist); color: #000; }
     .genre-badge { display: inline-block; font-size: 10px; color: #a0a0a0; background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; margin-top: 4px; margin-right: 4px; }
     .card-actions { position: absolute; right: 12px; bottom: 12px; }
     .card-delete-top { position: absolute; right: 12px; top: 12px; }
@@ -184,6 +186,7 @@
       <button class="filter-chip" onclick="setFilter('CD', this)">CD</button>
       <button class="filter-chip" onclick="setFilter('SACD', this)">SACD</button>
       <button class="filter-chip" onclick="setFilter('Coffret', this)">Coffrets</button>
+      <button class="filter-chip" onclick="setFilter('Wantlist', this)">💡 Envie</button>
     </div>
   </header>
 
@@ -220,7 +223,9 @@
           <div class="volumes-box" id="volumesList"></div>
         </div>
 
-        <div style="display:flex; gap: 10px; margin-top: 15px;">
+        <button id="buyWantlistBtn" class="btn-submit" style="background:#10b981; display:none; margin-bottom:15px;" onclick="convertToPurchased()">🛒 J'ai acheté cet album !</button>
+
+        <div style="display:flex; gap: 10px;">
           <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none;">🔗 Voir sur Discogs</a>
         </div>
       </div>
@@ -244,6 +249,11 @@
               <button type="button" class="btn-secondary" style="flex: 1; min-width: 0; background:var(--accent-blue); color:white; padding: 0 4px;" onclick="fetchDiscogsByInput()">🔍 Chercher</button>
             </div>
             <button type="button" class="btn-secondary" style="background:#3a3a3c; width:100%;" onclick="startLiveScanner()">📷 Scanner en direct (Caméra)</button>
+          </div>
+
+          <div class="checkbox-group" style="background:#2c2c2e; border:1px solid #f59e0b; padding:12px; border-radius:12px; margin-bottom:15px;">
+            <input type="checkbox" id="isWantlist">
+            <label for="isWantlist" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">💡 Envie (Ajouter à ma liste de recherche)</label>
           </div>
 
           <div class="form-group">
@@ -489,33 +499,44 @@
       const search = searchInput ? searchInput.value.toLowerCase().trim() : "";
       container.innerHTML = "";
 
-      let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, totalPrice = 0;
+      let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, countWantlist = 0, totalPrice = 0;
       collection.forEach(a => {
         if (!a) return;
-        if (a.isBoxSet) countCoffret++;
-        else if (a.support === 'Vinyle') countVinyle++;
-        else if (a.support === 'CD') countCD++;
-        else if (a.support === 'SACD') countSACD++;
+        if (a.isWantlist) {
+          countWantlist++;
+        } else {
+          if (a.isBoxSet) countCoffret++;
+          else if (a.support === 'Vinyle') countVinyle++;
+          else if (a.support === 'CD') countCD++;
+          else if (a.support === 'SACD') countSACD++;
 
-        let p = 0;
-        if (a.purchasePrice !== undefined && a.purchasePrice !== null) {
-          p = parseFloat(a.purchasePrice.toString().replace(',', '.')) || 0;
+          let p = 0;
+          if (a.purchasePrice !== undefined && a.purchasePrice !== null) {
+            p = parseFloat(a.purchasePrice.toString().replace(',', '.')) || 0;
+          }
+          totalPrice += p;
         }
-        totalPrice += p;
       });
 
       const formattedTotal = totalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+      const totalOwned = collection.length - countWantlist;
 
       const statsElem = document.getElementById("statsLine");
       if (statsElem) {
         statsElem.innerHTML = 
-          `${collection.length} références • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} €`;
+          `${totalOwned} possédés • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • 💡 ${countWantlist} Envie`;
       }
 
       let filtered = collection.filter((album) => {
         if (!album) return false;
-        if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
-        if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
+
+        if (currentFilter === 'Wantlist') {
+          if (!album.isWantlist) return false;
+        } else {
+          if (album.isWantlist) return false;
+          if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
+          if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
+        }
 
         if (search) {
           const matchTitle = matchText(album.title, search);
@@ -590,7 +611,11 @@
 
       let badgeClass = 'badge-cd';
       let badgeText = album.support || 'CD';
-      if (album.isBoxSet) {
+      
+      if (album.isWantlist) {
+        badgeClass = 'badge-wantlist';
+        badgeText = `💡 ENVIE (${album.support || 'VINYLE'})`;
+      } else if (album.isBoxSet) {
         badgeClass = 'badge-coffret';
         badgeText = `COFFRET (${album.volumes ? album.volumes.length : 0} VOL.)`;
       } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
@@ -674,7 +699,7 @@
       selectedAlbumIndex = index;
       const album = collection[index];
 
-      document.getElementById("modalDetailTitle").textContent = album.isBoxSet ? "Détails du Coffret" : "Détails de l'album";
+      document.getElementById("modalDetailTitle").textContent = album.isWantlist ? "💡 Élément recherché (Wantlist)" : (album.isBoxSet ? "Détails du Coffret" : "Détails de l'album");
       document.getElementById("modalDetailAlbumName").textContent = album.title || '';
       document.getElementById("modalDetailArtist").textContent = album.artist || '';
       document.getElementById("modalDetailSupport").textContent = album.isBoxSet ? `Coffret (${album.support})` : album.support;
@@ -699,6 +724,13 @@
       document.getElementById("modalDetailPrice").textContent = album.purchasePrice ? `${album.purchasePrice} €` : '-';
       document.getElementById("modalDetailLocation").textContent = album.purchaseLocation || '-';
 
+      const buyBtn = document.getElementById("buyWantlistBtn");
+      if (album.isWantlist) {
+        buyBtn.style.display = 'block';
+      } else {
+        buyBtn.style.display = 'none';
+      }
+
       const coverImg = document.getElementById("modalDetailCover");
       if (album.cover && album.cover.startsWith('http')) {
         coverImg.src = album.cover;
@@ -718,6 +750,19 @@
       } else { volSection.style.display = 'none'; }
 
       document.getElementById("detailsModal").classList.add("active");
+    }
+
+    function convertToPurchased() {
+      if (selectedAlbumIndex >= 0) {
+        collection[selectedAlbumIndex].isWantlist = false;
+        const today = new Date().toLocaleDateString('fr-FR');
+        if (!collection[selectedAlbumIndex].purchaseDate) {
+          collection[selectedAlbumIndex].purchaseDate = today;
+        }
+        saveCollection();
+        closeModal("detailsModal");
+        openEditModal(selectedAlbumIndex);
+      }
     }
 
     function renderVolumesList(vols) {
@@ -747,8 +792,9 @@
 
     function openAddModal() {
       selectedAlbumIndex = -1;
-      document.getElementById("formModalTitle").textContent = "Ajouter un album / coffret";
+      document.getElementById("formModalTitle").textContent = "Ajouter une référence";
       
+      document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
       document.getElementById("formLabel").value = '';
@@ -774,6 +820,7 @@
       const album = collection[index];
       document.getElementById("formModalTitle").textContent = "Modifier la référence";
       
+      document.getElementById("isWantlist").checked = !!album.isWantlist;
       document.getElementById("isBoxSet").checked = !!album.isBoxSet;
       toggleBoxSetFields();
 
@@ -825,6 +872,7 @@
       }
 
       const isBoxSet = document.getElementById("isBoxSet").checked;
+      const isWantlist = document.getElementById("isWantlist").checked;
       const volsRaw = document.getElementById("formVolumesText").value;
       const volumes = isBoxSet ? volsRaw.split('\n').map(v => v.trim()).filter(v => v.length > 0) : [];
 
@@ -843,6 +891,7 @@
         discogsId: discogsId,
         cover: document.getElementById("formCover").value.trim(),
         isBoxSet: isBoxSet,
+        isWantlist: isWantlist,
         volumes: volumes
       };
 
@@ -1006,9 +1055,11 @@
     }
 
     function getRandomAlbum() {
-      if (collection.length === 0) return;
-      const idx = Math.floor(Math.random() * collection.length);
-      showDetails(idx);
+      const owned = collection.filter(a => !a.isWantlist);
+      if (owned.length === 0) return;
+      const idx = Math.floor(Math.random() * owned.length);
+      const realIdx = collection.indexOf(owned[idx]);
+      showDetails(realIdx);
     }
 
     function closeModal(id) {
@@ -1080,7 +1131,8 @@
                   discogsId: cols[11] || '',
                   cover: cols[12] || '',
                   isBoxSet: cols[13] === 'true',
-                  volumes: cols[14] ? cols[14].split('||') : []
+                  isWantlist: cols[14] === 'true',
+                  volumes: cols[15] ? cols[15].split('||') : []
                 });
               }
             }
@@ -1146,6 +1198,7 @@
                 support: support,
                 cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : '',
                 isBoxSet: false,
+                isWantlist: false,
                 volumes: []
               });
             }
@@ -1153,7 +1206,7 @@
         }
 
         if (newAlbums.length > 0) {
-          if (confirm(`Voulez-vous importer les ${newAlbums.length} références avec leurs genres ?`)) {
+          if (confirm(`Voulez-vous importer les ${newAlbums.length} références ?`)) {
             collection = newAlbums;
             saveCollection();
             alert("Importation réussie !");
@@ -1165,10 +1218,10 @@
     }
 
     async function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;Volumes\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;Volumes\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.join('||') : '';
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${vols}"\n`;
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${vols}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
