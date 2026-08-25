@@ -108,6 +108,7 @@
     .badge-cd { background: var(--badge-cd); }
     .badge-sacd { background: var(--badge-sacd); }
     .badge-coffret { background: var(--badge-coffret); }
+    .genre-badge { display: inline-block; font-size: 10px; color: #a0a0a0; background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; margin-top: 4px; margin-right: 4px; }
     .card-actions { position: absolute; right: 12px; bottom: 12px; }
     .card-delete-top { position: absolute; right: 12px; top: 12px; }
     .card-action-btn { background: none; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; }
@@ -164,7 +165,7 @@
 
     <div class="search-row">
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, éditeur, chef, BWV..." oninput="onSearchInput()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <input type="text" id="searchInput" placeholder="Rechercher titre, artiste, genre, éditeur..." oninput="onSearchInput()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">✕</button>
       </div>
       <select id="sortSelect" class="sort-select" onchange="renderCollection()">
@@ -204,6 +205,7 @@
         <div class="details-grid">
           <div class="details-row"><span class="details-label">Support :</span><span class="details-val" id="modalDetailSupport"></span></div>
           <div class="details-row" id="rowLabel"><span class="details-label">Éditeur / Label :</span><span class="details-val" id="modalDetailLabel"></span></div>
+          <div class="details-row"><span class="details-label">Genre / Style :</span><span class="details-val" id="modalDetailStyle"></span></div>
           <div class="details-row"><span class="details-label">Année de sortie :</span><span class="details-val" id="modalDetailYear"></span></div>
           <div class="details-row"><span class="details-label">Pays d'édition :</span><span class="details-val" id="modalDetailCountry"></span></div>
           <div class="details-row" id="rowConductor"><span class="details-label">Chef d'orchestre :</span><span class="details-val" id="modalDetailConductor"></span></div>
@@ -257,6 +259,11 @@
           <div class="form-group">
             <label>Éditeur / Label</label>
             <input type="text" id="formLabel" placeholder="ex: Mofi, Teldec, CBS, Deutsche Grammophon..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          </div>
+
+          <div class="form-group">
+            <label>Genre / Style</label>
+            <input type="text" id="formStyle" placeholder="ex: Jazz / Hard Bop, Classical / Baroque..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
@@ -475,7 +482,7 @@
       }
     }
 
-        function renderCollection() {
+    function renderCollection() {
       const container = document.getElementById("collectionContainer");
       if (!container) return;
       const searchInput = document.getElementById("searchInput");
@@ -483,7 +490,6 @@
       container.innerHTML = "";
 
       let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, totalPrice = 0;
-      
       collection.forEach(a => {
         if (!a) return;
         if (a.isBoxSet) countCoffret++;
@@ -517,8 +523,9 @@
           const matchLabel = matchText(album.label, search);
           const matchConductor = matchText(album.conductor, search);
           const matchCountry = matchText(album.country, search);
+          const matchStyle = matchText(album.style, search);
           const matchVolumes = album.volumes && album.volumes.some(v => matchText(v, search));
-          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchVolumes;
+          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes;
         }
         return true;
       });
@@ -604,6 +611,8 @@
       }
       const subText = subParts.join(' • ');
 
+      const genreBadgesHtml = album.style ? `<div style="margin-top:2px;">${album.style.split(' / ').map(s => `<span class="genre-badge">${s}</span>`).join('')}</div>` : '';
+
       card.innerHTML = `
         <div class="card-delete-top">
           <button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)" title="Supprimer">🗑️</button>
@@ -615,6 +624,7 @@
           <span class="badge ${badgeClass}">${badgeText}</span>
           <div class="album-title">${album.title || 'Sans titre'}</div>
           <div class="album-sub">${subText}</div>
+          ${genreBadgesHtml}
         </div>
         <div class="card-actions">
           <button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button>
@@ -675,6 +685,7 @@
         document.getElementById("modalDetailLabel").textContent = album.label;
       } else { labelRow.style.display = 'none'; }
 
+      document.getElementById("modalDetailStyle").textContent = album.style || '-';
       document.getElementById("modalDetailYear").textContent = album.year || '-';
       document.getElementById("modalDetailCountry").textContent = album.country || '-';
       
@@ -741,6 +752,7 @@
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
       document.getElementById("formLabel").value = '';
+      document.getElementById("formStyle").value = '';
       document.getElementById("formConductor").value = '';
       document.getElementById("formSupport").value = 'Vinyle';
       document.getElementById("formYear").value = '';
@@ -768,6 +780,7 @@
       document.getElementById("formTitle").value = album.title || '';
       document.getElementById("formArtist").value = album.artist || '';
       document.getElementById("formLabel").value = album.label || '';
+      document.getElementById("formStyle").value = album.style || '';
       document.getElementById("formConductor").value = album.conductor || '';
       document.getElementById("formSupport").value = album.support || 'Vinyle';
       document.getElementById("formYear").value = album.year || '';
@@ -796,7 +809,6 @@
         return;
       }
 
-      // --- CONTRÔLE ANTI-DOUBLONS ---
       if (selectedAlbumIndex === -1) {
         const duplicate = collection.find(item => {
           const matchDiscogs = discogsId && item.discogsId && (item.discogsId.toString() === discogsId.toString());
@@ -820,6 +832,7 @@
         title: title,
         artist: artist,
         label: document.getElementById("formLabel").value.trim(),
+        style: document.getElementById("formStyle").value.trim(),
         conductor: document.getElementById("formConductor").value.trim(),
         support: document.getElementById("formSupport").value,
         year: document.getElementById("formYear").value.trim(),
@@ -976,6 +989,12 @@
         if (title) document.getElementById("formTitle").value = title;
         if (artist) document.getElementById("formArtist").value = artist;
         if (data.labels && data.labels.length) document.getElementById("formLabel").value = data.labels[0].name;
+        
+        const gList = data.genres ? data.genres.join(' • ') : '';
+        const sList = data.styles ? data.styles.join(' • ') : '';
+        const fullStyle = [gList, sList].filter(Boolean).join(' / ');
+        if (fullStyle) document.getElementById("formStyle").value = fullStyle;
+
         if (data.year) document.getElementById("formYear").value = data.year;
         if (data.country) document.getElementById("formCountry").value = data.country;
         if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
@@ -1051,16 +1070,17 @@
                   title: cols[1] || '',
                   conductor: cols[2] || '',
                   label: cols[3] || '',
-                  year: cols[4] || '',
-                  country: cols[5] || '',
-                  purchaseDate: cols[6] || '',
-                  purchasePrice: cols[7] || '',
-                  purchaseLocation: cols[8] || '',
-                  support: cols[9] || 'CD',
-                  discogsId: cols[10] || '',
-                  cover: cols[11] || '',
-                  isBoxSet: cols[12] === 'true',
-                  volumes: cols[13] ? cols[13].split('||') : []
+                  style: cols[4] || '',
+                  year: cols[5] || '',
+                  country: cols[6] || '',
+                  purchaseDate: cols[7] || '',
+                  purchasePrice: cols[8] || '',
+                  purchaseLocation: cols[9] || '',
+                  support: cols[10] || 'CD',
+                  discogsId: cols[11] || '',
+                  cover: cols[12] || '',
+                  isBoxSet: cols[13] === 'true',
+                  volumes: cols[14] ? cols[14].split('||') : []
                 });
               }
             }
@@ -1086,6 +1106,7 @@
             const labelIdx = findIdx(['labels', 'label'], ['éditeur', 'editeur']);
             const mediaIdx = findIdx(['media'], ['format', 'support']);
             const conductorIdx = findIdx(['conductors'], ['conductor', 'chef']);
+            const styleIdx = findIdx(['genres', 'style'], ['genre']);
             const yearIdx = findIdx(['release year'], ['year', 'année']);
             const countryIdx = findIdx(['country'], ['pays']);
             const pdateIdx = findIdx(['purchase date'], ['bought date']);
@@ -1114,6 +1135,7 @@
                 title: title || 'Sans titre',
                 artist: artist || 'Artiste inconnu',
                 label: labelIdx !== -1 && cols[labelIdx] ? cols[labelIdx].trim() : '',
+                style: styleIdx !== -1 && cols[styleIdx] ? cols[styleIdx].trim() : '',
                 conductor: conductorIdx !== -1 && cols[conductorIdx] ? cols[conductorIdx].trim() : '',
                 year: yearIdx !== -1 && cols[yearIdx] ? cols[yearIdx].trim() : '',
                 country: countryIdx !== -1 && cols[countryIdx] ? cols[countryIdx].trim() : '',
@@ -1131,7 +1153,7 @@
         }
 
         if (newAlbums.length > 0) {
-          if (confirm(`Voulez-vous importer les ${newAlbums.length} références avec leurs éditeurs ?`)) {
+          if (confirm(`Voulez-vous importer les ${newAlbums.length} références avec leurs genres ?`)) {
             collection = newAlbums;
             saveCollection();
             alert("Importation réussie !");
@@ -1143,10 +1165,10 @@
     }
 
     async function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;Volumes\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;Volumes\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.join('||') : '';
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${vols}"\n`;
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${vols}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
