@@ -228,8 +228,10 @@
 
         <button id="buyWantlistBtn" class="btn-submit" style="background:#10b981; display:none; margin-bottom:15px;" onclick="convertToPurchased()">🛒 J'ai acheté cet album !</button>
 
-        <div style="display:flex; gap: 10px;">
-          <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none;">🔗 Voir sur Discogs</a>
+        <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 10px;">
+  <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">🔗 Voir sur Discogs</a>
+  <a id="fnacLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">🟡 Voir sur FNAC</a>
+  <a id="jpcLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">🔵 Voir sur JPC</a>
         </div>
       </div>
     </div>
@@ -741,10 +743,25 @@
       } else { coverImg.style.display = 'none'; }
 
       const discogsBtn = document.getElementById("discogsLink");
-      if (album.discogsId) {
-        discogsBtn.href = `https://www.discogs.com/release/${album.discogsId}`;
-        discogsBtn.style.display = 'inline-flex';
-      } else { discogsBtn.style.display = 'none'; }
+if (album.discogsId) {
+  discogsBtn.href = `https://www.discogs.com/release/${album.discogsId}`;
+  discogsBtn.style.display = 'inline-flex';
+} else { discogsBtn.style.display = 'none'; }
+
+const searchQuery = encodeURIComponent(`${album.artist || ''} ${album.title || ''}`.trim());
+const fnacBtn = document.getElementById("fnacLink");
+const jpcBtn = document.getElementById("jpcLink");
+
+if (searchQuery) {
+  fnacBtn.href = `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${searchQuery}`;
+  fnacBtn.style.display = 'inline-flex';
+
+  jpcBtn.href = `https://www.jpc.de/s/${searchQuery}`;
+  jpcBtn.style.display = 'inline-flex';
+} else {
+  fnacBtn.style.display = 'none';
+  jpcBtn.style.display = 'none';
+}
 
       const volSection = document.getElementById("volumesSection");
       if (album.isBoxSet && album.volumes && album.volumes.length > 0) {
