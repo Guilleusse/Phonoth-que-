@@ -525,7 +525,7 @@
       const statsElem = document.getElementById("statsLine");
       if (statsElem) {
         statsElem.innerHTML = 
-          `${totalOwned} possédés • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • 💡 ${countWantlist} Envies`;
+          `${totalOwned} albums acquis • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € •  ${countWantlist} souhaits`;
       }
 
       let filtered = collection.filter((album) => {
@@ -615,7 +615,7 @@
       
       if (album.isWantlist) {
         badgeClass = 'badge-wantlist';
-        badgeText = `💡 ENVIES (${album.support || 'VINYLE'})`;
+        badgeText = `SOUHAITS (${album.support || 'VINYLE'})`;
       } else if (album.isBoxSet) {
         badgeClass = 'badge-coffret';
         badgeText = `COFFRET (${album.volumes ? album.volumes.length : 0} VOL.)`;
