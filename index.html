@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Phonothèque (Labo SOS)</title>
+  <title>Phonothèque</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -90,8 +90,7 @@
     input[type="text"], input[type="number"], input[type="date"], input[type="url"], select, textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
     input:focus, select:focus, textarea:focus { border-color: var(--accent-blue); }
     .search-clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #3a3a3c; color: var(--text-sub); border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; }
-    .filters-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
-    .filters-scroll::-webkit-scrollbar { display: none; }
+    .filters-scroll { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 10px; margin-bottom: 15px; }
     .filter-chip { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-sub); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
     .filter-chip.active { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
     .artist-group-header { font-size: 18px; font-weight: 700; color: var(--accent-blue); margin: 20px 0 10px 0; display: flex; justify-content: flex-start; align-items: baseline; gap: 8px; scroll-margin-top: 45px; }
@@ -186,7 +185,7 @@
       <button class="filter-chip" onclick="setFilter('CD', this)">CD</button>
       <button class="filter-chip" onclick="setFilter('SACD', this)">SACD</button>
       <button class="filter-chip" onclick="setFilter('Coffret', this)">Coffrets</button>
-      <button class="filter-chip" onclick="setFilter('Wantlist', this)">💡 Envie</button>
+      <button class="filter-chip" onclick="setFilter('Wantlist', this)">💡 Envies</button>
     </div>
   </header>
 
@@ -253,7 +252,7 @@
 
           <div class="checkbox-group" style="background:#2c2c2e; border:1px solid #f59e0b; padding:12px; border-radius:12px; margin-bottom:15px;">
             <input type="checkbox" id="isWantlist">
-            <label for="isWantlist" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">💡 Envie (Ajouter à ma liste de recherche)</label>
+            <label for="isWantlist" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">💡 Envies (Ajouter à ma liste d'envies)</label>
           </div>
 
           <div class="form-group">
@@ -524,7 +523,7 @@
       const statsElem = document.getElementById("statsLine");
       if (statsElem) {
         statsElem.innerHTML = 
-          `${totalOwned} possédés • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • 💡 ${countWantlist} Envie`;
+          `${totalOwned} possédés • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • 💡 ${countWantlist} Envies`;
       }
 
       let filtered = collection.filter((album) => {
