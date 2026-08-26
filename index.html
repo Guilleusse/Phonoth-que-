@@ -1019,6 +1019,7 @@
   if (!id) return;
 
   if (selectedAlbumIndex === -1) {
+    // On bloque uniquement si l'ID Discogs exact est déjà enregistré
     const existing = collection.find(a => a.discogsId && a.discogsId.toString() === id.toString());
     if (existing) {
       alert(`⚠️ Cet ID Discogs (${id}) est déjà présent dans votre phonothèque !\n\n"${existing.title}" par ${existing.artist}`);
@@ -1033,18 +1034,6 @@
 
     const title = data.title || '';
     const artist = (data.artists && data.artists.length) ? data.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ') : '';
-
-    if (selectedAlbumIndex === -1 && artist && title) {
-      const existingTitleArtist = collection.find(a => 
-        a.artist && a.title && 
-        a.artist.trim().toLowerCase() === artist.trim().toLowerCase() && 
-        a.title.trim().toLowerCase() === title.trim().toLowerCase()
-      );
-      if (existingTitleArtist) {
-        const confirmAdd = confirm(`⚠️ Cet album existe déjà dans votre phonothèque !\n\n"${existingTitleArtist.title}" par ${existingTitleArtist.artist}\n\nVoulez-vous l'ajouter quand même ?`);
-        if (!confirmAdd) return;
-      }
-    }
 
     if (title) document.getElementById("formTitle").value = title;
     if (artist) document.getElementById("formArtist").value = artist;
