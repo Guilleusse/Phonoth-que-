@@ -229,9 +229,9 @@
         <button id="buyWantlistBtn" class="btn-submit" style="background:#10b981; display:none; margin-bottom:15px;" onclick="convertToPurchased()">🛒 J'ai acheté cet album !</button>
 
         <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 10px;">
-          <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">⚫️ Voir sur Discogs</a>
-          <a id="fnacLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">🟡 Voir sur FNAC</a>
-          <a id="jpcLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">🟢 Voir sur JPC</a>
+          <button type="button" id="discogsLink" class="btn-secondary" style="display:none; justify-content:center;" onclick="openExternalLink(this.dataset.url)">⚫️ Voir sur Discogs</button>
+          <button type="button" id="fnacLink" class="btn-secondary" style="display:none; justify-content:center;" onclick="openExternalLink(this.dataset.url)">🟡 Voir sur FNAC</button>
+          <button type="button" id="jpcLink" class="btn-secondary" style="display:none; justify-content:center;" onclick="openExternalLink(this.dataset.url)">🟢 Voir sur JPC</button>
         </div>
       </div>
     </div>
@@ -380,6 +380,12 @@
     let selectedAlbumIndex = -1;
     let html5QrCode = null;
     let savedScrollPosition = 0;
+
+    function openExternalLink(url) {
+      if (url) {
+        window.open(url, '_blank');
+      }
+    }
 
     function initApp() {
       loadLocal();
@@ -746,20 +752,22 @@
 
       const discogsBtn = document.getElementById("discogsLink");
       if (album.discogsId) {
-        discogsBtn.href = `https://www.discogs.com/release/${album.discogsId}`;
-        discogsBtn.style.display = 'inline-flex';
-      } else { discogsBtn.style.display = 'none'; }
+        discogsBtn.dataset.url = `https://www.discogs.com/release/${album.discogsId}`;
+        discogsBtn.style.display = 'flex';
+      } else { 
+        discogsBtn.style.display = 'none'; 
+      }
 
       const searchQuery = encodeURIComponent(`${album.artist || ''} ${album.title || ''}`.trim());
       const fnacBtn = document.getElementById("fnacLink");
       const jpcBtn = document.getElementById("jpcLink");
 
       if (searchQuery) {
-        fnacBtn.href = `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${searchQuery}`;
-        fnacBtn.style.display = 'inline-flex';
+        fnacBtn.dataset.url = `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${searchQuery}`;
+        fnacBtn.style.display = 'flex';
 
-        jpcBtn.href = `https://www.jpc.de/s/${searchQuery}`;
-        jpcBtn.style.display = 'inline-flex';
+        jpcBtn.dataset.url = `https://www.jpc.de/s/${searchQuery}`;
+        jpcBtn.style.display = 'flex';
       } else {
         fnacBtn.style.display = 'none';
         jpcBtn.style.display = 'none';
