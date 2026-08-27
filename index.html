@@ -87,7 +87,23 @@
       background-repeat: no-repeat;
       background-position: right 8px center;
     }
-    input[type="text"], input[type="number"], input[type="date"], input[type="url"], select, textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
+    input[type="text"], input[type="number"], input[type="date"], input[type="url"], textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
+
+select {
+  width: 100%;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  padding: 12px 35px 12px 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14' fill='none' stroke='%23f3f4f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 5l3-3 3 3'/><path d='M2 9l3 3 3-3'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
     input:focus, select:focus, textarea:focus { border-color: var(--accent-blue); }
     .search-clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #3a3a3c; color: var(--text-sub); border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; }
     .filters-scroll { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 0px; margin-bottom: 0px; }
@@ -557,11 +573,13 @@
       const sortSelect = document.getElementById("sortSelect");
       const sortVal = sortSelect ? sortSelect.value : 'artist-az';
 
-      filtered.sort((a, b) => {
+            filtered.sort((a, b) => {
         if (sortVal === 'artist-za') {
-          return (b.artist || '').localeCompare(a.artist || '', 'fr', {sensitivity: 'base'});
+          const comp = (b.artist || '').localeCompare(a.artist || '', 'fr', {sensitivity: 'base'});
+          if (comp !== 0) return comp;
+          return (a.title || '').localeCompare(b.title || '', 'fr', {numeric: true, sensitivity: 'base'});
         } else if (sortVal === 'title-az') {
-          return (a.title || '').localeCompare(b.title || '', 'fr', {sensitivity: 'base'});
+          return (a.title || '').localeCompare(b.title || '', 'fr', {numeric: true, sensitivity: 'base'});
         } else if (sortVal === 'purchase-desc') {
           return parsePurchaseTimestamp(b.purchaseDate) - parsePurchaseTimestamp(a.purchaseDate);
         } else if (sortVal === 'year-desc') {
@@ -569,7 +587,10 @@
         } else if (sortVal === 'year-asc') {
           return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
         } else {
-          return (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
+          // artist-az (par défaut)
+          const comp = (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
+          if (comp !== 0) return comp;
+          return (a.title || '').localeCompare(b.title || '', 'fr', {numeric: true, sensitivity: 'base'});
         }
       });
 
