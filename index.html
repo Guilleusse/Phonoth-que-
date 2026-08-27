@@ -571,7 +571,10 @@
           const matchConductor = matchText(album.conductor, search);
           const matchCountry = matchText(album.country, search);
           const matchStyle = matchText(album.style, search);
-          const matchVolumes = album.volumes && album.volumes.some(v => matchText(v, search));
+          const matchVolumes = album.volumes && album.volumes.some(v => {
+            const vText = typeof v === 'object' ? v.title : v;
+            return matchText(vText, search);
+          });
           return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes;
         }
         return true;
@@ -833,14 +836,24 @@
       }
 
       vols.forEach((v, idx) => {
+        const isObj = (typeof v === 'object' && v !== null);
+        const titleText = isObj ? (v.title || '') : v;
+        const coverUrl = isObj ? (v.cover || '') : '';
+
         const item = document.createElement("div");
-        item.style.cssText = "background:#1c1c1e; padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid #3a3a3c;";
+        item.style.cssText = "background:#1c1c1e; padding:10px; border-radius:12px; margin-bottom:8px; display:flex; gap:10px; align-items:center; border:1px solid #3a3a3c;";
+        
+        const coverHtml = coverUrl && coverUrl.startsWith('http') 
+          ? `<img src="${coverUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">`
+          : `<div style="width:50px; height:50px; border-radius:8px; background:#2a2a2a; color:var(--text-sub); font-size:9px; display:flex; align-items:center; justify-content:center; text-align:center; flex-shrink:0;">Disque ${idx+1}</div>`;
+
         item.innerHTML = `
-          <div style="flex:1; padding-right:10px;">
-            <span style="font-size:10px; background:var(--badge-coffret); color:white; padding:2px 6px; border-radius:4px; font-weight:bold; margin-bottom:4px; display:inline-block;">DISQUE ${idx+1}</span>
-            <div style="font-size:14px; font-weight:600; color:white; margin-top:2px;">${v}</div>
+          ${coverHtml}
+          <div style="flex:1; padding-right:6px; min-width:0;">
+            <span style="font-size:9px; background:var(--badge-coffret); color:white; padding:2px 6px; border-radius:4px; font-weight:bold; display:inline-block;">DISQUE ${idx+1}</span>
+            <div style="font-size:13px; font-weight:600; color:white; margin-top:2px; word-break:break-word;">${titleText}</div>
           </div>
-          <div style="display:flex; gap:8px;">
+          <div style="display:flex; gap:6px; flex-shrink:0;">
             <button class="card-action-btn" onclick="editVolumeItem(${idx})" title="Modifier">✏️</button>
             <button class="card-action-btn" onclick="deleteVolumeItem(${idx})" title="Supprimer">🗑️</button>
           </div>
@@ -852,10 +865,16 @@
     function addNewVolumeToCurrentAlbum() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
-      const val = prompt("Nom / Détail du nouveau disque (ex: Vol. 1 - Cantates BWV 1 à 4) :");
-      if (val && val.trim()) {
+      const titleVal = prompt("Nom / Détail du nouveau disque (ex: Vol. 1 - Cantates BWV 1 à 4) :");
+      if (titleVal && titleVal.trim()) {
+        const coverVal = prompt("URL de la vignette / pochette pour ce disque (Facultatif) :", "") || "";
         if (!album.volumes) album.volumes = [];
-        album.volumes.push(val.trim());
+        
+        // Normalisation en objet pour stocker titre + pochette
+        album.volumes.push({
+          title: titleVal.trim(),
+          cover: coverVal.trim()
+        });
         album.discsCount = album.volumes.length;
         saveCollection();
         showDetails(selectedAlbumIndex);
@@ -866,10 +885,18 @@
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       if (!album.volumes || !album.volumes[volIdx]) return;
+      
       const current = album.volumes[volIdx];
-      const val = prompt("Modifier le disque :", current);
-      if (val !== null && val.trim()) {
-        album.volumes[volIdx] = val.trim();
+      const currentTitle = typeof current === 'object' ? current.title : current;
+      const currentCover = typeof current === 'object' ? (current.cover || '') : '';
+
+      const newTitle = prompt("Modifier le nom du disque :", currentTitle);
+      if (newTitle !== null && newTitle.trim()) {
+        const newCover = prompt("Modifier l'URL de la pochette :", currentCover) || "";
+        album.volumes[volIdx] = {
+          title: newTitle.trim(),
+          cover: newCover.trim()
+        };
         saveCollection();
         showDetails(selectedAlbumIndex);
       }
@@ -879,7 +906,8 @@
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       if (!album.volumes || !album.volumes[volIdx]) return;
-      if (confirm(`Supprimer "${album.volumes[volIdx]}" ?`)) {
+      const titleText = typeof album.volumes[volIdx] === 'object' ? album.volumes[volIdx].title : album.volumes[volIdx];
+      if (confirm(`Supprimer "${titleText}" ?`)) {
         album.volumes.splice(volIdx, 1);
         album.discsCount = album.volumes.length;
         saveCollection();
@@ -945,7 +973,8 @@
       document.getElementById("formDiscsCount").value = album.discsCount || '';
 
       if (album.volumes) {
-        document.getElementById("formVolumesText").value = album.volumes.join('\n');
+        const textVols = album.volumes.map(v => typeof v === 'object' ? v.title : v);
+        document.getElementById("formVolumesText").value = textVols.join('\n');
       } else { document.getElementById("formVolumesText").value = ''; }
 
       closeModal("detailsModal");
@@ -987,7 +1016,20 @@
       const isWantlist = document.getElementById("isWantlist").checked;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
       const volsRaw = document.getElementById("formVolumesText").value;
-      const volumes = isBoxSet ? volsRaw.split('\n').map(v => v.trim()).filter(v => v.length > 0) : [];
+      
+      let volumes = [];
+      if (isBoxSet) {
+        const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
+        const lines = volsRaw.split('\n').map(v => v.trim()).filter(v => v.length > 0);
+        
+        volumes = lines.map((line, idx) => {
+          const oldItem = existingVols[idx];
+          if (typeof oldItem === 'object' && oldItem !== null) {
+            return { title: line, cover: oldItem.cover || '' };
+          }
+          return { title: line, cover: '' };
+        });
+      }
 
       const albumData = {
         title: title,
@@ -1243,7 +1285,10 @@
                   isBoxSet: cols[13] === 'true',
                   isWantlist: cols[14] === 'true',
                   discsCount: parseInt(cols[15]) || 0,
-                  volumes: cols[16] ? cols[16].split('||') : []
+                  volumes: cols[16] ? cols[16].split('||').map(v => {
+                    const parts = v.split(':::');
+                    return parts.length > 1 ? { title: parts[0], cover: parts[1] } : { title: v, cover: '' };
+                  }) : []
                 });
               }
             }
@@ -1332,7 +1377,12 @@
     async function exportToCSV() {
       let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;DiscsCount;Volumes\n";
       collection.forEach(a => {
-        const vols = a.volumes ? a.volumes.join('||') : '';
+        const vols = a.volumes ? a.volumes.map(v => {
+          if (typeof v === 'object' && v !== null) {
+            return `${v.title || ''}:::${v.cover || ''}`;
+          }
+          return `${v}:::`;
+        }).join('||') : '';
         csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.discsCount||0}";"${vols}"\n`;
       });
 
