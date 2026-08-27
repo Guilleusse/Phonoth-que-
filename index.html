@@ -2,11 +2,9 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Phonothèque</title>
   
@@ -242,7 +240,6 @@
 
         <div id="volumesSection" style="display:none; margin-bottom: 15px;">
           <h3 style="font-size: 15px; margin-bottom: 8px;">Contenu du coffret / Liste des disques :</h3>
-          <input type="text" id="volumeSearch" placeholder="Filtrer un volume, cantate, BWV..." oninput="filterVolumes()" style="margin-bottom: 8px; font-size: 13px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <div class="volumes-box" id="volumesList"></div>
         </div>
 
@@ -353,8 +350,12 @@
           </div>
 
           <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
-            <label>Liste des disques (Un disque par ligne)</label>
-            <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label>Nombre de disques (ex: 2, 5, 12...)</label>
+              <input type="number" id="formDiscsCount" placeholder="ex: 2" min="1" autocomplete="off">
+            </div>
+            <label>Contenu des disques (Optionnel)</label>
+            <textarea id="formVolumesText" rows="4" placeholder="Disque 1 - Cantates 1 à 4&#10;Disque 2 - Cantates 5 à 8" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
 
           <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
@@ -399,6 +400,7 @@
     let currentFilter = 'all';
     let selectedAlbumIndex = -1;
     let html5QrCode = null;
+    let savedScrollPosition = 0;
 
     function initApp() {
       loadLocal();
@@ -646,7 +648,7 @@
         badgeText = `SOUHAITS (${album.support || 'VINYLE'})`;
       } else if (album.isBoxSet) {
         badgeClass = 'badge-coffret';
-        const nbDisques = album.volumes ? album.volumes.length : 0;
+        const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
         badgeText = nbDisques > 0 ? `${nbDisques} DISQUE${nbDisques > 1 ? 'S' : ''}` : 'DISQUES';
       } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
       else if (album.support === 'SACD') badgeClass = 'badge-sacd';
@@ -726,6 +728,7 @@
     }
 
     function showDetails(index) {
+      savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
 
@@ -812,22 +815,13 @@
 
     function renderVolumesList(vols) {
       const box = document.getElementById("volumesList");
-      const search = document.getElementById("volumeSearch").value.toLowerCase();
       box.innerHTML = "";
       vols.forEach((v) => {
-        if (!search || v.toLowerCase().includes(search)) {
-          const item = document.createElement("div");
-          item.className = "volume-item";
-          item.textContent = v;
-          box.appendChild(item);
-        }
+        const item = document.createElement("div");
+        item.className = "volume-item";
+        item.textContent = v;
+        box.appendChild(item);
       });
-    }
-
-    function filterVolumes() {
-      if (selectedAlbumIndex !== -1 && collection[selectedAlbumIndex].volumes) {
-        renderVolumesList(collection[selectedAlbumIndex].volumes);
-      }
     }
 
     function toggleBoxSetFields() {
@@ -836,6 +830,7 @@
     }
 
     function openAddModal() {
+      savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = -1;
       document.getElementById("formModalTitle").textContent = "Ajouter une référence";
       
@@ -853,6 +848,7 @@
       document.getElementById("formPurchaseLocation").value = '';
       document.getElementById("formDiscogsId").value = '';
       document.getElementById("formCover").value = '';
+      document.getElementById("formDiscsCount").value = '';
       document.getElementById("formVolumesText").value = '';
       
       document.getElementById("isBoxSet").checked = false;
@@ -861,6 +857,7 @@
     }
 
     function openEditModal(index) {
+      savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
       document.getElementById("formModalTitle").textContent = "Modifier la référence";
@@ -882,6 +879,7 @@
       document.getElementById("formPurchaseLocation").value = album.purchaseLocation || '';
       document.getElementById("formDiscogsId").value = album.discogsId || '';
       document.getElementById("formCover").value = album.cover || '';
+      document.getElementById("formDiscsCount").value = album.discsCount || '';
 
       if (album.volumes) {
         document.getElementById("formVolumesText").value = album.volumes.join('\n');
@@ -924,6 +922,7 @@
 
       const isBoxSet = document.getElementById("isBoxSet").checked;
       const isWantlist = document.getElementById("isWantlist").checked;
+      const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
       const volsRaw = document.getElementById("formVolumesText").value;
       const volumes = isBoxSet ? volsRaw.split('\n').map(v => v.trim()).filter(v => v.length > 0) : [];
 
@@ -943,6 +942,7 @@
         cover: document.getElementById("formCover").value.trim(),
         isBoxSet: isBoxSet,
         isWantlist: isWantlist,
+        discsCount: discsCount,
         volumes: volumes
       };
 
@@ -1106,6 +1106,11 @@
         stopLiveScanner();
       } else {
         document.getElementById(id).classList.remove("active");
+        if (id === 'detailsModal' || id === 'formModal') {
+          setTimeout(() => {
+            window.scrollTo(0, savedScrollPosition);
+          }, 10);
+        }
       }
     }
 
@@ -1174,7 +1179,8 @@
                   cover: cols[12] || '',
                   isBoxSet: cols[13] === 'true',
                   isWantlist: cols[14] === 'true',
-                  volumes: cols[15] ? cols[15].split('||') : []
+                  discsCount: parseInt(cols[15]) || 0,
+                  volumes: cols[16] ? cols[16].split('||') : []
                 });
               }
             }
@@ -1241,6 +1247,7 @@
                 cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : '',
                 isBoxSet: false,
                 isWantlist: false,
+                discsCount: 0,
                 volumes: []
               });
             }
@@ -1260,10 +1267,10 @@
     }
 
     async function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;Volumes\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;DiscsCount;Volumes\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.join('||') : '';
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${vols}"\n`;
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.discsCount||0}";"${vols}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
