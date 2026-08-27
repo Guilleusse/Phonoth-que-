@@ -810,7 +810,7 @@
       const volSection = document.getElementById("volumesSection");
       if (album.isBoxSet) {
         volSection.style.display = 'block';
-        renderVolumesList(album.volumes || []);
+        renderVolumesList(album.volumes || [], album.cover);
       } else { volSection.style.display = 'none'; }
 
       document.getElementById("detailsModal").classList.add("active");
@@ -829,7 +829,7 @@
       }
     }
 
-    function renderVolumesList(vols) {
+    function renderVolumesList(vols, parentCover) {
       const box = document.getElementById("volumesList");
       box.innerHTML = "";
       
@@ -855,7 +855,11 @@
       vols.forEach((v, idx) => {
         const isObj = (typeof v === 'object' && v !== null);
         const titleText = isObj ? (v.title || '') : v;
-        const coverUrl = isObj ? (v.cover || '') : '';
+        let coverUrl = isObj ? (v.cover || '') : '';
+        
+        if (!coverUrl && parentCover && parentCover.startsWith('http')) {
+          coverUrl = parentCover;
+        }
 
         const item = document.createElement("div");
         item.style.cssText = "background:#1c1c1e; padding:10px; border-radius:12px; margin-bottom:8px; display:flex; gap:10px; align-items:center; border:1px solid #3a3a3c;";
