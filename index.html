@@ -539,15 +539,33 @@
       container.innerHTML = "";
 
       let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, countWantlist = 0, totalPrice = 0;
+      let totalDiscsPhysical = 0;
+
       collection.forEach(a => {
         if (!a) return;
         if (a.isWantlist) {
           countWantlist++;
         } else {
-          if (a.isBoxSet) countCoffret++;
-          else if (a.support === 'Vinyle') countVinyle++;
-          else if (a.support === 'CD') countCD++;
-          else if (a.support === 'SACD') countSACD++;
+          // Si le champ d'entrée 'discsCount' contient la valeur réelle des disques (ex: 90)
+          const explicitDiscs = parseInt(a.discsCount) || 0;
+          const subBoxes = (a.volumes && a.volumes.length > 0) ? a.volumes.length : 1;
+
+          // Nombre de coffrets physiques réels (ex: 45)
+          const realBoxCount = a.isBoxSet ? subBoxes : 0;
+          
+          // Nombre de galettes physiques (ex: 90 s'il y a 2 disques par coffret, ou égale au nombre de sous-coffrets)
+          const realDiscsCount = explicitDiscs > 0 ? explicitDiscs : (a.isBoxSet ? subBoxes * 2 : 1);
+
+          totalDiscsPhysical += realDiscsCount;
+
+          // Répartition par support
+          if (a.support === 'Vinyle') countVinyle += realDiscsCount;
+          else if (a.support === 'CD') countCD += realDiscsCount;
+          else if (a.support === 'SACD') countSACD += realDiscsCount;
+
+          if (a.isBoxSet) {
+            countCoffret += realBoxCount;
+          }
 
           let p = 0;
           if (a.purchasePrice !== undefined && a.purchasePrice !== null) {
@@ -563,7 +581,7 @@
       const statsElem = document.getElementById("statsLine");
       if (statsElem) {
         statsElem.innerHTML = 
-          `${totalOwned} albums acquis • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € •  ${countWantlist} souhaits`;
+          `${totalDiscsPhysical} disques (${totalOwned} réf.) • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • ${countWantlist} souhaits`;
       }
 
       let filtered = collection.filter((album) => {
@@ -608,7 +626,7 @@
         } else if (sortVal === 'year-desc') {
           return (parseInt(b.year) || 0) - (parseInt(a.year) || 0);
         } else if (sortVal === 'year-asc') {
-          return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
+          return (parseInt(a.year) || 0) - (parseInt(a.year) || 0);
         } else {
           const comp = (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
           if (comp !== 0) return comp;
@@ -910,7 +928,7 @@
           });
         });
 
-        album.discsCount = album.volumes.length;
+        album.discsCount = album.volumes.length * 2;
         saveCollection();
         closeModal("bulkModal");
         showDetails(selectedAlbumIndex);
@@ -929,7 +947,7 @@
           title: titleVal.trim(),
           cover: coverVal.trim()
         });
-        album.discsCount = album.volumes.length;
+        album.discsCount = album.volumes.length * 2;
         saveCollection();
         showDetails(selectedAlbumIndex);
       }
@@ -963,7 +981,7 @@
       const titleText = typeof album.volumes[volIdx] === 'object' ? album.volumes[volIdx].title : album.volumes[volIdx];
       if (confirm(`Supprimer "${titleText}" ?`)) {
         album.volumes.splice(volIdx, 1);
-        album.discsCount = album.volumes.length;
+        album.discsCount = album.volumes.length * 2;
         saveCollection();
         showDetails(selectedAlbumIndex);
       }
