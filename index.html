@@ -88,22 +88,21 @@
       background-position: right 8px center;
     }
     input[type="text"], input[type="number"], input[type="date"], input[type="url"], textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
-
-select {
-  width: 100%;
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  color: var(--text-main);
-  padding: 12px 35px 12px 14px;
-  border-radius: 12px;
-  font-size: 15px;
-  outline: none;
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14' fill='none' stroke='%23f3f4f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 5l3-3 3 3'/><path d='M2 9l3 3 3-3'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-}
+    select {
+      width: 100%;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 12px 35px 12px 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14' fill='none' stroke='%23f3f4f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 5l3-3 3 3'/><path d='M2 9l3 3 3-3'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
     input:focus, select:focus, textarea:focus { border-color: var(--accent-blue); }
     .search-clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #3a3a3c; color: var(--text-sub); border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; }
     .filters-scroll { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 0px; margin-bottom: 0px; }
@@ -237,15 +236,17 @@ select {
         </div>
 
         <div id="volumesSection" style="display:none; margin-bottom: 15px;">
-          <h3 style="font-size: 15px; margin-bottom: 8px;">Contenu du coffret / Liste des volumes :</h3>
+          <h3 style="font-size: 15px; margin-bottom: 8px;">Contenu du coffret / Liste des disques :</h3>
           <input type="text" id="volumeSearch" placeholder="Filtrer un volume, cantate, BWV..." oninput="filterVolumes()" style="margin-bottom: 8px; font-size: 13px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <div class="volumes-box" id="volumesList"></div>
         </div>
 
         <button id="buyWantlistBtn" class="btn-submit" style="background:#10b981; display:none; margin-bottom:15px;" onclick="convertToPurchased()">🛒 J'ai acheté cet album !</button>
 
-        <div style="display:flex; gap: 10px;">
-          <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none;">🔗 Voir sur Discogs</a>
+        <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 10px;">
+          <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">⚫️ Voir sur Discogs</a>
+          <a id="fnacLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">🟡 Voir sur FNAC</a>
+          <a id="jpcLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">🟢 Voir sur JPC</a>
         </div>
       </div>
     </div>
@@ -347,7 +348,7 @@ select {
           </div>
 
           <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
-            <label>Liste des volumes (Un volume par ligne)</label>
+            <label>Liste des disques (Un disque par ligne)</label>
             <textarea id="formVolumesText" rows="6" placeholder="Vol. 1 - Cantates BWV 1 à 4&#10;Vol. 2 - Cantates BWV 5 à 8&#10;Vol. 3 - Cantates BWV 9 à 11" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
 
@@ -573,7 +574,7 @@ select {
       const sortSelect = document.getElementById("sortSelect");
       const sortVal = sortSelect ? sortSelect.value : 'artist-az';
 
-            filtered.sort((a, b) => {
+      filtered.sort((a, b) => {
         if (sortVal === 'artist-za') {
           const comp = (b.artist || '').localeCompare(a.artist || '', 'fr', {sensitivity: 'base'});
           if (comp !== 0) return comp;
@@ -587,7 +588,6 @@ select {
         } else if (sortVal === 'year-asc') {
           return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
         } else {
-          // artist-az (par défaut)
           const comp = (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
           if (comp !== 0) return comp;
           return (a.title || '').localeCompare(b.title || '', 'fr', {numeric: true, sensitivity: 'base'});
@@ -641,7 +641,8 @@ select {
         badgeText = `SOUHAITS (${album.support || 'VINYLE'})`;
       } else if (album.isBoxSet) {
         badgeClass = 'badge-coffret';
-        badgeText = `COFFRET (${album.volumes ? album.volumes.length : 0} VOL.)`;
+        const nbDisques = album.volumes ? album.volumes.length : 0;
+        badgeText = nbDisques > 0 ? `${nbDisques} DISQUE${nbDisques > 1 ? 'S' : ''}` : 'COFFRET';
       } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
       else if (album.support === 'SACD') badgeClass = 'badge-sacd';
 
@@ -767,6 +768,21 @@ select {
         discogsBtn.style.display = 'inline-flex';
       } else { discogsBtn.style.display = 'none'; }
 
+      const searchQuery = encodeURIComponent(`${album.artist || ''} ${album.title || ''}`.trim());
+      const fnacBtn = document.getElementById("fnacLink");
+      const jpcBtn = document.getElementById("jpcLink");
+
+      if (searchQuery) {
+        fnacBtn.href = `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${searchQuery}`;
+        fnacBtn.style.display = 'inline-flex';
+
+        jpcBtn.href = `https://www.jpc.de/s/${searchQuery}`;
+        jpcBtn.style.display = 'inline-flex';
+      } else {
+        fnacBtn.style.display = 'none';
+        jpcBtn.style.display = 'none';
+      }
+
       const volSection = document.getElementById("volumesSection");
       if (album.isBoxSet && album.volumes && album.volumes.length > 0) {
         volSection.style.display = 'block';
@@ -871,71 +887,69 @@ select {
     }
 
     function saveAlbumForm() {
-  const title = document.getElementById("formTitle").value.trim();
-  const artist = document.getElementById("formArtist").value.trim();
-  const discogsId = document.getElementById("formDiscogsId").value.trim();
+      const title = document.getElementById("formTitle").value.trim();
+      const artist = document.getElementById("formArtist").value.trim();
+      const discogsId = document.getElementById("formDiscogsId").value.trim();
 
-  if (!title || !artist) {
-    alert("Veuillez renseigner au moins le titre et l'artiste.");
-    return;
-  }
-
-  if (selectedAlbumIndex === -1) {
-    // 1. Vérification ID Discogs strictement identique
-    if (discogsId) {
-      const dupDiscogs = collection.find(item => item.discogsId && item.discogsId.toString() === discogsId.toString());
-      if (dupDiscogs) {
-        alert(`⚠️ Cet ID Discogs (${discogsId}) est déjà enregistré dans votre phonothèque !\n\n"${dupDiscogs.title}" par ${dupDiscogs.artist}`);
+      if (!title || !artist) {
+        alert("Veuillez renseigner au moins le titre et l'artiste.");
         return;
       }
+
+      if (selectedAlbumIndex === -1) {
+        if (discogsId) {
+          const dupDiscogs = collection.find(item => item.discogsId && item.discogsId.toString() === discogsId.toString());
+          if (dupDiscogs) {
+            alert(`⚠️ Cet ID Discogs (${discogsId}) est déjà enregistré dans votre phonothèque !\n\n"${dupDiscogs.title}" par ${dupDiscogs.artist}`);
+            return;
+          }
+        }
+
+        const dupTitleArtist = collection.find(item => 
+          item.artist && item.title && 
+          (item.artist.trim().toLowerCase() === artist.toLowerCase()) && 
+          (item.title.trim().toLowerCase() === title.toLowerCase())
+        );
+
+        if (dupTitleArtist) {
+          const confirmAdd = confirm(`⚠️ Cet album existe déjà dans votre phonothèque !\n\n"${dupTitleArtist.title}" par ${dupTitleArtist.artist}\n\nVoulez-vous l'ajouter quand même ?`);
+          if (!confirmAdd) return;
+        }
+      }
+
+      const isBoxSet = document.getElementById("isBoxSet").checked;
+      const isWantlist = document.getElementById("isWantlist").checked;
+      const volsRaw = document.getElementById("formVolumesText").value;
+      const volumes = isBoxSet ? volsRaw.split('\n').map(v => v.trim()).filter(v => v.length > 0) : [];
+
+      const albumData = {
+        title: title,
+        artist: artist,
+        label: document.getElementById("formLabel").value.trim(),
+        style: document.getElementById("formStyle").value.trim(),
+        conductor: document.getElementById("formConductor").value.trim(),
+        support: document.getElementById("formSupport").value,
+        year: document.getElementById("formYear").value.trim(),
+        country: document.getElementById("formCountry").value.trim(),
+        purchaseDate: document.getElementById("formPurchaseDate").value.trim(),
+        purchasePrice: document.getElementById("formPurchasePrice").value.trim(),
+        purchaseLocation: document.getElementById("formPurchaseLocation").value.trim(),
+        discogsId: discogsId,
+        cover: document.getElementById("formCover").value.trim(),
+        isBoxSet: isBoxSet,
+        isWantlist: isWantlist,
+        volumes: volumes
+      };
+
+      if (selectedAlbumIndex >= 0) {
+        collection[selectedAlbumIndex] = albumData;
+      } else {
+        collection.unshift(albumData);
+      }
+
+      saveCollection();
+      closeModal("formModal");
     }
-
-    // 2. Vérification Titre + Artiste (Demande de confirmation)
-    const dupTitleArtist = collection.find(item => 
-      item.artist && item.title && 
-      (item.artist.trim().toLowerCase() === artist.toLowerCase()) && 
-      (item.title.trim().toLowerCase() === title.toLowerCase())
-    );
-
-    if (dupTitleArtist) {
-      const confirmAdd = confirm(`⚠️ Cet album existe déjà dans votre phonothèque !\n\n"${dupTitleArtist.title}" par ${dupTitleArtist.artist}\n\nVoulez-vous l'ajouter quand même ?`);
-      if (!confirmAdd) return;
-    }
-  }
-
-  const isBoxSet = document.getElementById("isBoxSet").checked;
-  const isWantlist = document.getElementById("isWantlist").checked;
-  const volsRaw = document.getElementById("formVolumesText").value;
-  const volumes = isBoxSet ? volsRaw.split('\n').map(v => v.trim()).filter(v => v.length > 0) : [];
-
-  const albumData = {
-    title: title,
-    artist: artist,
-    label: document.getElementById("formLabel").value.trim(),
-    style: document.getElementById("formStyle").value.trim(),
-    conductor: document.getElementById("formConductor").value.trim(),
-    support: document.getElementById("formSupport").value,
-    year: document.getElementById("formYear").value.trim(),
-    country: document.getElementById("formCountry").value.trim(),
-    purchaseDate: document.getElementById("formPurchaseDate").value.trim(),
-    purchasePrice: document.getElementById("formPurchasePrice").value.trim(),
-    purchaseLocation: document.getElementById("formPurchaseLocation").value.trim(),
-    discogsId: discogsId,
-    cover: document.getElementById("formCover").value.trim(),
-    isBoxSet: isBoxSet,
-    isWantlist: isWantlist,
-    volumes: volumes
-  };
-
-  if (selectedAlbumIndex >= 0) {
-    collection[selectedAlbumIndex] = albumData;
-  } else {
-    collection.unshift(albumData);
-  }
-
-  saveCollection();
-  closeModal("formModal");
-}
 
     async function startLiveScanner() {
       document.getElementById("scannerModal").classList.add("active");
@@ -1036,44 +1050,43 @@ select {
     }
 
     async function fetchDiscogsById(idParam) {
-  const id = idParam || document.getElementById("formDiscogsId").value.trim();
-  if (!id) return;
+      const id = idParam || document.getElementById("formDiscogsId").value.trim();
+      if (!id) return;
 
-  if (selectedAlbumIndex === -1) {
-    // On bloque uniquement si l'ID Discogs exact est déjà enregistré
-    const existing = collection.find(a => a.discogsId && a.discogsId.toString() === id.toString());
-    if (existing) {
-      alert(`⚠️ Cet ID Discogs (${id}) est déjà présent dans votre phonothèque !\n\n"${existing.title}" par ${existing.artist}`);
-      return;
+      if (selectedAlbumIndex === -1) {
+        const existing = collection.find(a => a.discogsId && a.discogsId.toString() === id.toString());
+        if (existing) {
+          alert(`⚠️ Cet ID Discogs (${id}) est déjà présent dans votre phonothèque !\n\n"${existing.title}" par ${existing.artist}`);
+          return;
+        }
+      }
+
+      try {
+        const res = await fetch(`https://api.discogs.com/releases/${id}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        const title = data.title || '';
+        const artist = (data.artists && data.artists.length) ? data.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ') : '';
+
+        if (title) document.getElementById("formTitle").value = title;
+        if (artist) document.getElementById("formArtist").value = artist;
+        if (data.labels && data.labels.length) document.getElementById("formLabel").value = data.labels[0].name;
+        
+        const gList = data.genres ? data.genres.join(' • ') : '';
+        const sList = data.styles ? data.styles.join(' • ') : '';
+        const fullStyle = [gList, sList].filter(Boolean).join(' / ');
+        if (fullStyle) document.getElementById("formStyle").value = fullStyle;
+
+        if (data.year) document.getElementById("formYear").value = data.year;
+        if (data.country) document.getElementById("formCountry").value = data.country;
+        if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
+
+        alert("Données remplies depuis Discogs avec succès !");
+      } catch(e) {
+        alert("Impossible de charger les données pour cet ID Discogs.");
+      }
     }
-  }
-
-  try {
-    const res = await fetch(`https://api.discogs.com/releases/${id}`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-
-    const title = data.title || '';
-    const artist = (data.artists && data.artists.length) ? data.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ') : '';
-
-    if (title) document.getElementById("formTitle").value = title;
-    if (artist) document.getElementById("formArtist").value = artist;
-    if (data.labels && data.labels.length) document.getElementById("formLabel").value = data.labels[0].name;
-    
-    const gList = data.genres ? data.genres.join(' • ') : '';
-    const sList = data.styles ? data.styles.join(' • ') : '';
-    const fullStyle = [gList, sList].filter(Boolean).join(' / ');
-    if (fullStyle) document.getElementById("formStyle").value = fullStyle;
-
-    if (data.year) document.getElementById("formYear").value = data.year;
-    if (data.country) document.getElementById("formCountry").value = data.country;
-    if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
-
-    alert("Données remplies depuis Discogs avec succès !");
-  } catch(e) {
-    alert("Impossible de charger les données pour cet ID Discogs.");
-  }
-}
 
     function getRandomAlbum() {
       const owned = collection.filter(a => !a.isWantlist);
@@ -1084,8 +1097,11 @@ select {
     }
 
     function closeModal(id) {
-      if (id === 'scannerModal') stopLiveScanner();
-      else document.getElementById(id).classList.remove("active");
+      if (id === 'scannerModal') {
+        stopLiveScanner();
+      } else {
+        document.getElementById(id).classList.remove("active");
+      }
     }
 
     function parseCSV(text) {
