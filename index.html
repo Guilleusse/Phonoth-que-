@@ -642,7 +642,7 @@
       } else if (album.isBoxSet) {
         badgeClass = 'badge-coffret';
         const nbDisques = album.volumes ? album.volumes.length : 0;
-        badgeText = nbDisques > 0 ? `${nbDisques} DISQUE${nbDisques > 1 ? 'S' : ''}` : 'COFFRET';
+        badgeText = nbDisques > 0 ? `${nbDisques} DISQUE${nbDisques > 1 ? 'S' : ''}` : 'DISQUES';
       } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
       else if (album.support === 'SACD') badgeClass = 'badge-sacd';
 
