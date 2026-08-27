@@ -595,7 +595,7 @@
         } else if (sortVal === 'year-asc') {
           return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
         } else {
-          const comp = (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
+          const comp = (a.artist || '').localeCompare(a.artist || '', 'fr', {sensitivity: 'base'});
           if (comp !== 0) return comp;
           return (a.title || '').localeCompare(b.title || '', 'fr', {numeric: true, sensitivity: 'base'});
         }
@@ -819,17 +819,20 @@
       box.innerHTML = "";
       
       const headerDiv = document.createElement("div");
-      headerDiv.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;";
+      headerDiv.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:6px;";
       headerDiv.innerHTML = `
-        <span style="font-size:12px; color:var(--text-sub); font-weight:bold;">${vols.length} DISQUE(S) RÉPERTORIÉ(S)</span>
-        <button class="btn-secondary" style="width:auto; padding:6px 12px; font-size:12px; background:var(--accent-blue); color:white; border:none;" onclick="addNewVolumeToCurrentAlbum()">+ Ajouter un disque</button>
+        <span style="font-size:11px; color:var(--text-sub); font-weight:bold;">${vols.length} DISQUE(S)</span>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:#374151; color:white; border:none;" onclick="addBulkVolumesToCurrentAlbum()">📋 Coller une liste</button>
+          <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:var(--accent-blue); color:white; border:none;" onclick="addNewVolumeToCurrentAlbum()">+ 1 disque</button>
+        </div>
       `;
       box.appendChild(headerDiv);
 
       if (!vols || vols.length === 0) {
         const empty = document.createElement("div");
         empty.style.cssText = "color:var(--text-sub); font-size:13px; text-align:center; padding:15px; background:#1c1c1e; border-radius:10px;";
-        empty.textContent = "Aucun disque détaillé pour le moment. Cliquez sur + Ajouter un disque pour commencer.";
+        empty.textContent = "Aucun disque détaillé pour le moment. Cliquez sur '📋 Coller une liste' pour tout importer en un clic !";
         box.appendChild(empty);
         return;
       }
@@ -859,6 +862,25 @@
         `;
         box.appendChild(item);
       });
+    }
+
+    function addBulkVolumesToCurrentAlbum() {
+      if (selectedAlbumIndex < 0) return;
+      const album = collection[selectedAlbumIndex];
+      const text = prompt("Collez la liste complète des disques (une ligne par disque) :");
+      if (text && text.trim()) {
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        if (!album.volumes) album.volumes = [];
+        lines.forEach(line => {
+          album.volumes.push({
+            title: line,
+            cover: ''
+          });
+        });
+        album.discsCount = album.volumes.length;
+        saveCollection();
+        showDetails(selectedAlbumIndex);
+      }
     }
 
     function addNewVolumeToCurrentAlbum() {
