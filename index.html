@@ -867,16 +867,28 @@
     function addBulkVolumesToCurrentAlbum() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
-      const text = prompt("Collez la liste complète des disques (une ligne par disque) :");
+      const text = prompt("Collez la liste complète des disques :");
       if (text && text.trim()) {
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        if (!album.volumes) album.volumes = [];
+        let lines = [];
+        if (text.includes('\n')) {
+          lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        } else {
+          lines = text.split(/(?=\bVol\.\s*\d+)/gi).map(l => l.trim()).filter(l => l.length > 0);
+        }
+
+        if (album.volumes && album.volumes.length === 1 && album.volumes[0].title.includes("Vol. 02")) {
+          album.volumes = [];
+        } else if (!album.volumes) {
+          album.volumes = [];
+        }
+
         lines.forEach(line => {
           album.volumes.push({
             title: line,
             cover: ''
           });
         });
+
         album.discsCount = album.volumes.length;
         saveCollection();
         showDetails(selectedAlbumIndex);
