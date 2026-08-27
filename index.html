@@ -156,7 +156,6 @@
     .btn-submit { width: 100%; background: var(--accent-blue); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
     .btn-danger { background: var(--danger); }
     .volumes-box { background: #2c2c2e; border-radius: 14px; padding: 12px; margin-top: 10px; }
-    .volume-item { background: #1c1c1e; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
     
     #reader video { width: 100% !important; border-radius: 12px; }
     #reader__scan_region { display: flex; justify-content: center; align-items: center; }
@@ -239,7 +238,7 @@
         </div>
 
         <div id="volumesSection" style="display:none; margin-bottom: 15px;">
-          <h3 style="font-size: 15px; margin-bottom: 8px;">Contenu du coffret / Liste des disques :</h3>
+          <h3 style="font-size: 15px; margin-bottom: 8px;">📁 Sous-collection des disques :</h3>
           <div class="volumes-box" id="volumesList"></div>
         </div>
 
@@ -792,9 +791,9 @@
       }
 
       const volSection = document.getElementById("volumesSection");
-      if (album.isBoxSet && album.volumes && album.volumes.length > 0) {
+      if (album.isBoxSet) {
         volSection.style.display = 'block';
-        renderVolumesList(album.volumes);
+        renderVolumesList(album.volumes || []);
       } else { volSection.style.display = 'none'; }
 
       document.getElementById("detailsModal").classList.add("active");
@@ -816,12 +815,76 @@
     function renderVolumesList(vols) {
       const box = document.getElementById("volumesList");
       box.innerHTML = "";
-      vols.forEach((v) => {
+      
+      const headerDiv = document.createElement("div");
+      headerDiv.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;";
+      headerDiv.innerHTML = `
+        <span style="font-size:12px; color:var(--text-sub); font-weight:bold;">${vols.length} DISQUE(S) RÉPERTORIÉ(S)</span>
+        <button class="btn-secondary" style="width:auto; padding:6px 12px; font-size:12px; background:var(--accent-blue); color:white; border:none;" onclick="addNewVolumeToCurrentAlbum()">+ Ajouter un disque</button>
+      `;
+      box.appendChild(headerDiv);
+
+      if (!vols || vols.length === 0) {
+        const empty = document.createElement("div");
+        empty.style.cssText = "color:var(--text-sub); font-size:13px; text-align:center; padding:15px; background:#1c1c1e; border-radius:10px;";
+        empty.textContent = "Aucun disque détaillé pour le moment. Cliquez sur + Ajouter un disque pour commencer.";
+        box.appendChild(empty);
+        return;
+      }
+
+      vols.forEach((v, idx) => {
         const item = document.createElement("div");
-        item.className = "volume-item";
-        item.textContent = v;
+        item.style.cssText = "background:#1c1c1e; padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid #3a3a3c;";
+        item.innerHTML = `
+          <div style="flex:1; padding-right:10px;">
+            <span style="font-size:10px; background:var(--badge-coffret); color:white; padding:2px 6px; border-radius:4px; font-weight:bold; margin-bottom:4px; display:inline-block;">DISQUE ${idx+1}</span>
+            <div style="font-size:14px; font-weight:600; color:white; margin-top:2px;">${v}</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="card-action-btn" onclick="editVolumeItem(${idx})" title="Modifier">✏️</button>
+            <button class="card-action-btn" onclick="deleteVolumeItem(${idx})" title="Supprimer">🗑️</button>
+          </div>
+        `;
         box.appendChild(item);
       });
+    }
+
+    function addNewVolumeToCurrentAlbum() {
+      if (selectedAlbumIndex < 0) return;
+      const album = collection[selectedAlbumIndex];
+      const val = prompt("Nom / Détail du nouveau disque (ex: Vol. 1 - Cantates BWV 1 à 4) :");
+      if (val && val.trim()) {
+        if (!album.volumes) album.volumes = [];
+        album.volumes.push(val.trim());
+        album.discsCount = album.volumes.length;
+        saveCollection();
+        showDetails(selectedAlbumIndex);
+      }
+    }
+
+    function editVolumeItem(volIdx) {
+      if (selectedAlbumIndex < 0) return;
+      const album = collection[selectedAlbumIndex];
+      if (!album.volumes || !album.volumes[volIdx]) return;
+      const current = album.volumes[volIdx];
+      const val = prompt("Modifier le disque :", current);
+      if (val !== null && val.trim()) {
+        album.volumes[volIdx] = val.trim();
+        saveCollection();
+        showDetails(selectedAlbumIndex);
+      }
+    }
+
+    function deleteVolumeItem(volIdx) {
+      if (selectedAlbumIndex < 0) return;
+      const album = collection[selectedAlbumIndex];
+      if (!album.volumes || !album.volumes[volIdx]) return;
+      if (confirm(`Supprimer "${album.volumes[volIdx]}" ?`)) {
+        album.volumes.splice(volIdx, 1);
+        album.discsCount = album.volumes.length;
+        saveCollection();
+        showDetails(selectedAlbumIndex);
+      }
     }
 
     function toggleBoxSetFields() {
