@@ -15,8 +15,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
   <link rel="icon" type="image/png" sizes="180x180" href="icon-180.png">
 
-  <!-- Firebase & Scanner HTML5 -->
+  <!-- Firebase Auth & Firestore SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
@@ -90,7 +91,7 @@
       background-repeat: no-repeat;
       background-position: right 8px center;
     }
-    input[type="text"], input[type="number"], input[type="date"], input[type="url"], textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
+    input[type="text"], input[type="password"], input[type="number"], input[type="date"], input[type="url"], textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
     select {
       width: 100%;
       background-color: var(--card-bg);
@@ -159,6 +160,10 @@
     
     #reader video { width: 100% !important; border-radius: 12px; }
     #reader__scan_region { display: flex; justify-content: center; align-items: center; }
+
+    /* Modal Connexion */
+    #loginModal { z-index: 3000; }
+    .login-box { background: #1c1c1e; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid var(--card-border); }
   </style>
 </head>
 <body>
@@ -212,6 +217,28 @@
 
   <main id="collectionContainer"></main>
   <div class="az-index" id="azIndex"></div>
+
+  <!-- MODALE CONNEXION -->
+  <div class="modal-overlay" id="loginModal" style="align-items: center;">
+    <div class="login-box">
+      <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px; text-align: center;">🔐 Phonothèque</h2>
+      <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px; text-align: center;">Connexion sécurisée requise</p>
+      
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="text" id="loginEmail" placeholder="votre-email@orange.fr" autocomplete="username">
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label>Mot de passe</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <div id="loginError" style="color: var(--danger); font-size: 12px; margin-bottom: 12px; text-align: center; display: none;"></div>
+
+      <button type="button" class="btn-submit" onclick="loginUser()">Se connecter</button>
+    </div>
+  </div>
 
   <!-- MODALE DETAILS -->
   <div class="modal-overlay" id="detailsModal">
@@ -403,9 +430,11 @@
     };
 
     let db = null;
+    let auth = null;
     try {
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
+      auth = firebase.auth();
     } catch(e) { console.log("Mode local"); }
 
     let collection = [];
@@ -417,6 +446,38 @@
     function initApp() {
       loadLocal();
 
+      if (auth) {
+        auth.onAuthStateChanged(user => {
+          if (user) {
+            document.getElementById("loginModal").classList.remove("active");
+            subscribeFirestore();
+          } else {
+            document.getElementById("loginModal").classList.add("active");
+          }
+        });
+      }
+    }
+
+    function loginUser() {
+      const email = document.getElementById("loginEmail").value.trim();
+      const pass = document.getElementById("loginPassword").value.trim();
+      const errBox = document.getElementById("loginError");
+      errBox.style.display = "none";
+
+      if (!email || !pass) {
+        errBox.textContent = "Veuillez saisir votre e-mail et mot de passe.";
+        errBox.style.display = "block";
+        return;
+      }
+
+      auth.signInWithEmailAndPassword(email, pass)
+        .catch(error => {
+          errBox.textContent = "Identifiants incorrects.";
+          errBox.style.display = "block";
+        });
+    }
+
+    function subscribeFirestore() {
       if (db) {
         db.collection("phonotheque").doc("main").onSnapshot(doc => {
           if (doc.exists && doc.data().list) {
@@ -450,7 +511,7 @@
 
     function saveCollection() {
       localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-      if (db) {
+      if (db && auth && auth.currentUser) {
         showSpinner();
         db.collection("phonotheque").doc("main").set({ list: collection })
           .then(() => {
@@ -546,19 +607,14 @@
         if (a.isWantlist) {
           countWantlist++;
         } else {
-          // Si le champ d'entrée 'discsCount' contient la valeur réelle des disques (ex: 90)
           const explicitDiscs = parseInt(a.discsCount) || 0;
           const subBoxes = (a.volumes && a.volumes.length > 0) ? a.volumes.length : 1;
 
-          // Nombre de coffrets physiques réels (ex: 45)
           const realBoxCount = a.isBoxSet ? subBoxes : 0;
-          
-          // Nombre de galettes physiques (ex: 90 s'il y a 2 disques par coffret, ou égale au nombre de sous-coffrets)
           const realDiscsCount = explicitDiscs > 0 ? explicitDiscs : (a.isBoxSet ? subBoxes * 2 : 1);
 
           totalDiscsPhysical += realDiscsCount;
 
-          // Répartition par support
           if (a.support === 'Vinyle') countVinyle += realDiscsCount;
           else if (a.support === 'CD') countCD += realDiscsCount;
           else if (a.support === 'SACD') countSACD += realDiscsCount;
@@ -626,7 +682,7 @@
         } else if (sortVal === 'year-desc') {
           return (parseInt(b.year) || 0) - (parseInt(a.year) || 0);
         } else if (sortVal === 'year-asc') {
-          return (parseInt(a.year) || 0) - (parseInt(a.year) || 0);
+          return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
         } else {
           const comp = (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
           if (comp !== 0) return comp;
