@@ -349,12 +349,10 @@
           </div>
 
           <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
-            <div class="form-group" style="margin-bottom: 12px;">
-              <label>Nombre de disques (ex: 2, 5, 12...)</label>
-              <input type="number" id="formDiscsCount" placeholder="ex: 2" min="1" autocomplete="off">
+            <div class="form-group" style="margin-bottom: 0px;">
+              <label>Nombre de disques (ex: 2, 5, 45, 90...)</label>
+              <input type="number" id="formDiscsCount" placeholder="ex: 90" min="1" autocomplete="off">
             </div>
-            <label>Contenu des disques (Optionnel)</label>
-            <textarea id="formVolumesText" rows="4" placeholder="Disque 1 - Cantates 1 à 4&#10;Disque 2 - Cantates 5 à 8" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
 
           <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
@@ -651,7 +649,8 @@
       } else if (album.isBoxSet) {
         badgeClass = 'badge-coffret';
         const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
-        badgeText = nbDisques > 0 ? `${nbDisques} DISQUE${nbDisques > 1 ? 'S' : ''}` : 'DISQUES';
+        const supp = (album.support || 'Vinyle').toUpperCase();
+        badgeText = nbDisques > 0 ? `${nbDisques} DISQUES (${supp})` : `COFFRET (${supp})`;
       } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
       else if (album.support === 'SACD') badgeClass = 'badge-sacd';
 
@@ -870,7 +869,6 @@
         const coverVal = prompt("URL de la vignette / pochette pour ce disque (Facultatif) :", "") || "";
         if (!album.volumes) album.volumes = [];
         
-        // Normalisation en objet pour stocker titre + pochette
         album.volumes.push({
           title: titleVal.trim(),
           cover: coverVal.trim()
@@ -940,7 +938,6 @@
       document.getElementById("formDiscogsId").value = '';
       document.getElementById("formCover").value = '';
       document.getElementById("formDiscsCount").value = '';
-      document.getElementById("formVolumesText").value = '';
       
       document.getElementById("isBoxSet").checked = false;
       toggleBoxSetFields();
@@ -971,11 +968,6 @@
       document.getElementById("formDiscogsId").value = album.discogsId || '';
       document.getElementById("formCover").value = album.cover || '';
       document.getElementById("formDiscsCount").value = album.discsCount || '';
-
-      if (album.volumes) {
-        const textVols = album.volumes.map(v => typeof v === 'object' ? v.title : v);
-        document.getElementById("formVolumesText").value = textVols.join('\n');
-      } else { document.getElementById("formVolumesText").value = ''; }
 
       closeModal("detailsModal");
       document.getElementById("formModal").classList.add("active");
@@ -1015,21 +1007,9 @@
       const isBoxSet = document.getElementById("isBoxSet").checked;
       const isWantlist = document.getElementById("isWantlist").checked;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
-      const volsRaw = document.getElementById("formVolumesText").value;
       
-      let volumes = [];
-      if (isBoxSet) {
-        const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
-        const lines = volsRaw.split('\n').map(v => v.trim()).filter(v => v.length > 0);
-        
-        volumes = lines.map((line, idx) => {
-          const oldItem = existingVols[idx];
-          if (typeof oldItem === 'object' && oldItem !== null) {
-            return { title: line, cover: oldItem.cover || '' };
-          }
-          return { title: line, cover: '' };
-        });
-      }
+      const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
+      const volumes = isBoxSet ? existingVols : [];
 
       const albumData = {
         title: title,
