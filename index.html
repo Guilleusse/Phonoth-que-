@@ -283,7 +283,7 @@
     </div>
   </div>
 
-    <!-- MODALE IMPORTATION EN MASSE DISQUES -->
+  <!-- MODALE IMPORTATION EN MASSE DISQUES -->
   <div class="modal-overlay" id="bulkModal" style="z-index: 1500;">
     <div class="modal-content" style="height: auto; max-height: 85vh;">
       <div class="modal-header">
@@ -424,7 +424,7 @@
     </div>
   </div>
 
-  <script>
+    <script>
     const firebaseConfig = {
       apiKey: "AIzaSyADp8kgtHBqXUx2PF4z1Up5Kn-o73bh_P4",
       authDomain: "phonotheque-264a6.firebaseapp.com",
@@ -534,7 +534,7 @@
       }
     }
 
-        function loadLocal() {
+    function loadLocal() {
       const data = localStorage.getItem("phonotheque_backup");
       if (data) {
         try {
@@ -729,7 +729,7 @@
         } else if (sortVal === 'year-asc') {
           return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
         } else {
-          const comp = (a.artist || '').localeCompare(a.artist || '', 'fr', {sensitivity: 'base'});
+          const comp = (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
           if (comp !== 0) return comp;
           return (a.title || '').localeCompare(b.title || '', 'fr', {numeric: true, sensitivity: 'base'});
         }
@@ -737,40 +737,41 @@
 
       const isArtistGroup = (sortVal === 'artist-az' || sortVal === 'artist-za');
 
-          if (isArtistGroup) {
-      let groups = {};
-      filtered.forEach((album) => {
-        const artist = album.artist || 'Artiste inconnu';
-        if (!groups[artist]) groups[artist] = [];
-        groups[artist].push(album);
-      });
+      if (isArtistGroup) {
+        let groups = {};
+        filtered.forEach((album) => {
+          const artist = album.artist || 'Artiste inconnu';
+          if (!groups[artist]) groups[artist] = [];
+          groups[artist].push(album);
+        });
 
-      const sortedArtists = Object.keys(groups).sort((a, b) => {
-        if (sortVal === 'artist-za') {
-          return b.localeCompare(a, 'fr', { sensitivity: 'base' });
-        }
-        return a.localeCompare(b, 'fr', { sensitivity: 'base' });
-      });
+        const sortedArtists = Object.keys(groups).sort((a, b) => {
+          if (sortVal === 'artist-za') {
+            return b.localeCompare(a, 'fr', { sensitivity: 'base' });
+          }
+          return a.localeCompare(b, 'fr', { sensitivity: 'base' });
+        });
 
-      renderAZIndex(sortedArtists);
+        renderAZIndex(sortedArtists);
 
-      sortedArtists.forEach(artist => {
-        const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
-        const groupHeader = document.createElement("div");
-        groupHeader.className = "artist-group-header";
-        groupHeader.id = artistId;
-        groupHeader.innerHTML = `${artist} <span class="artist-count">(${groups[artist].length})</span>`;
-        container.appendChild(groupHeader);
+        sortedArtists.forEach(artist => {
+          const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
+          const groupHeader = document.createElement("div");
+          groupHeader.className = "artist-group-header";
+          groupHeader.id = artistId;
+          groupHeader.innerHTML = `${artist} <span class="artist-count">(${groups[artist].length})</span>`;
+          container.appendChild(groupHeader);
 
-        groups[artist].forEach(album => renderAlbumCard(album, container));
-      });
-    } else {
-      const az = document.getElementById("azIndex");
-      if (az) az.innerHTML = "";
-      filtered.forEach(album => renderAlbumCard(album, container));
+          groups[artist].forEach(album => renderAlbumCard(album, container));
+        });
+      } else {
+        const az = document.getElementById("azIndex");
+        if (az) az.innerHTML = "";
+        filtered.forEach(album => renderAlbumCard(album, container));
+      }
     }
 
-    function renderAlbumCard(album, container) {
+          function renderAlbumCard(album, container) {
       const realIndex = collection.indexOf(album);
       const card = document.createElement("div");
       card.className = "album-card";
