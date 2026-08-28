@@ -14,7 +14,7 @@
   <meta name="apple-mobile-web-app-title" content="Phonothèque">
   <meta name="theme-color" content="#121212">
   
-  <!-- Icônes Apple & Favicon (Format d'origine stable) -->
+  <!-- Icônes Apple & Favicon -->
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
 
@@ -386,6 +386,8 @@
           <div class="form-group">
             <label>URL de la pochette</label>
             <input type="url" id="formCover" placeholder="https://..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('coverFileInput').click()">🖼️ Choisir une image (Photos / Fichiers)</button>
+            <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(event)">
           </div>
 
           <div class="checkbox-group">
@@ -422,7 +424,7 @@
     </div>
   </div>
 
-    <script>
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyADp8kgtHBqXUx2PF4z1Up5Kn-o73bh_P4",
       authDomain: "phonotheque-264a6.firebaseapp.com",
@@ -445,6 +447,46 @@
     let selectedAlbumIndex = -1;
     let html5QrCode = null;
     let savedScrollPosition = 0;
+
+    function handleCoverFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement("canvas");
+          const maxDim = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
+          document.getElementById("formCover").value = dataUrl;
+          alert("Image chargée et optimisée avec succès !");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
 
     function initApp() {
       loadLocal();
@@ -492,7 +534,7 @@
       }
     }
 
-    function loadLocal() {
+        function loadLocal() {
       const data = localStorage.getItem("phonotheque_backup");
       if (data) {
         try {
@@ -687,7 +729,7 @@
         } else if (sortVal === 'year-asc') {
           return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
         } else {
-          const comp = (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
+          const comp = (a.artist || '').localeCompare(a.artist || '', 'fr', {sensitivity: 'base'});
           if (comp !== 0) return comp;
           return (a.title || '').localeCompare(b.title || '', 'fr', {numeric: true, sensitivity: 'base'});
         }
@@ -746,7 +788,7 @@
       } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
       else if (album.support === 'SACD') badgeClass = 'badge-sacd';
 
-      const coverSrc = album.cover && album.cover.startsWith('http') ? album.cover : '';
+      const coverSrc = album.cover ? album.cover : '';
 
       let subParts = [];
       if (album.artist && (document.getElementById("sortSelect").value !== 'artist-az' && document.getElementById("sortSelect").value !== 'artist-za')) {
@@ -858,7 +900,7 @@
       }
 
       const coverImg = document.getElementById("modalDetailCover");
-      if (album.cover && album.cover.startsWith('http')) {
+      if (album.cover) {
         coverImg.src = album.cover;
         coverImg.style.display = 'block';
       } else { coverImg.style.display = 'none'; }
@@ -934,14 +976,14 @@
         const titleText = isObj ? (v.title || '') : v;
         let coverUrl = isObj ? (v.cover || '') : '';
         
-        if (!coverUrl && parentCover && parentCover.startsWith('http')) {
+        if (!coverUrl && parentCover) {
           coverUrl = parentCover;
         }
 
         const item = document.createElement("div");
         item.style.cssText = "background:#1c1c1e; padding:10px; border-radius:12px; margin-bottom:8px; display:flex; gap:10px; align-items:center; border:1px solid #3a3a3c;";
         
-        const coverHtml = coverUrl && coverUrl.startsWith('http') 
+        const coverHtml = coverUrl 
           ? `<img src="${coverUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">`
           : `<div style="width:50px; height:50px; border-radius:8px; background:#2a2a2a; color:var(--text-sub); font-size:9px; display:flex; align-items:center; justify-content:center; text-align:center; flex-shrink:0;">Disque ${idx+1}</div>`;
 
