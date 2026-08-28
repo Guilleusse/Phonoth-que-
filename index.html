@@ -737,31 +737,37 @@
 
       const isArtistGroup = (sortVal === 'artist-az' || sortVal === 'artist-za');
 
-      if (isArtistGroup) {
-        let groups = {};
-        filtered.forEach((album) => {
-          const artist = album.artist || 'Artiste inconnu';
-          if (!groups[artist]) groups[artist] = [];
-          groups[artist].push(album);
-        });
+          if (isArtistGroup) {
+      let groups = {};
+      filtered.forEach((album) => {
+        const artist = album.artist || 'Artiste inconnu';
+        if (!groups[artist]) groups[artist] = [];
+        groups[artist].push(album);
+      });
 
-        renderAZIndex(Object.keys(groups));
+      const sortedArtists = Object.keys(groups).sort((a, b) => {
+        if (sortVal === 'artist-za') {
+          return b.localeCompare(a, 'fr', { sensitivity: 'base' });
+        }
+        return a.localeCompare(b, 'fr', { sensitivity: 'base' });
+      });
 
-        Object.keys(groups).forEach(artist => {
-          const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
-          const groupHeader = document.createElement("div");
-          groupHeader.className = "artist-group-header";
-          groupHeader.id = artistId;
-          groupHeader.innerHTML = `${artist} <span class="artist-count">(${groups[artist].length})</span>`;
-          container.appendChild(groupHeader);
+      renderAZIndex(sortedArtists);
 
-          groups[artist].forEach(album => renderAlbumCard(album, container));
-        });
-      } else {
-        const az = document.getElementById("azIndex");
-        if (az) az.innerHTML = "";
-        filtered.forEach(album => renderAlbumCard(album, container));
-      }
+      sortedArtists.forEach(artist => {
+        const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
+        const groupHeader = document.createElement("div");
+        groupHeader.className = "artist-group-header";
+        groupHeader.id = artistId;
+        groupHeader.innerHTML = `${artist} <span class="artist-count">(${groups[artist].length})</span>`;
+        container.appendChild(groupHeader);
+
+        groups[artist].forEach(album => renderAlbumCard(album, container));
+      });
+    } else {
+      const az = document.getElementById("azIndex");
+      if (az) az.innerHTML = "";
+      filtered.forEach(album => renderAlbumCard(album, container));
     }
 
     function renderAlbumCard(album, container) {
