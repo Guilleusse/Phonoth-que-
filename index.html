@@ -711,11 +711,12 @@
           const matchCountry = matchText(album.country, search);
           const matchStyle = matchText(album.style, search);
           const matchVolumes = album.volumes && album.volumes.some(v => {
-            const vText = typeof v === 'object' ? v.title : v;
+          const vText = typeof v === 'object' ? v.title : v;
             return matchText(vText, search);
           });
-          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes;
-        }
+          const matchAudiophile = album.isAudiophile && matchText('audiophile', search);
+          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes || matchAudiophile;
+      }
         return true;
       });
 
