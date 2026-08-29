@@ -321,12 +321,12 @@
 
           <div class="checkbox-group" style="background:#2c2c2e; border:1px solid #f59e0b; padding:12px; border-radius:12px; margin-bottom:15px;">
             <input type="checkbox" id="isWantlist">
-            <label for="isWantlist" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">💡 Souhaits (Ajouter à ma liste de souhaits)</label>
+            <label for="isWantlist" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">Souhaits (Ajouter à ma liste de souhaits)</label>
           </div>
 
           <div class="checkbox-group" style="background:#2c2c2e; border:1px solid #b45309; padding:12px; border-radius:12px; margin-bottom:15px;">
             <input type="checkbox" id="isAudiophile">
-            <label for="isAudiophile" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">👑 Édition Audiophile (MoFi, Analogue Prod...)</label>
+            <label for="isAudiophile" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">Édition Audiophile</label>
           </div>
 
           <div class="form-group">
@@ -393,7 +393,7 @@
           <div class="form-group">
             <label>URL de la pochette</label>
             <input type="url" id="formCover" placeholder="https://..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('coverFileInput').click()">🖼️ Choisir une image (Photos / Fichiers)</button>
+            <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('coverFileInput').click()">Choisir une image (Photos / Fichiers)</button>
             <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(event)">
           </div>
 
@@ -796,7 +796,7 @@
         badgeText = `SOUHAITS (${album.support || 'VINYLE'})`;
       } else if (album.isAudiophile) {
         badgeClass = 'badge-audiophile';
-        badgeText = `👑 AUDIOPHILE (${(album.support || 'Vinyle').toUpperCase()})`;
+        badgeText = `${(album.support || 'Vinyle').toUpperCase()} AUDIOPHILE`;
       } else if (album.isBoxSet) {
         badgeClass = 'badge-coffret';
         const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
