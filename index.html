@@ -8,14 +8,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Phonothèque</title>
   
+  <!-- Web App & PWA Settings pour iOS / iPadOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Phonothèque">
   <meta name="theme-color" content="#121212">
   
+  <!-- Icônes Apple & Favicon -->
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
 
+  <!-- Firebase Auth & Firestore SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -220,6 +223,7 @@
   <main id="collectionContainer"></main>
   <div class="az-index" id="azIndex"></div>
 
+  <!-- MODALE CONNEXION -->
   <div class="modal-overlay" id="loginModal" style="align-items: center;">
     <div class="login-box">
       <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px; text-align: center;">🔐 Phonothèque</h2>
@@ -241,6 +245,7 @@
     </div>
   </div>
 
+  <!-- MODALE DETAILS -->
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -264,11 +269,6 @@
           <div class="details-row"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
         </div>
 
-        <div id="volumesSection" style="display:none; margin-bottom: 15px;">
-          <h3 style="font-size: 15px; margin-bottom: 8px;">📁 Sous-collection des disques :</h3>
-          <div class="volumes-box" id="volumesList"></div>
-        </div>
-
         <button id="buyWantlistBtn" class="btn-submit" style="background:#10b981; display:none; margin-bottom:15px;" onclick="convertToPurchased()">🛒 J'ai acheté cet album !</button>
 
         <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 10px;">
@@ -280,20 +280,22 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="bulkModal" style="z-index: 1500;">
-    <div class="modal-content" style="height: auto; max-height: 85vh;">
+  <!-- MODALE IMPORTATION EN MASSE DISQUES / PISTES (Remontée plus haut) -->
+  <div class="modal-overlay" id="bulkModal" style="z-index: 1500; align-items: center; justify-content: center; padding: 15px;">
+    <div class="modal-content" style="height: auto; max-height: 80vh; border-radius: 20px;">
       <div class="modal-header">
         <span class="modal-title" id="bulkModalTitle">Coller une liste</span>
         <button class="modal-close" onclick="closeModal('bulkModal')">✕</button>
       </div>
       <div class="modal-body" style="padding:15px;">
         <label id="bulkLabelInstructions" style="display:block; font-size:12px; color:var(--text-sub); margin-bottom:8px; font-weight:bold;">COLLEZ VOTRE LISTE CI-DESSOUS :</label>
-        <textarea id="bulkInput" rows="12" placeholder="Collez votre liste ici..." style="width:100%; height:220px; font-size:13px; line-height:1.4; margin-bottom:15px; resize:none;"></textarea>
+        <textarea id="bulkInput" rows="10" placeholder="Collez votre liste ici..." style="width:100%; height:200px; font-size:13px; line-height:1.4; margin-bottom:15px; resize:none;"></textarea>
         <button type="button" class="btn-submit" onclick="submitBulkData()">Enregistrer</button>
       </div>
     </div>
   </div>
 
+  <!-- MODALE AJOUT / EDITION -->
   <div class="modal-overlay" id="formModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -396,9 +398,14 @@
           </div>
 
           <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
-            <div class="form-group" style="margin-bottom: 0px;">
+            <div class="form-group" style="margin-bottom: 12px;">
               <label>Nombre de disques (ex: 2, 5, 45, 90...)</label>
               <input type="number" id="formDiscsCount" placeholder="ex: 90" min="1" autocomplete="off">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0px;">
+              <label>📁 Gestion des disques et pistes</label>
+              <div class="volumes-box" id="formVolumesList"></div>
             </div>
           </div>
 
@@ -411,6 +418,7 @@
     </div>
   </div>
 
+  <!-- MODALE SCANNER CAMERA HTML5 EN DIRECT -->
   <div class="modal-overlay" id="scannerModal" style="z-index: 2000;">
     <div class="modal-content" style="height: 75vh; max-height:75dvh; background: #000;">
       <div class="modal-header">
@@ -444,7 +452,8 @@
     let collection = [];
     let currentFilter = 'all';
     let selectedAlbumIndex = -1;
-    let selectedVolumeIndex = -1; // Pour gérer l'ajout de pistes sur un disque précis
+    let selectedVolumeIndex = -1; 
+    let formVolumes = []; 
     let html5QrCode = null;
     let savedScrollPosition = 0;
 
@@ -772,7 +781,7 @@
       }
     }
 
-      function renderAlbumCard(album, container) {
+    function renderAlbumCard(album, container) {
       const realIndex = collection.indexOf(album);
       const card = document.createElement("div");
       card.className = "album-card";
@@ -873,7 +882,7 @@
       renderCollection();
     }
 
-    function showDetails(index) {
+        function showDetails(index) {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
@@ -937,12 +946,6 @@
         jpcBtn.style.display = 'none';
       }
 
-      const volSection = document.getElementById("volumesSection");
-      if (album.isBoxSet) {
-        volSection.style.display = 'block';
-        renderVolumesList(album.volumes || [], album.cover);
-      } else { volSection.style.display = 'none'; }
-
       document.getElementById("detailsModal").classList.add("active");
     }
 
@@ -959,51 +962,43 @@
       }
     }
 
-    function renderVolumesList(vols, parentCover) {
-      const box = document.getElementById("volumesList");
+    function renderFormVolumesList() {
+      const box = document.getElementById("formVolumesList");
+      if (!box) return;
       box.innerHTML = "";
       
       const headerDiv = document.createElement("div");
       headerDiv.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:6px;";
       headerDiv.innerHTML = `
-        <span style="font-size:11px; color:var(--text-sub); font-weight:bold;">${vols.length} DISQUE(S)</span>
+        <span style="font-size:11px; color:var(--text-sub); font-weight:bold;">${formVolumes.length} DISQUE(S)</span>
         <div style="display:flex; gap:6px;">
-          <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:#374151; color:white; border:none;" onclick="addBulkVolumesToCurrentAlbum()">📋 Coller les disques</button>
-          <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:var(--accent-blue); color:white; border:none;" onclick="addNewVolumeToCurrentAlbum()">+ 1 disque</button>
+          <button type="button" class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:#374151; color:white; border:none;" onclick="addBulkFormVolumes()">📋 Coller les disques</button>
+          <button type="button" class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:var(--accent-blue); color:white; border:none;" onclick="addNewFormVolume()">+ 1 disque</button>
         </div>
       `;
       box.appendChild(headerDiv);
 
-      if (!vols || vols.length === 0) {
+      if (!formVolumes || formVolumes.length === 0) {
         const empty = document.createElement("div");
-        empty.style.cssText = "color:var(--text-sub); font-size:13px; text-align:center; padding:15px; background:#1c1c1e; border-radius:10px;";
-        empty.textContent = "Aucun disque détaillé pour le moment. Cliquez sur '📋 Coller les disques' pour importer vos disques !";
+        empty.style.cssText = "color:var(--text-sub); font-size:13px; text-align:center; padding:12px; background:#1c1c1e; border-radius:10px;";
+        empty.textContent = "Aucun disque détaillé. Cliquez sur '📋 Coller les disques' !";
         box.appendChild(empty);
         return;
       }
 
-      vols.forEach((v, idx) => {
+      formVolumes.forEach((v, idx) => {
         const isObj = (typeof v === 'object' && v !== null);
         const titleText = isObj ? (v.title || '') : v;
         const tracks = isObj && Array.isArray(v.tracks) ? v.tracks : [];
         let coverUrl = isObj ? (v.cover || '') : '';
-        
-        if (!coverUrl && parentCover) {
-          coverUrl = parentCover;
-        }
 
         const item = document.createElement("div");
         item.style.cssText = "background:#1c1c1e; padding:10px; border-radius:12px; margin-bottom:8px; border:1px solid #3a3a3c;";
         
-        const coverHtml = coverUrl 
-          ? `<img src="${coverUrl}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; flex-shrink:0;">`
-          : `<div style="width:40px; height:40px; border-radius:6px; background:#2a2a2a; color:var(--text-sub); font-size:8px; display:flex; align-items:center; justify-content:center; text-align:center; flex-shrink:0;">D${idx+1}</div>`;
-
-        // Construction du contenu de la carte disque avec accordéon pour les pistes
         let tracksHtml = '';
         if (tracks.length > 0) {
           tracksHtml = `
-            <div id="tracks-container-${idx}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #3a3a3c;">
+            <div id="form-tracks-${idx}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #3a3a3c;">
               <div style="font-size:11px; color:var(--text-sub); font-weight:bold; margin-bottom:4px;">Pistes (${tracks.length}) :</div>
               <ul style="padding-left:16px; font-size:12px; color:#d1d5db; line-height:1.4;">
                 ${tracks.map(t => `<li>${t}</li>`).join('')}
@@ -1013,8 +1008,8 @@
         }
 
         item.innerHTML = `
-          <div style="display:flex; gap:10px; align-items:center; cursor:pointer;" onclick="toggleVolumeAccordion(${idx})">
-            ${coverHtml}
+          <div style="display:flex; gap:10px; align-items:center; cursor:pointer;" onclick="toggleFormVolumeAccordion(${idx})">
+            <div style="width:35px; height:35px; border-radius:6px; background:#2a2a2a; color:var(--text-sub); font-size:8px; display:flex; align-items:center; justify-content:center; text-align:center; flex-shrink:0;">D${idx+1}</div>
             <div style="flex:1; padding-right:6px; min-width:0;">
               <div style="display:flex; align-items:center; gap:6px;">
                 <span style="font-size:9px; background:var(--badge-coffret); color:white; padding:2px 6px; border-radius:4px; font-weight:bold;">DISQUE ${idx+1}</span>
@@ -1023,9 +1018,9 @@
               <div style="font-size:13px; font-weight:600; color:white; margin-top:2px; word-break:break-word;">${titleText}</div>
             </div>
             <div style="display:flex; gap:4px; flex-shrink:0;" onclick="event.stopPropagation()">
-              <button class="card-action-btn" onclick="addTracksToVolume(${idx})" title="Ajouter des morceaux">+ 🎵</button>
-              <button class="card-action-btn" onclick="editVolumeItem(${idx})" title="Modifier">✏️</button>
-              <button class="card-action-btn" onclick="deleteVolumeItem(${idx})" title="Supprimer">🗑️</button>
+              <button type="button" class="card-action-btn" onclick="addTracksToFormVolume(${idx})" title="Ajouter des morceaux">+ 🎵</button>
+              <button type="button" class="card-action-btn" onclick="editFormVolumeItem(${idx})" title="Modifier">✏️</button>
+              <button type="button" class="card-action-btn" onclick="deleteFormVolumeItem(${idx})" title="Supprimer">🗑️</button>
             </div>
           </div>
           ${tracksHtml}
@@ -1034,31 +1029,24 @@
       });
     }
 
-    function toggleVolumeAccordion(idx) {
-      const container = document.getElementById(`tracks-container-${idx}`);
+    function toggleFormVolumeAccordion(idx) {
+      const container = document.getElementById(`form-tracks-${idx}`);
       if (container) {
-        if (container.style.display === 'none') {
-          container.style.display = 'block';
-        } else {
-          container.style.display = 'none';
-        }
+        container.style.display = (container.style.display === 'none') ? 'block' : 'none';
       }
     }
 
-    function addBulkVolumesToCurrentAlbum() {
-      if (selectedAlbumIndex < 0) return;
-      selectedVolumeIndex = -1; // Mode Disques
+    function addBulkFormVolumes() {
+      selectedVolumeIndex = -1; 
       document.getElementById("bulkModalTitle").textContent = "Coller une liste de disques";
       document.getElementById("bulkLabelInstructions").textContent = "COLLEZ VOS DISQUES CI-DESSOUS (UN PAR LIGNE) :";
       document.getElementById("bulkInput").value = "";
       document.getElementById("bulkModal").classList.add("active");
     }
 
-    function addTracksToVolume(volIdx) {
-      if (selectedAlbumIndex < 0) return;
-      selectedVolumeIndex = volIdx; // Mode Pistes pour un disque précis
-      const album = collection[selectedAlbumIndex];
-      const vol = album.volumes[volIdx];
+    function addTracksToFormVolume(volIdx) {
+      selectedVolumeIndex = volIdx; 
+      const vol = formVolumes[volIdx];
       const volTitle = typeof vol === 'object' ? vol.title : vol;
 
       document.getElementById("bulkModalTitle").textContent = `Coller les pistes pour : ${volTitle}`;
@@ -1067,71 +1055,22 @@
       document.getElementById("bulkModal").classList.add("active");
     }
 
-    function submitBulkData() {
-      if (selectedAlbumIndex < 0) return;
-      const album = collection[selectedAlbumIndex];
-      const text = document.getElementById("bulkInput").value.trim();
-      
-      if (!text) return;
-      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
-      if (selectedVolumeIndex === -1) {
-        // Import en masse de disques
-        if (!album.volumes) album.volumes = [];
-        lines.forEach(line => {
-          album.volumes.push({
-            title: line,
-            cover: '',
-            tracks: []
-          });
-        });
-        album.discsCount = album.volumes.length * 2;
-      } else {
-        // Import en masse de pistes pour un disque spécifique
-        if (!album.volumes[selectedVolumeIndex]) return;
-        if (typeof album.volumes[selectedVolumeIndex] !== 'object') {
-          album.volumes[selectedVolumeIndex] = {
-            title: album.volumes[selectedVolumeIndex],
-            cover: '',
-            tracks: []
-          };
-        }
-        if (!album.volumes[selectedVolumeIndex].tracks) {
-          album.volumes[selectedVolumeIndex].tracks = [];
-        }
-        album.volumes[selectedVolumeIndex].tracks.push(...lines);
-      }
-
-      saveCollection();
-      closeModal("bulkModal");
-      showDetails(selectedAlbumIndex);
-    }
-
-    function addNewVolumeToCurrentAlbum() {
-      if (selectedAlbumIndex < 0) return;
-      const album = collection[selectedAlbumIndex];
+    function addNewFormVolume() {
       const titleVal = prompt("Nom / Détail du nouveau disque (ex: Vol. 1 - Disque 1) :");
       if (titleVal && titleVal.trim()) {
         const coverVal = prompt("URL de la vignette / pochette pour ce disque (Facultatif) :", "") || "";
-        if (!album.volumes) album.volumes = [];
-        
-        album.volumes.push({
+        formVolumes.push({
           title: titleVal.trim(),
           cover: coverVal.trim(),
           tracks: []
         });
-        album.discsCount = album.volumes.length * 2;
-        saveCollection();
-        showDetails(selectedAlbumIndex);
+        document.getElementById("formDiscsCount").value = formVolumes.length * 2;
+        renderFormVolumesList();
       }
     }
 
-    function editVolumeItem(volIdx) {
-      if (selectedAlbumIndex < 0) return;
-      const album = collection[selectedAlbumIndex];
-      if (!album.volumes || !album.volumes[volIdx]) return;
-      
-      const current = album.volumes[volIdx];
+    function editFormVolumeItem(volIdx) {
+      const current = formVolumes[volIdx];
       const currentTitle = typeof current === 'object' ? current.title : current;
       const currentCover = typeof current === 'object' ? (current.cover || '') : '';
       const currentTracks = typeof current === 'object' ? (current.tracks || []) : [];
@@ -1139,37 +1078,69 @@
       const newTitle = prompt("Modifier le nom du disque :", currentTitle);
       if (newTitle !== null && newTitle.trim()) {
         const newCover = prompt("Modifier l'URL de la pochette :", currentCover) || "";
-        album.volumes[volIdx] = {
+        formVolumes[volIdx] = {
           title: newTitle.trim(),
           cover: newCover.trim(),
           tracks: currentTracks
         };
-        saveCollection();
-        showDetails(selectedAlbumIndex);
+        renderFormVolumesList();
       }
     }
 
-    function deleteVolumeItem(volIdx) {
-      if (selectedAlbumIndex < 0) return;
-      const album = collection[selectedAlbumIndex];
-      if (!album.volumes || !album.volumes[volIdx]) return;
-      const titleText = typeof album.volumes[volIdx] === 'object' ? album.volumes[volIdx].title : album.volumes[volIdx];
+    function deleteFormVolumeItem(volIdx) {
+      const titleText = typeof formVolumes[volIdx] === 'object' ? formVolumes[volIdx].title : formVolumes[volIdx];
       if (confirm(`Supprimer "${titleText}" ?`)) {
-        album.volumes.splice(volIdx, 1);
-        album.discsCount = album.volumes.length * 2;
-        saveCollection();
-        showDetails(selectedAlbumIndex);
+        formVolumes.splice(volIdx, 1);
+        document.getElementById("formDiscsCount").value = formVolumes.length * 2;
+        renderFormVolumesList();
       }
+    }
+
+    function submitBulkData() {
+      const text = document.getElementById("bulkInput").value.trim();
+      if (!text) return;
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+      if (selectedVolumeIndex === -1) {
+        lines.forEach(line => {
+          formVolumes.push({
+            title: line,
+            cover: '',
+            tracks: []
+          });
+        });
+        document.getElementById("formDiscsCount").value = formVolumes.length * 2;
+      } else {
+        if (!formVolumes[selectedVolumeIndex]) return;
+        if (typeof formVolumes[selectedVolumeIndex] !== 'object') {
+          formVolumes[selectedVolumeIndex] = {
+            title: formVolumes[selectedVolumeIndex],
+            cover: '',
+            tracks: []
+          };
+        }
+        if (!formVolumes[selectedVolumeIndex].tracks) {
+          formVolumes[selectedVolumeIndex].tracks = [];
+        }
+        formVolumes[selectedVolumeIndex].tracks.push(...lines);
+      }
+
+      renderFormVolumesList();
+      closeModal("bulkModal");
     }
 
     function toggleBoxSetFields() {
       const isChecked = document.getElementById("isBoxSet").checked;
       document.getElementById("boxSetFieldsGroup").style.display = isChecked ? 'block' : 'none';
+      if (isChecked) {
+        renderFormVolumesList();
+      }
     }
 
     function openAddModal() {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = -1;
+      formVolumes = [];
       document.getElementById("formModalTitle").textContent = "Ajouter une référence";
       
       document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
@@ -1198,6 +1169,7 @@
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
+      formVolumes = album.volumes ? JSON.parse(JSON.stringify(album.volumes)) : [];
       document.getElementById("formModalTitle").textContent = "Modifier la référence";
       
       document.getElementById("isWantlist").checked = !!album.isWantlist;
@@ -1259,9 +1231,7 @@
       const isWantlist = document.getElementById("isWantlist").checked;
       const isAudiophile = document.getElementById("isAudiophile").checked;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
-      
-      const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
-      const volumes = isBoxSet ? existingVols : [];
+      const volumes = isBoxSet ? formVolumes : [];
 
       const albumData = {
         title: title,
