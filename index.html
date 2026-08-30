@@ -882,7 +882,7 @@
       renderCollection();
     }
 
-            function showDetails(index) {
+    function showDetails(index) {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
@@ -912,43 +912,55 @@
       document.getElementById("modalDetailPrice").textContent = album.purchasePrice ? `${album.purchasePrice} €` : '-';
       document.getElementById("modalDetailLocation").textContent = album.purchaseLocation || '-';
 
-      // --- AJOUT : AFFICHAGE DES DISQUES ET DES PISTES ---
+      // --- CORRECTION : AFFICHAGE DES DISQUES, PISTES ET MINI-VIGNETTES ---
       let volsContainer = document.getElementById("modalDetailVolumes");
       if (!volsContainer) {
-        // Création dynamique du conteneur s'il n'existe pas dans le HTML
         volsContainer = document.createElement("div");
         volsContainer.id = "modalDetailVolumes";
-        volsContainer.style.cssText = "margin-top: 15px; margin-bottom: 15px;";
         document.querySelector("#detailsModal .details-grid").after(volsContainer);
       }
       
-      volsContainer.innerHTML = ""; // On vide le conteneur avant de le remplir
+      volsContainer.style.cssText = "margin-top: 20px; margin-bottom: 15px;";
+      volsContainer.innerHTML = ""; 
+
       if (album.volumes && album.volumes.length > 0) {
-        let html = `<h4 style="font-size: 14px; color: var(--accent-blue); margin-bottom: 10px;">Contenu (${album.volumes.length} disques)</h4>`;
+        let html = `<div style="font-size: 13px; font-weight: bold; color: var(--text-sub); text-transform: uppercase; margin-bottom: 10px;">Contenu (${album.volumes.length} disques) :</div>`;
         
         album.volumes.forEach((vol, idx) => {
           const isObj = (typeof vol === 'object' && vol !== null);
           const vTitle = isObj ? (vol.title || `Disque ${idx+1}`) : vol;
+          const vCover = isObj ? (vol.cover || '') : '';
           const vTracks = isObj && Array.isArray(vol.tracks) ? vol.tracks : [];
           
           html += `<div style="background: #2c2c2e; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #3a3a3c;">`;
-          html += `<div style="font-size: 13px; font-weight: bold; color: white; display: flex; align-items: center; gap: 8px;">
-                     <span style="background: var(--card-bg); padding: 2px 6px; border-radius: 6px; font-size: 10px; color: var(--text-sub);">D${idx+1}</span>
-                     ${vTitle}
-                   </div>`;
+          html += `<div style="display: flex; gap: 10px; align-items: center;">`;
           
-          if (vTracks.length > 0) {
-            html += `<ul style="margin-top: 8px; padding-left: 20px; font-size: 12px; color: var(--text-sub); line-height: 1.5;">`;
-            vTracks.forEach(t => {
-              html += `<li style="margin-bottom: 3px;">${t}</li>`;
-            });
-            html += `</ul>`;
+          // Gestion de la mini-vignette du disque
+          if (vCover) {
+            html += `<div style="width: 35px; height: 35px; border-radius: 6px; background: #2a2a2a; overflow: hidden; flex-shrink: 0;"><img src="${vCover}" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
+          } else {
+            html += `<div style="width: 35px; height: 35px; border-radius: 6px; background: #2a2a2a; color: var(--text-sub); font-size: 9px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">D${idx+1}</div>`;
           }
-          html += `</div>`;
+
+          html += `<div style="flex: 1; min-width: 0;">
+                     <div style="font-size: 10px; color: var(--accent-blue); font-weight: bold; text-transform: uppercase;">Disque ${idx+1}</div>
+                     <div style="font-size: 14px; font-weight: 600; color: white; word-break: break-word;">${vTitle}</div>
+                   </div>`;
+          html += `</div>`; // Fin flex ligne principale disque
+
+          if (vTracks.length > 0) {
+            html += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #3a3a3c;">
+                       <div style="font-size: 11px; color: var(--text-sub); font-weight: bold; margin-bottom: 4px;">Pistes (${vTracks.length}) :</div>
+                       <ul style="padding-left: 16px; font-size: 12px; color: #d1d5db; line-height: 1.4;">
+                         ${vTracks.map(t => `<li style="margin-bottom: 2px;">${t}</li>`).join('')}
+                       </ul>
+                     </div>`;
+          }
+          html += `</div>`; // Fin bloc disque
         });
         volsContainer.innerHTML = html;
       }
-      // ---------------------------------------------------
+      // -------------------------------------------------------------------
 
       const buyBtn = document.getElementById("buyWantlistBtn");
       if (album.isWantlist) {
@@ -985,8 +997,7 @@
       }
 
       document.getElementById("detailsModal").classList.add("active");
-    }
-
+    }      
 
     function convertToPurchased() {
       if (selectedAlbumIndex >= 0) {
