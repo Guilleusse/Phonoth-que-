@@ -178,10 +178,11 @@
     .modal-close { background: #3a3a3c; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     
     /* CORPS AVEC ASCENSEUR ACTIF ET FLUIDE */
-    .modal-body { 
+        .modal-body { 
       flex: 1; 
-      min-height: 0; 
-      overflow-y: auto; 
+      min-height: 0;
+      max-height: calc(90dvh - 60px);
+      overflow-y: scroll; 
       padding: 20px; 
       -webkit-overflow-scrolling: touch; 
     }
