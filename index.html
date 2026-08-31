@@ -269,6 +269,12 @@
           <div class="details-row"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
         </div>
 
+        <!-- Section des Titres / Pistes (Sous le bloc gris des détails) -->
+        <div id="tracksSection" style="display:none; margin-bottom: 15px;">
+          <h3 style="font-size: 15px; margin-bottom: 8px; color: white;">🎵 Titres / Pistes :</h3>
+          <div class="volumes-box" id="tracksList"></div>
+        </div>
+
         <div id="volumesSection" style="display:none; margin-bottom: 15px;">
           <h3 style="font-size: 15px; margin-bottom: 8px;">📁 Sous-collection des disques :</h3>
           <div class="volumes-box" id="volumesList"></div>
@@ -454,6 +460,7 @@
     let selectedAlbumIndex = -1;
     let html5QrCode = null;
     let savedScrollPosition = 0;
+    let currentFetchedTracks = []; // Variable globale pour stocker temporairement les pistes Discogs
 
     function handleCoverFileSelect(event) {
       const file = event.target.files[0];
@@ -714,8 +721,9 @@
           const vText = typeof v === 'object' ? v.title : v;
             return matchText(vText, search);
           });
+          const matchTracks = album.tracks && album.tracks.some(t => matchText(t.title, search));
           const matchAudiophile = album.isAudiophile && matchText('audiophile', search);
-          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes || matchAudiophile;
+          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes || matchTracks || matchAudiophile;
       }
         return true;
       });
@@ -779,7 +787,7 @@
       }
     }
 
-          function renderAlbumCard(album, container) {
+    function renderAlbumCard(album, container) {
       const realIndex = collection.indexOf(album);
       const card = document.createElement("div");
       card.className = "album-card";
@@ -909,6 +917,21 @@
       document.getElementById("modalDetailDate").textContent = formatDateFR(album.purchaseDate);
       document.getElementById("modalDetailPrice").textContent = album.purchasePrice ? `${album.purchasePrice} €` : '-';
       document.getElementById("modalDetailLocation").textContent = album.purchaseLocation || '-';
+
+      // Affichage dynamique des pistes (titres) sous le bloc gris
+      const trackSection = document.getElementById("tracksSection");
+      const trackBox = document.getElementById("tracksList");
+      if (album.tracks && album.tracks.length > 0) {
+        trackSection.style.display = 'block';
+        trackBox.innerHTML = album.tracks.map((t, i) => `
+          <div style="font-size:13px; padding:6px 0; border-bottom:1px solid #3a3a3c; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <span style="color:white;"><b style="color:var(--accent-blue);">${t.position || (i+1)}</b>. ${t.title}</span>
+            <span style="color:var(--text-sub); font-size:11px; flex-shrink:0;">${t.duration || ''}</span>
+          </div>
+        `).join('');
+      } else {
+        trackSection.style.display = 'none';
+      }
 
       const buyBtn = document.getElementById("buyWantlistBtn");
       if (album.isWantlist) {
@@ -1047,7 +1070,7 @@
           });
         });
 
-        album.discsCount = album.volumes.length * 2;
+        album.discsCount = album.volumes.length;
         saveCollection();
         closeModal("bulkModal");
         showDetails(selectedAlbumIndex);
@@ -1066,7 +1089,7 @@
           title: titleVal.trim(),
           cover: coverVal.trim()
         });
-        album.discsCount = album.volumes.length * 2;
+        album.discsCount = album.volumes.length;
         saveCollection();
         showDetails(selectedAlbumIndex);
       }
@@ -1100,7 +1123,7 @@
       const titleText = typeof album.volumes[volIdx] === 'object' ? album.volumes[volIdx].title : album.volumes[volIdx];
       if (confirm(`Supprimer "${titleText}" ?`)) {
         album.volumes.splice(volIdx, 1);
-        album.discsCount = album.volumes.length * 2;
+        album.discsCount = album.volumes.length;
         saveCollection();
         showDetails(selectedAlbumIndex);
       }
@@ -1114,6 +1137,7 @@
     function openAddModal() {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = -1;
+      currentFetchedTracks = []; // Réinitialisation des pistes temporaires
       document.getElementById("formModalTitle").textContent = "Ajouter une référence";
       
       document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
@@ -1141,6 +1165,7 @@
     function openEditModal(index) {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
+      currentFetchedTracks = []; // Réinitialisation des pistes temporaires
       const album = collection[index];
       document.getElementById("formModalTitle").textContent = "Modifier la référence";
       
@@ -1207,6 +1232,10 @@
       const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
       const volumes = isBoxSet ? existingVols : [];
 
+      // Récupération des pistes (nouvelles de Discogs ou conservation des existantes en cas d'édition)
+      const existingTracks = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].tracks) ? collection[selectedAlbumIndex].tracks : [];
+      const tracks = (currentFetchedTracks.length > 0) ? currentFetchedTracks : existingTracks;
+
       const albumData = {
         title: title,
         artist: artist,
@@ -1225,7 +1254,8 @@
         isWantlist: isWantlist,
         isAudiophile: isAudiophile,
         discsCount: discsCount,
-        volumes: volumes
+        volumes: volumes,
+        tracks: tracks // Intégration des pistes dans l'objet album
       };
 
       if (selectedAlbumIndex >= 0) {
@@ -1369,7 +1399,17 @@
         if (data.country) document.getElementById("formCountry").value = data.country;
         if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
 
-        alert("Données remplies depuis Discogs avec succès !");
+        // Récupération automatique de la tracklist Discogs
+        currentFetchedTracks = [];
+        if (data.tracklist && data.tracklist.length) {
+          currentFetchedTracks = data.tracklist.map(t => ({
+            position: t.position || '',
+            title: t.title || '',
+            duration: t.duration || ''
+          }));
+        }
+
+        alert("Données et pistes remplies depuis Discogs avec succès !");
       } catch(e) {
         alert("Impossible de charger les données pour cet ID Discogs.");
       }
@@ -1466,9 +1506,12 @@
                   volumes: cols[17] ? cols[17].split('||').map(v => {
                     const parts = v.split(':::');
                     return parts.length > 1 ? { title: parts[0], cover: parts[1] } : { title: v, cover: '' };
+                  }) : [],
+                  tracks: cols[18] ? cols[18].split('||').map(t => {
+                    const parts = t.split(':::');
+                    return { position: parts[0] || '', title: parts[1] || '', duration: parts[2] || '' };
                   }) : []
-                });
-              }
+              });
             }
           }
         } else {
@@ -1535,7 +1578,8 @@
                 isWantlist: false,
                 isAudiophile: false,
                 discsCount: 0,
-                volumes: []
+                volumes: [],
+                tracks: []
               });
             }
           }
@@ -1554,7 +1598,7 @@
     }
 
     async function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;DiscsCount;Volumes\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;DiscsCount;Volumes;Tracks\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
           if (typeof v === 'object' && v !== null) {
@@ -1562,7 +1606,10 @@
           }
           return `${v}:::`;
         }).join('||') : '';
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.discsCount||0}";"${vols}"\n`;
+
+        const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
+
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.discsCount||0}";"${vols}";"${trks}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
@@ -1575,7 +1622,7 @@
           await navigator.share({
             files: [file],
             title: filename
-          });
+        });
         } catch (err) {}
       } else {
         const link = document.createElement("a");
