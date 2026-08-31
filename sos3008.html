@@ -37,6 +37,7 @@
       --badge-sacd: #0d9488;
       --badge-coffret: #8b5cf6;
       --badge-wantlist: #f59e0b;
+      --badge-audiophile: #b45309;
       --danger: #ef4444;
     }
 
@@ -133,6 +134,7 @@
     .badge-sacd { background: var(--badge-sacd); }
     .badge-coffret { background: var(--badge-coffret); }
     .badge-wantlist { background: var(--badge-wantlist); color: #000; }
+    .badge-audiophile { background: var(--badge-audiophile); border: 1px solid #f59e0b; color: #fff; }
     .genre-badge { display: inline-block; font-size: 10px; color: #a0a0a0; background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; margin-top: 4px; margin-right: 4px; }
     .card-actions { position: absolute; right: 12px; bottom: 12px; }
     .card-delete-top { position: absolute; right: 12px; top: 12px; }
@@ -319,7 +321,12 @@
 
           <div class="checkbox-group" style="background:#2c2c2e; border:1px solid #f59e0b; padding:12px; border-radius:12px; margin-bottom:15px;">
             <input type="checkbox" id="isWantlist">
-            <label for="isWantlist" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">💡 Souhaits (Ajouter à ma liste de souhaits)</label>
+            <label for="isWantlist" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">Souhaits (Ajouter à ma liste de souhaits)</label>
+          </div>
+
+          <div class="checkbox-group" style="background:#2c2c2e; border:1px solid #b45309; padding:12px; border-radius:12px; margin-bottom:15px;">
+            <input type="checkbox" id="isAudiophile">
+            <label for="isAudiophile" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">Édition Audiophile</label>
           </div>
 
           <div class="form-group">
@@ -386,7 +393,7 @@
           <div class="form-group">
             <label>URL de la pochette</label>
             <input type="url" id="formCover" placeholder="https://..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('coverFileInput').click()">🖼️ Choisir une image (Photos / Fichiers)</button>
+            <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('coverFileInput').click()">Choisir une image (Photos / Fichiers)</button>
             <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(event)">
           </div>
 
@@ -704,11 +711,12 @@
           const matchCountry = matchText(album.country, search);
           const matchStyle = matchText(album.style, search);
           const matchVolumes = album.volumes && album.volumes.some(v => {
-            const vText = typeof v === 'object' ? v.title : v;
+          const vText = typeof v === 'object' ? v.title : v;
             return matchText(vText, search);
           });
-          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes;
-        }
+          const matchAudiophile = album.isAudiophile && matchText('audiophile', search);
+          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes || matchAudiophile;
+      }
         return true;
       });
 
@@ -729,7 +737,7 @@
         } else if (sortVal === 'year-asc') {
           return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
         } else {
-          const comp = (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
+          const comp = (a.artist || '').localeCompare(a.artist || '', 'fr', {sensitivity: 'base'});
           if (comp !== 0) return comp;
           return (a.title || '').localeCompare(b.title || '', 'fr', {numeric: true, sensitivity: 'base'});
         }
@@ -787,6 +795,9 @@
       if (album.isWantlist) {
         badgeClass = 'badge-wantlist';
         badgeText = `SOUHAITS (${album.support || 'VINYLE'})`;
+      } else if (album.isAudiophile) {
+        badgeClass = 'badge-audiophile';
+        badgeText = `${(album.support || 'Vinyle').toUpperCase()} AUDIOPHILE`;
       } else if (album.isBoxSet) {
         badgeClass = 'badge-coffret';
         const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
@@ -1106,6 +1117,7 @@
       document.getElementById("formModalTitle").textContent = "Ajouter une référence";
       
       document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
+      document.getElementById("isAudiophile").checked = false;
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
       document.getElementById("formLabel").value = '';
@@ -1133,6 +1145,7 @@
       document.getElementById("formModalTitle").textContent = "Modifier la référence";
       
       document.getElementById("isWantlist").checked = !!album.isWantlist;
+      document.getElementById("isAudiophile").checked = !!album.isAudiophile;
       document.getElementById("isBoxSet").checked = !!album.isBoxSet;
       toggleBoxSetFields();
 
@@ -1188,6 +1201,7 @@
 
       const isBoxSet = document.getElementById("isBoxSet").checked;
       const isWantlist = document.getElementById("isWantlist").checked;
+      const isAudiophile = document.getElementById("isAudiophile").checked;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
       
       const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
@@ -1209,6 +1223,7 @@
         cover: document.getElementById("formCover").value.trim(),
         isBoxSet: isBoxSet,
         isWantlist: isWantlist,
+        isAudiophile: isAudiophile,
         discsCount: discsCount,
         volumes: volumes
       };
@@ -1446,8 +1461,9 @@
                   cover: cols[12] || '',
                   isBoxSet: cols[13] === 'true',
                   isWantlist: cols[14] === 'true',
-                  discsCount: parseInt(cols[15]) || 0,
-                  volumes: cols[16] ? cols[16].split('||').map(v => {
+                  isAudiophile: cols[15] === 'true',
+                  discsCount: parseInt(cols[16]) || 0,
+                  volumes: cols[17] ? cols[17].split('||').map(v => {
                     const parts = v.split(':::');
                     return parts.length > 1 ? { title: parts[0], cover: parts[1] } : { title: v, cover: '' };
                   }) : []
@@ -1517,6 +1533,7 @@
                 cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : '',
                 isBoxSet: false,
                 isWantlist: false,
+                isAudiophile: false,
                 discsCount: 0,
                 volumes: []
               });
@@ -1537,7 +1554,7 @@
     }
 
     async function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;DiscsCount;Volumes\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;DiscsCount;Volumes\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
           if (typeof v === 'object' && v !== null) {
@@ -1545,7 +1562,7 @@
           }
           return `${v}:::`;
         }).join('||') : '';
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.discsCount||0}";"${vols}"\n`;
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.discsCount||0}";"${vols}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
