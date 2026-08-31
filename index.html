@@ -228,6 +228,7 @@
         <div class="details-grid">
           <div class="details-row"><span class="details-label">Support :</span><span class="details-val" id="modalDetailSupport"></span></div>
           <div class="details-row" id="rowLabel"><span class="details-label">Éditeur / Label :</span><span class="details-val" id="modalDetailLabel"></span></div>
+          <div class="details-row" id="rowCatalogNumber"><span class="details-label">N° de catalogue :</span><span class="details-val" id="modalDetailCatalogNumber"></span></div>
           <div class="details-row"><span class="details-label">Genre / Style :</span><span class="details-val" id="modalDetailStyle"></span></div>
           <div class="details-row"><span class="details-label">Année de sortie :</span><span class="details-val" id="modalDetailYear"></span></div>
           <div class="details-row"><span class="details-label">Pays d'édition :</span><span class="details-val" id="modalDetailCountry"></span></div>
@@ -310,6 +311,11 @@
           <div class="form-group">
             <label>Éditeur / Label</label>
             <input type="text" id="formLabel" placeholder="ex: Mofi, Teldec, CBS, Deutsche Grammophon..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          </div>
+
+          <div class="form-group">
+            <label>Numéro de catalogue</label>
+            <input type="text" id="formCatalogNumber" placeholder="ex: ST-84031, 543 300-2..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
@@ -787,6 +793,12 @@
         document.getElementById("modalDetailLabel").textContent = album.label;
       } else { labelRow.style.display = 'none'; }
 
+      const catalogRow = document.getElementById("rowCatalogNumber");
+      if (album.catalogNumber) {
+        catalogRow.style.display = 'flex';
+        document.getElementById("modalDetailCatalogNumber").textContent = album.catalogNumber;
+      } else { catalogRow.style.display = 'none'; }
+
       document.getElementById("modalDetailStyle").textContent = album.style || '-';
       document.getElementById("modalDetailYear").textContent = album.year || '-';
       document.getElementById("modalDetailCountry").textContent = album.country || '-';
@@ -1030,6 +1042,7 @@
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
       document.getElementById("formLabel").value = '';
+      document.getElementById("formCatalogNumber").value = '';
       document.getElementById("formStyle").value = '';
       document.getElementById("formConductor").value = '';
       document.getElementById("formTracklist").value = '';
@@ -1061,6 +1074,7 @@
       document.getElementById("formTitle").value = album.title || '';
       document.getElementById("formArtist").value = album.artist || '';
       document.getElementById("formLabel").value = album.label || '';
+      document.getElementById("formCatalogNumber").value = album.catalogNumber || '';
       document.getElementById("formStyle").value = album.style || '';
       document.getElementById("formConductor").value = album.conductor || '';
       document.getElementById("formTracklist").value = (album.tracklist && album.tracklist.length) ? album.tracklist.join('\n') : '';
@@ -1123,6 +1137,7 @@
         title: title,
         artist: artist,
         label: document.getElementById("formLabel").value.trim(),
+        catalogNumber: document.getElementById("formCatalogNumber").value.trim(),
         style: document.getElementById("formStyle").value.trim(),
         conductor: document.getElementById("formConductor").value.trim(),
         tracklist: tracklist,
@@ -1270,7 +1285,10 @@
 
         if (title) document.getElementById("formTitle").value = title;
         if (artist) document.getElementById("formArtist").value = artist;
-        if (data.labels && data.labels.length) document.getElementById("formLabel").value = data.labels[0].name;
+        if (data.labels && data.labels.length) {
+          document.getElementById("formLabel").value = data.labels[0].name;
+          if (data.labels[0].catno) document.getElementById("formCatalogNumber").value = data.labels[0].catno;
+        }
         
         const gList = data.genres ? data.genres.join(' • ') : '';
         const sList = data.styles ? data.styles.join(' • ') : '';
