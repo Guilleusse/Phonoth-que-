@@ -1085,7 +1085,7 @@
           });
         });
 
-        album.discsCount = album.volumes.length * 2;
+        album.discsCount = album.volumes.length;
         saveCollection();
         closeModal("bulkModal");
         showDetails(selectedAlbumIndex);
@@ -1104,7 +1104,7 @@
           title: titleVal.trim(),
           cover: coverVal.trim()
         });
-        album.discsCount = album.volumes.length * 2;
+        album.discsCount = album.volumes.length;
         saveCollection();
         showDetails(selectedAlbumIndex);
       }
@@ -1138,7 +1138,7 @@
       const titleText = typeof album.volumes[volIdx] === 'object' ? album.volumes[volIdx].title : album.volumes[volIdx];
       if (confirm(`Supprimer "${titleText}" ?`)) {
         album.volumes.splice(volIdx, 1);
-        album.discsCount = album.volumes.length * 2;
+        album.discsCount = album.volumes.length;
         saveCollection();
         showDetails(selectedAlbumIndex);
       }
