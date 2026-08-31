@@ -392,7 +392,7 @@
             <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
-          <div class="form-group" id="formTracksGroup">
+          <div class="form-group">
             <label>Titres des morceaux (un par ligne)</label>
             <textarea id="formTracks" rows="6" placeholder="A1. Malaxe&#10;A2. La Nuit Je Mens..." style="font-size:14px; line-height:1.4; resize:vertical;"></textarea>
           </div>
@@ -970,7 +970,7 @@
         trackSection.style.display = 'block';
         trackBox.innerHTML = album.tracks.map((t, i) => `
           <div style="font-size:13px; padding:6px 0; border-bottom:1px solid #3a3a3c; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-            <span style="color:white;"><b style="color:var(--accent-blue);">${t.position || (i+1)}</b>. ${t.title}</span>
+            <span style="color:white;"><b style="color:var(--accent-blue);">${t.position || (i+1)}</b>. ${t.title || ''}</span>
             <span style="color:var(--text-sub); font-size:11px; flex-shrink:0;">${t.duration || ''}</span>
           </div>
         `).join('');
@@ -1081,7 +1081,7 @@
               <details style="font-size:12px;">
                 <summary style="cursor:pointer; color:var(--accent-blue); font-weight:600; user-select:none;">🎵 Titres (${vTracks.length})</summary>
                 <div style="margin-top:6px; padding-left:8px; display:flex; flex-direction:column; gap:4px;">
-                  ${vTracks.map((t, ti) => `<div style="color:var(--text-main);"><b style="color:var(--text-sub);">${t.position || (ti+1)}.</b> ${t.title}</div>`).join('')}
+                  ${vTracks.map((t, ti) => `<div style="color:var(--text-main);"><b style="color:var(--text-sub);">${t.position || (ti+1)}.</b> ${t.title || ''}</div>`).join('')}
                 </div>
               </details>
             </div>
@@ -1174,7 +1174,7 @@
       document.getElementById("editVolTitle").value = title;
       document.getElementById("editVolCover").value = cover;
       document.getElementById("editVolTracks").value = tracks.map(t => {
-        return t.position ? `${t.position}. ${t.title}` : t.title;
+        return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
       }).join('\n');
 
       document.getElementById("editVolumeModal").classList.add("active");
@@ -1229,7 +1229,6 @@
     function toggleBoxSetFields() {
       const isChecked = document.getElementById("isBoxSet").checked;
       document.getElementById("boxSetFieldsGroup").style.display = isChecked ? 'block' : 'none';
-      document.getElementById("formTracksGroup").style.display = isChecked ? 'none' : 'block';
     }
 
     function openAddModal() {
@@ -1283,7 +1282,7 @@
       
       if (!album.isBoxSet && album.tracks && album.tracks.length > 0) {
         document.getElementById("formTracks").value = album.tracks.map(t => {
-          return t.position ? `${t.position}. ${t.title}` : t.title;
+          return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
         }).join('\n');
       } else {
         document.getElementById("formTracks").value = '';
@@ -1340,7 +1339,13 @@
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
   
       const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
-      const volumes = isBoxSet ? existingVols : [];
+      let volumes = isBoxSet ? existingVols : [];
+
+      if (isBoxSet && volumes.length === 0 && discsCount > 0) {
+        for (let i = 1; i <= discsCount; i++) {
+          volumes.push({ title: `Disque ${i}`, cover: '', tracks: [] });
+        }
+      }
 
       const tracksText = document.getElementById("formTracks").value.trim();
       let manualTracks = [];
@@ -1528,7 +1533,6 @@
         if (data.country) document.getElementById("formCountry").value = data.country;
         if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
 
-        currentFetchedTracks = [];
         if (data.tracklist && data.tracklist.length) {
           currentFetchedTracks = data.tracklist.map(t => ({
             position: t.position || '',
@@ -1537,12 +1541,12 @@
           }));
           if (!document.getElementById("isBoxSet").checked) {
             document.getElementById("formTracks").value = currentFetchedTracks.map(t => {
-              return t.position ? `${t.position}. ${t.title}` : t.title;
+              return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
             }).join('\n');
           }
         }
 
-        alert("Données et pistes remplies depuis Discogs avec succès !");
+        alert("Données remplies depuis Discogs avec succès !");
       } catch(e) {
         alert("Impossible de charger les données pour cet ID Discogs.");
       }
