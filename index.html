@@ -8,19 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Phonothèque</title>
   
-  <!-- Web App & PWA Settings pour iOS / iPadOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Phonothèque">
   <meta name="theme-color" content="#121212">
-  
-  <!-- Icônes Apple & Favicon -->
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+  <link rel="icon" type="image/png" sizes="180x180" href="icon-180.png">
 
-  <!-- Firebase Auth & Firestore SDKs -->
+  <!-- Firebase & Scanner HTML5 -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
@@ -37,7 +33,6 @@
       --badge-sacd: #0d9488;
       --badge-coffret: #8b5cf6;
       --badge-wantlist: #f59e0b;
-      --badge-audiophile: #b45309;
       --danger: #ef4444;
     }
 
@@ -95,7 +90,7 @@
       background-repeat: no-repeat;
       background-position: right 8px center;
     }
-    input[type="text"], input[type="password"], input[type="number"], input[type="date"], input[type="url"], textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
+    input[type="text"], input[type="number"], input[type="date"], input[type="url"], textarea { width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 12px 14px; border-radius: 12px; font-size: 15px; outline: none; }
     select {
       width: 100%;
       background-color: var(--card-bg);
@@ -134,7 +129,6 @@
     .badge-sacd { background: var(--badge-sacd); }
     .badge-coffret { background: var(--badge-coffret); }
     .badge-wantlist { background: var(--badge-wantlist); color: #000; }
-    .badge-audiophile { background: var(--badge-audiophile); border: 1px solid #f59e0b; color: #fff; }
     .genre-badge { display: inline-block; font-size: 10px; color: #a0a0a0; background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; margin-top: 4px; margin-right: 4px; }
     .card-actions { position: absolute; right: 12px; bottom: 12px; }
     .card-delete-top { position: absolute; right: 12px; top: 12px; }
@@ -165,10 +159,6 @@
     
     #reader video { width: 100% !important; border-radius: 12px; }
     #reader__scan_region { display: flex; justify-content: center; align-items: center; }
-
-    /* Modal Connexion */
-    #loginModal { z-index: 3000; }
-    .login-box { background: #1c1c1e; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid var(--card-border); }
   </style>
 </head>
 <body>
@@ -223,28 +213,6 @@
   <main id="collectionContainer"></main>
   <div class="az-index" id="azIndex"></div>
 
-  <!-- MODALE CONNEXION -->
-  <div class="modal-overlay" id="loginModal" style="align-items: center;">
-    <div class="login-box">
-      <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px; text-align: center;">🔐 Phonothèque</h2>
-      <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px; text-align: center;">Connexion sécurisée requise</p>
-      
-      <div class="form-group">
-        <label>E-mail</label>
-        <input type="text" id="loginEmail" placeholder="votre-email@orange.fr" autocomplete="username">
-      </div>
-      
-      <div class="form-group" style="margin-bottom: 20px;">
-        <label>Mot de passe</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
-      </div>
-
-      <div id="loginError" style="color: var(--danger); font-size: 12px; margin-bottom: 12px; text-align: center; display: none;"></div>
-
-      <button type="button" class="btn-submit" onclick="loginUser()">Se connecter</button>
-    </div>
-  </div>
-
   <!-- MODALE DETAILS -->
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-content">
@@ -267,6 +235,11 @@
           <div class="details-row"><span class="details-label">Date d'achat :</span><span class="details-val" id="modalDetailDate"></span></div>
           <div class="details-row"><span class="details-label">Prix d'achat :</span><span class="details-val" id="modalDetailPrice"></span></div>
           <div class="details-row"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
+        </div>
+
+        <div id="tracklistSection" style="display:none; margin-bottom: 15px;">
+          <h3 style="font-size: 15px; margin-bottom: 8px;">🎵 Titres :</h3>
+          <div class="volumes-box" id="tracklistList"></div>
         </div>
 
         <div id="volumesSection" style="display:none; margin-bottom: 15px;">
@@ -321,12 +294,7 @@
 
           <div class="checkbox-group" style="background:#2c2c2e; border:1px solid #f59e0b; padding:12px; border-radius:12px; margin-bottom:15px;">
             <input type="checkbox" id="isWantlist">
-            <label for="isWantlist" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">Souhaits (Ajouter à ma liste de souhaits)</label>
-          </div>
-
-          <div class="checkbox-group" style="background:#2c2c2e; border:1px solid #b45309; padding:12px; border-radius:12px; margin-bottom:15px;">
-            <input type="checkbox" id="isAudiophile">
-            <label for="isAudiophile" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">Édition Audiophile</label>
+            <label for="isWantlist" style="text-transform:none; font-size:14px; color:#f59e0b; font-weight:bold; cursor:pointer;">💡 Souhaits (Ajouter à ma liste de souhaits)</label>
           </div>
 
           <div class="form-group">
@@ -352,6 +320,11 @@
           <div class="form-group">
             <label>Chef d'orchestre / Interprète</label>
             <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          </div>
+
+          <div class="form-group">
+            <label>Titres des morceaux (un par ligne)</label>
+            <textarea id="formTracklist" rows="6" placeholder="1. Alcaline&#10;2. Résidents de la République&#10;3. Comment on fait..." style="resize:vertical; line-height:1.4; font-size:14px;"></textarea>
           </div>
 
           <div class="form-row">
@@ -393,8 +366,6 @@
           <div class="form-group">
             <label>URL de la pochette</label>
             <input type="url" id="formCover" placeholder="https://..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('coverFileInput').click()">Choisir une image (Photos / Fichiers)</button>
-            <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(event)">
           </div>
 
           <div class="checkbox-group">
@@ -442,11 +413,9 @@
     };
 
     let db = null;
-    let auth = null;
     try {
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
-      auth = firebase.auth();
     } catch(e) { console.log("Mode local"); }
 
     let collection = [];
@@ -455,81 +424,9 @@
     let html5QrCode = null;
     let savedScrollPosition = 0;
 
-    function handleCoverFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement("canvas");
-          const maxDim = 600;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > maxDim) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            }
-          } else {
-            if (height > maxDim) {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
-          document.getElementById("formCover").value = dataUrl;
-          alert("Image chargée et optimisée avec succès !");
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-      event.target.value = '';
-    }
-
     function initApp() {
       loadLocal();
 
-      if (auth) {
-        auth.onAuthStateChanged(user => {
-          if (user) {
-            document.getElementById("loginModal").classList.remove("active");
-            subscribeFirestore();
-          } else {
-            document.getElementById("loginModal").classList.add("active");
-          }
-        });
-      }
-    }
-
-    function loginUser() {
-      const email = document.getElementById("loginEmail").value.trim();
-      const pass = document.getElementById("loginPassword").value.trim();
-      const errBox = document.getElementById("loginError");
-      errBox.style.display = "none";
-
-      if (!email || !pass) {
-        errBox.textContent = "Veuillez saisir votre e-mail et mot de passe.";
-        errBox.style.display = "block";
-        return;
-      }
-
-      auth.signInWithEmailAndPassword(email, pass)
-        .catch(error => {
-          errBox.textContent = "Identifiants incorrects.";
-          errBox.style.display = "block";
-        });
-    }
-
-    function subscribeFirestore() {
       if (db) {
         db.collection("phonotheque").doc("main").onSnapshot(doc => {
           if (doc.exists && doc.data().list) {
@@ -563,7 +460,7 @@
 
     function saveCollection() {
       localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-      if (db && auth && auth.currentUser) {
+      if (db) {
         showSpinner();
         db.collection("phonotheque").doc("main").set({ list: collection })
           .then(() => {
@@ -615,7 +512,7 @@
       const clean = str.trim();
       const parts = clean.split('-');
       if (parts.length === 3 && parts[0].length === 4) {
-        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
       }
       return clean;
     }
@@ -659,14 +556,19 @@
         if (a.isWantlist) {
           countWantlist++;
         } else {
+          // Si le champ d'entrée 'discsCount' contient la valeur réelle des disques (ex: 90)
           const explicitDiscs = parseInt(a.discsCount) || 0;
           const subBoxes = (a.volumes && a.volumes.length > 0) ? a.volumes.length : 1;
 
+          // Nombre de coffrets physiques réels (ex: 45)
           const realBoxCount = a.isBoxSet ? subBoxes : 0;
+          
+          // Nombre de galettes physiques (ex: 90 s'il y a 2 disques par coffret, ou égale au nombre de sous-coffrets)
           const realDiscsCount = explicitDiscs > 0 ? explicitDiscs : (a.isBoxSet ? subBoxes * 2 : 1);
 
           totalDiscsPhysical += realDiscsCount;
 
+          // Répartition par support
           if (a.support === 'Vinyle') countVinyle += realDiscsCount;
           else if (a.support === 'CD') countCD += realDiscsCount;
           else if (a.support === 'SACD') countSACD += realDiscsCount;
@@ -711,12 +613,11 @@
           const matchCountry = matchText(album.country, search);
           const matchStyle = matchText(album.style, search);
           const matchVolumes = album.volumes && album.volumes.some(v => {
-          const vText = typeof v === 'object' ? v.title : v;
+            const vText = typeof v === 'object' ? v.title : v;
             return matchText(vText, search);
           });
-          const matchAudiophile = album.isAudiophile && matchText('audiophile', search);
-          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes || matchAudiophile;
-      }
+          return matchTitle || matchArtist || matchLabel || matchConductor || matchCountry || matchStyle || matchVolumes;
+        }
         return true;
       });
 
@@ -737,7 +638,7 @@
         } else if (sortVal === 'year-asc') {
           return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
         } else {
-          const comp = (a.artist || '').localeCompare(a.artist || '', 'fr', {sensitivity: 'base'});
+          const comp = (a.artist || '').localeCompare(b.artist || '', 'fr', {sensitivity: 'base'});
           if (comp !== 0) return comp;
           return (a.title || '').localeCompare(b.title || '', 'fr', {numeric: true, sensitivity: 'base'});
         }
@@ -753,16 +654,9 @@
           groups[artist].push(album);
         });
 
-        const sortedArtists = Object.keys(groups).sort((a, b) => {
-          if (sortVal === 'artist-za') {
-            return b.localeCompare(a, 'fr', { sensitivity: 'base' });
-          }
-          return a.localeCompare(b, 'fr', { sensitivity: 'base' });
-        });
+        renderAZIndex(Object.keys(groups));
 
-        renderAZIndex(sortedArtists);
-
-        sortedArtists.forEach(artist => {
+        Object.keys(groups).forEach(artist => {
           const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
           const groupHeader = document.createElement("div");
           groupHeader.className = "artist-group-header";
@@ -779,7 +673,7 @@
       }
     }
 
-          function renderAlbumCard(album, container) {
+    function renderAlbumCard(album, container) {
       const realIndex = collection.indexOf(album);
       const card = document.createElement("div");
       card.className = "album-card";
@@ -795,9 +689,6 @@
       if (album.isWantlist) {
         badgeClass = 'badge-wantlist';
         badgeText = `SOUHAITS (${album.support || 'VINYLE'})`;
-      } else if (album.isAudiophile) {
-        badgeClass = 'badge-audiophile';
-        badgeText = `${(album.support || 'Vinyle').toUpperCase()} AUDIOPHILE`;
       } else if (album.isBoxSet) {
         badgeClass = 'badge-coffret';
         const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
@@ -806,7 +697,7 @@
       } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
       else if (album.support === 'SACD') badgeClass = 'badge-sacd';
 
-      const coverSrc = album.cover ? album.cover : '';
+      const coverSrc = album.cover && album.cover.startsWith('http') ? album.cover : '';
 
       let subParts = [];
       if (album.artist && (document.getElementById("sortSelect").value !== 'artist-az' && document.getElementById("sortSelect").value !== 'artist-za')) {
@@ -918,7 +809,7 @@
       }
 
       const coverImg = document.getElementById("modalDetailCover");
-      if (album.cover) {
+      if (album.cover && album.cover.startsWith('http')) {
         coverImg.src = album.cover;
         coverImg.style.display = 'block';
       } else { coverImg.style.display = 'none'; }
@@ -949,6 +840,12 @@
         volSection.style.display = 'block';
         renderVolumesList(album.volumes || [], album.cover);
       } else { volSection.style.display = 'none'; }
+
+      const trackSection = document.getElementById("tracklistSection");
+      if (album.tracklist && album.tracklist.length > 0) {
+        trackSection.style.display = 'block';
+        renderTracklist(album.tracklist);
+      } else { trackSection.style.display = 'none'; }
 
       document.getElementById("detailsModal").classList.add("active");
     }
@@ -994,14 +891,14 @@
         const titleText = isObj ? (v.title || '') : v;
         let coverUrl = isObj ? (v.cover || '') : '';
         
-        if (!coverUrl && parentCover) {
+        if (!coverUrl && parentCover && parentCover.startsWith('http')) {
           coverUrl = parentCover;
         }
 
         const item = document.createElement("div");
         item.style.cssText = "background:#1c1c1e; padding:10px; border-radius:12px; margin-bottom:8px; display:flex; gap:10px; align-items:center; border:1px solid #3a3a3c;";
         
-        const coverHtml = coverUrl 
+        const coverHtml = coverUrl && coverUrl.startsWith('http') 
           ? `<img src="${coverUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">`
           : `<div style="width:50px; height:50px; border-radius:8px; background:#2a2a2a; color:var(--text-sub); font-size:9px; display:flex; align-items:center; justify-content:center; text-align:center; flex-shrink:0;">Disque ${idx+1}</div>`;
 
@@ -1020,6 +917,21 @@
       });
     }
 
+    function renderTracklist(tracks) {
+      const box = document.getElementById("tracklistList");
+      box.innerHTML = "";
+      tracks.forEach((t, idx) => {
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex; gap:10px; padding:8px 4px; border-bottom:1px solid #3a3a3c; font-size:13px;";
+        if (idx === tracks.length - 1) row.style.borderBottom = "none";
+        row.innerHTML = `
+          <span style="color:var(--text-sub); flex-shrink:0; min-width:18px;">${idx + 1}.</span>
+          <span style="color:white; word-break:break-word;">${t}</span>
+        `;
+        box.appendChild(row);
+      });
+    }
+
     function addBulkVolumesToCurrentAlbum() {
       if (selectedAlbumIndex < 0) return;
       document.getElementById("bulkInput").value = "";
@@ -1034,9 +946,7 @@
       if (text) {
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         
-        if (album.volumes && album.volumes.length === 1 && album.volumes[0].title.includes("Vol. 02")) {
-          album.volumes = [];
-        } else if (!album.volumes) {
+        if (!album.volumes) {
           album.volumes = [];
         }
 
@@ -1117,12 +1027,12 @@
       document.getElementById("formModalTitle").textContent = "Ajouter une référence";
       
       document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
-      document.getElementById("isAudiophile").checked = false;
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
       document.getElementById("formLabel").value = '';
       document.getElementById("formStyle").value = '';
       document.getElementById("formConductor").value = '';
+      document.getElementById("formTracklist").value = '';
       document.getElementById("formSupport").value = 'Vinyle';
       document.getElementById("formYear").value = '';
       document.getElementById("formCountry").value = '';
@@ -1145,7 +1055,6 @@
       document.getElementById("formModalTitle").textContent = "Modifier la référence";
       
       document.getElementById("isWantlist").checked = !!album.isWantlist;
-      document.getElementById("isAudiophile").checked = !!album.isAudiophile;
       document.getElementById("isBoxSet").checked = !!album.isBoxSet;
       toggleBoxSetFields();
 
@@ -1154,6 +1063,7 @@
       document.getElementById("formLabel").value = album.label || '';
       document.getElementById("formStyle").value = album.style || '';
       document.getElementById("formConductor").value = album.conductor || '';
+      document.getElementById("formTracklist").value = (album.tracklist && album.tracklist.length) ? album.tracklist.join('\n') : '';
       document.getElementById("formSupport").value = album.support || 'Vinyle';
       document.getElementById("formYear").value = album.year || '';
       document.getElementById("formCountry").value = album.country || '';
@@ -1201,11 +1111,13 @@
 
       const isBoxSet = document.getElementById("isBoxSet").checked;
       const isWantlist = document.getElementById("isWantlist").checked;
-      const isAudiophile = document.getElementById("isAudiophile").checked;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
       
       const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
       const volumes = isBoxSet ? existingVols : [];
+
+      const tracklistRaw = document.getElementById("formTracklist").value.trim();
+      const tracklist = tracklistRaw ? tracklistRaw.split('\n').map(t => t.trim()).filter(t => t.length > 0) : [];
 
       const albumData = {
         title: title,
@@ -1213,6 +1125,7 @@
         label: document.getElementById("formLabel").value.trim(),
         style: document.getElementById("formStyle").value.trim(),
         conductor: document.getElementById("formConductor").value.trim(),
+        tracklist: tracklist,
         support: document.getElementById("formSupport").value,
         year: document.getElementById("formYear").value.trim(),
         country: document.getElementById("formCountry").value.trim(),
@@ -1223,7 +1136,6 @@
         cover: document.getElementById("formCover").value.trim(),
         isBoxSet: isBoxSet,
         isWantlist: isWantlist,
-        isAudiophile: isAudiophile,
         discsCount: discsCount,
         volumes: volumes
       };
@@ -1369,6 +1281,13 @@
         if (data.country) document.getElementById("formCountry").value = data.country;
         if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
 
+        if (data.tracklist && data.tracklist.length) {
+          const trackTitles = data.tracklist
+            .filter(t => t.type_ === 'track' || !t.type_)
+            .map(t => t.position ? `${t.position}. ${t.title}` : t.title);
+          if (trackTitles.length) document.getElementById("formTracklist").value = trackTitles.join('\n');
+        }
+
         alert("Données remplies depuis Discogs avec succès !");
       } catch(e) {
         alert("Impossible de charger les données pour cet ID Discogs.");
@@ -1461,9 +1380,8 @@
                   cover: cols[12] || '',
                   isBoxSet: cols[13] === 'true',
                   isWantlist: cols[14] === 'true',
-                  isAudiophile: cols[15] === 'true',
-                  discsCount: parseInt(cols[16]) || 0,
-                  volumes: cols[17] ? cols[17].split('||').map(v => {
+                  discsCount: parseInt(cols[15]) || 0,
+                  volumes: cols[16] ? cols[16].split('||').map(v => {
                     const parts = v.split(':::');
                     return parts.length > 1 ? { title: parts[0], cover: parts[1] } : { title: v, cover: '' };
                   }) : []
@@ -1533,7 +1451,6 @@
                 cover: coverIdx !== -1 && cols[coverIdx] ? cols[coverIdx].trim() : '',
                 isBoxSet: false,
                 isWantlist: false,
-                isAudiophile: false,
                 discsCount: 0,
                 volumes: []
               });
@@ -1553,8 +1470,13 @@
       event.target.value = '';
     }
 
+    // Échappe les guillemets internes pour un champ CSV valide (format RFC 4180)
+    function csvEscape(val) {
+      return String(val === undefined || val === null ? '' : val).replace(/"/g, '""');
+    }
+
     async function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;DiscsCount;Volumes\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;DiscsCount;Volumes\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
           if (typeof v === 'object' && v !== null) {
@@ -1562,7 +1484,7 @@
           }
           return `${v}:::`;
         }).join('||') : '';
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.discsCount||0}";"${vols}"\n`;
+        csv += `"${csvEscape(a.artist)}";"${csvEscape(a.title)}";"${csvEscape(a.conductor)}";"${csvEscape(a.label)}";"${csvEscape(a.style)}";"${csvEscape(a.year)}";"${csvEscape(a.country)}";"${csvEscape(a.purchaseDate)}";"${csvEscape(a.purchasePrice)}";"${csvEscape(a.purchaseLocation)}";"${csvEscape(a.support)}";"${csvEscape(a.discogsId)}";"${csvEscape(a.cover)}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.discsCount||0}";"${csvEscape(vols)}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
