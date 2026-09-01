@@ -173,7 +173,7 @@
 </head>
 <body>
 
-  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 01-09-2026 23:15</div>
+  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 02-09-2026 12:45</div>
 
   <header>
     <div class="top-bar">
@@ -295,13 +295,13 @@
   <div class="modal-overlay" id="bulkModal" style="z-index: 1500;">
     <div class="modal-content" style="height: auto; max-height: 85vh;">
       <div class="modal-header">
-        <span class="modal-title">Coller une liste de disques</span>
+        <span class="modal-title">Coller une liste de disques (Noms des albums)</span>
         <button class="modal-close" onclick="closeModal('bulkModal')">✕</button>
       </div>
       <div class="modal-body" style="padding:15px;">
-        <label style="display:block; font-size:12px; color:var(--text-sub); margin-bottom:8px; font-weight:bold;">COLLEZ VOTRE LISTE CI-DESSOUS (UNE LIGNE PAR DISQUE) :</label>
-        <textarea id="bulkInput" rows="12" placeholder="Vol. 01 - Roman Photos&#10;Vol. 02 - Roulette Russe..." style="width:100%; height:220px; font-size:13px; line-height:1.4; margin-bottom:15px; resize:none;"></textarea>
-        <button type="button" class="btn-submit" onclick="submitBulkVolumes()">Importer tous les disques</button>
+        <label style="display:block; font-size:12px; color:var(--text-sub); margin-bottom:8px; font-weight:bold;">COLLEZ VOS NOMS DE DISQUES CI-DESSOUS (UN PAR LIGNE) :</label>
+        <textarea id="bulkInput" rows="8" placeholder="Lyla&#10;At Home&#10;Continuo..." style="width:100%; height:180px; font-size:13px; line-height:1.4; margin-bottom:15px; resize:none;"></textarea>
+        <button type="button" class="btn-submit" onclick="submitBulkVolumes()">Appliquer les noms aux disques</button>
       </div>
     </div>
   </div>
@@ -317,7 +317,7 @@
         <input type="hidden" id="editVolIndex">
         <div class="form-group">
           <label>Nom / Titre du disque</label>
-          <input type="text" id="editVolTitle" placeholder="ex: Disque 1 - Roman Photos" autocomplete="off">
+          <input type="text" id="editVolTitle" placeholder="ex: Disque 1 - Lyla" autocomplete="off">
         </div>
         <div class="form-group">
           <label>URL de la vignette (facultatif)</label>
@@ -335,7 +335,7 @@
 
         <div class="form-group">
           <label>Titres des morceaux de ce disque (un par ligne)</label>
-          <textarea id="editVolTracks" rows="8" placeholder="1.1. Roman Photos&#10;1.2. L'Amour C'Est Pas Confortable..." style="font-size:14px; line-height:1.4; resize:vertical;"></textarea>
+          <textarea id="editVolTracks" rows="8" placeholder="1.1. Ascension&#10;1.2. Lyla..." style="font-size:14px; line-height:1.4; resize:vertical;"></textarea>
         </div>
         <button type="button" class="btn-submit" onclick="saveEditedVolume()">Enregistrer ce disque</button>
       </div>
@@ -373,17 +373,17 @@
 
           <div class="form-group">
             <label>Artiste / Compositeur *</label>
-            <input type="text" id="formArtist" placeholder="ex: Johann Sebastian Bach" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formArtist" placeholder="ex: Avishai Cohen" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>Titre de l'album *</label>
-            <input type="text" id="formTitle" placeholder="ex: Les Cantates, Vol. 1 à 45" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formTitle" placeholder="ex: Lyla | At Home | Continuo" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
             <label>Éditeur / Label</label>
-            <input type="text" id="formLabel" placeholder="ex: Mofi, Teldec, CBS, Deutsche Grammophon..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formLabel" placeholder="ex: Plus Loin Music..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
@@ -393,7 +393,7 @@
 
           <div class="form-group">
             <label>Genre / Style</label>
-            <input type="text" id="formStyle" placeholder="ex: Jazz / Hard Bop, Classical / Baroque..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formStyle" placeholder="ex: Jazz / Contemporary Jazz..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
@@ -409,11 +409,11 @@
           <div class="form-row">
             <div class="form-group" style="flex:1">
               <label>Année de sortie</label>
-              <input type="text" id="formYear" placeholder="ex: 2026" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formYear" placeholder="ex: 2011" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div class="form-group" style="flex:1">
               <label>Pays d'édition</label>
-              <input type="text" id="formCountry" placeholder="ex: Allemagne" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formCountry" placeholder="ex: Europe" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
 
@@ -429,17 +429,17 @@
           <div class="form-row">
             <div class="form-group" style="flex:1">
               <label>Date d'achat</label>
-              <input type="text" id="formPurchaseDate" placeholder="ex: 25/08/2026" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formPurchaseDate" placeholder="ex: 04-11-2024" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div class="form-group" style="flex:1">
               <label>Prix d'achat (€)</label>
-              <input type="text" id="formPurchasePrice" placeholder="ex: 20.00" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="formPurchasePrice" placeholder="ex: 8" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
 
           <div class="form-group">
             <label>Lieu d'achat</label>
-            <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, FNAC, JPC..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs France..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
           <div class="form-group">
@@ -457,7 +457,7 @@
           <div class="form-group" id="boxSetFieldsGroup" style="display:none;">
             <div class="form-group" style="margin-bottom: 0px;">
               <label>Nombre de disques (ex: 2, 5, 45, 90...)</label>
-              <input type="number" id="formDiscsCount" placeholder="ex: 18" min="1" autocomplete="off">
+              <input type="number" id="formDiscsCount" placeholder="ex: 3" min="1" autocomplete="off">
             </div>
           </div>
 
@@ -1120,6 +1120,7 @@
       document.getElementById("bulkModal").classList.add("active");
     }
 
+    // COLLAGE EN MASSE DES NOMS DE DISQUES/ALBUMS (Une ligne = un titre de disque)
     function submitBulkVolumes() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
@@ -1128,18 +1129,19 @@
       if (text) {
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         
-        if (album.volumes && album.volumes.length === 1 && album.volumes[0].title.includes("Vol. 02")) {
-          album.volumes = [];
-        } else if (!album.volumes) {
-          album.volumes = [];
-        }
+        if (!album.volumes) album.volumes = [];
 
-        lines.forEach(line => {
-          album.volumes.push({
-            title: line,
-            cover: '',
-            tracks: []
-          });
+        // Attribue chaque ligne de texte au titre d'un disque du coffret
+        lines.forEach((line, idx) => {
+          if (album.volumes[idx]) {
+            album.volumes[idx].title = line;
+          } else {
+            album.volumes.push({
+              title: line,
+              cover: album.cover || '',
+              tracks: []
+            });
+          }
         });
 
         album.discsCount = album.volumes.length;
