@@ -173,7 +173,7 @@
 </head>
 <body>
 
-  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — 01-09-2026</div>
+  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — 01-09-2026 03:34</div>
 
   <header>
     <div class="top-bar">
@@ -324,7 +324,6 @@
           <input type="url" id="editVolCover" placeholder="https://..." autocomplete="off">
         </div>
 
-        <!-- RECHERCHE DISCOGS SANS LOUPE POUR PLUS D'AIR -->
         <div class="form-group" style="background:#2c2c2e; padding:12px; border-radius:12px; margin-bottom:15px;">
           <label style="color:white; font-size:11px; margin-bottom:6px;">Extraction automatique des pistes Discogs pour ce disque</label>
           <div style="display:flex; gap:6px;">
@@ -1684,7 +1683,7 @@
                   isAudiophile: cols[16] === 'true',
                   discsCount: parseInt(cols[17]) || 0,
                   volumes: [],
-                  tracks: []
+                    tracks: []
                 });
               }
             }
@@ -1703,7 +1702,8 @@
       event.target.value = '';
     }
 
-    async function exportToCSV() {
+    // EXPORT CORRIGÉ : Téléchargement direct sans fichier .txt parasite
+    function exportToCSV() {
       let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;DiscsCount;Volumes;Tracks\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
@@ -1722,21 +1722,13 @@
       const today = new Date().toISOString().split('T')[0];
       const filename = `phonotheque_backup_${today}.csv`;
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const file = new File([blob], filename, { type: "text/csv" });
 
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: filename
-          });
-        } catch (err) {}
-      } else {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-      }
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     window.onload = initApp;
