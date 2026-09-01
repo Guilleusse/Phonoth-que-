@@ -173,7 +173,7 @@
 </head>
 <body>
 
-  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 02-09-2026 12:45</div>
+  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 02-09-2026 01:32</div>
 
   <header>
     <div class="top-bar">
@@ -847,20 +847,24 @@
 
       let badgeClass = 'badge-cd';
       let badgeText = album.support || 'CD';
+      const supp = (album.support || 'Vinyle').toUpperCase();
+      const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
   
       if (album.isWantlist) {
         badgeClass = 'badge-wantlist';
-        badgeText = `SOUHAITS (${album.support || 'VINYLE'})`;
+        badgeText = `SOUHAITS ${supp}`;
+      } else if (album.isBoxSet) {
+        badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
+        let baseText = nbDisques > 0 ? `${nbDisques} DISQUES ${supp}` : `COFFRET ${supp}`;
+        badgeText = album.isAudiophile ? `${baseText} AUDIOPHILE` : baseText;
       } else if (album.isAudiophile) {
         badgeClass = 'badge-audiophile';
-        badgeText = `${(album.support || 'Vinyle').toUpperCase()} AUDIOPHILE`;
-      } else if (album.isBoxSet) {
-        badgeClass = 'badge-coffret';
-        const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
-        const supp = (album.support || 'Vinyle').toUpperCase();
-        badgeText = nbDisques > 0 ? `${nbDisques} DISQUES (${supp})` : `COFFRET (${supp})`;
-      } else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
-      else if (album.support === 'SACD') badgeClass = 'badge-sacd';
+        badgeText = `${supp} AUDIOPHILE`;
+      } else if (album.support === 'Vinyle') {
+        badgeClass = 'badge-vinyle';
+      } else if (album.support === 'SACD') {
+        badgeClass = 'badge-sacd';
+      }
 
       const coverSrc = album.cover ? album.cover : '';
 
