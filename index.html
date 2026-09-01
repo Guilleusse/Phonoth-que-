@@ -270,12 +270,6 @@
           <div class="details-row"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
         </div>
 
-        <!-- Section des Titres / Pistes (pour album simple) -->
-        <div id="tracksSection" style="display:none; margin-bottom: 15px;">
-          <h3 style="font-size: 15px; margin-bottom: 8px; color: white;">🎵 Titres / Pistes :</h3>
-          <div class="volumes-box" id="tracksList"></div>
-        </div>
-
         <div id="volumesSection" style="display:none; margin-bottom: 15px;">
           <h3 style="font-size: 15px; margin-bottom: 8px;">📁 Sous-collection des disques :</h3>
           <div class="volumes-box" id="volumesList"></div>
@@ -324,6 +318,16 @@
           <label>URL de la vignette (facultatif)</label>
           <input type="url" id="editVolCover" placeholder="https://..." autocomplete="off">
         </div>
+
+        <!-- RECHERCHE DISCOGS DÉDIÉE AU DISQUE -->
+        <div class="form-group" style="background:#2c2c2e; padding:10px; border-radius:10px; margin-bottom:15px;">
+          <label style="color:white; font-size:11px; margin-bottom:6px;">Importer les pistes de ce disque via Discogs</label>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="editVolDiscogsId" placeholder="ID Discogs de cette release..." style="font-size:13px; padding:8px 10px; flex:3;" autocomplete="off">
+            <button type="button" class="btn-secondary" style="flex:1; background:var(--accent-blue); color:white; padding:0 4px; font-size:12px;" onclick="fetchVolumeTracksFromDiscogs()">🔍 Chercher</button>
+          </div>
+        </div>
+
         <div class="form-group">
           <label>Titres des morceaux de ce disque (un par ligne)</label>
           <textarea id="editVolTracks" rows="8" placeholder="1. Roman Photos&#10;2. L'Amour C'Est Pas Confortable..." style="font-size:14px; line-height:1.4; resize:vertical;"></textarea>
@@ -390,11 +394,6 @@
           <div class="form-group">
             <label>Chef d'orchestre / Interprète</label>
             <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-          </div>
-
-          <div class="form-group">
-            <label>Titres des morceaux (un par ligne)</label>
-            <textarea id="formTracks" rows="6" placeholder="A1. Malaxe&#10;A2. La Nuit Je Mens..." style="font-size:14px; line-height:1.4; resize:vertical;"></textarea>
           </div>
 
           <div class="form-row">
@@ -760,9 +759,8 @@
             const vTracks = (v.tracks && v.tracks.some(t => matchText(t.title, search)));
             return matchText(vText, search) || vTracks;
           });
-          const matchTracks = album.tracks && album.tracks.some(t => matchText(t.title, search));
           const matchAudiophile = album.isAudiophile && matchText('audiophile', search);
-          return matchTitle || matchArtist || matchLabel || matchCatalog || matchConductor || matchCountry || matchStyle || matchVolumes || matchTracks || matchAudiophile;
+          return matchTitle || matchArtist || matchLabel || matchCatalog || matchConductor || matchCountry || matchStyle || matchVolumes || matchAudiophile;
         }
         return true;
       });
@@ -964,20 +962,6 @@
       document.getElementById("modalDetailPrice").textContent = album.purchasePrice ? `${album.purchasePrice} €` : '-';
       document.getElementById("modalDetailLocation").textContent = album.purchaseLocation || '-';
 
-      const trackSection = document.getElementById("tracksSection");
-      const trackBox = document.getElementById("tracksList");
-      if (!album.isBoxSet && album.tracks && album.tracks.length > 0) {
-        trackSection.style.display = 'block';
-        trackBox.innerHTML = album.tracks.map((t, i) => `
-          <div style="font-size:13px; padding:6px 0; border-bottom:1px solid #3a3a3c; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-            <span style="color:white;"><b style="color:var(--accent-blue);">${t.position || (i+1)}</b>. ${t.title || ''}</span>
-            <span style="color:var(--text-sub); font-size:11px; flex-shrink:0;">${t.duration || ''}</span>
-          </div>
-        `).join('');
-      } else {
-        trackSection.style.display = 'none';
-      }
-
       const buyBtn = document.getElementById("buyWantlistBtn");
       if (album.isWantlist) {
         buyBtn.style.display = 'block';
@@ -1173,11 +1157,42 @@
       document.getElementById("editVolIndex").value = volIdx;
       document.getElementById("editVolTitle").value = title;
       document.getElementById("editVolCover").value = cover;
+      document.getElementById("editVolDiscogsId").value = "";
       document.getElementById("editVolTracks").value = tracks.map(t => {
         return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
       }).join('\n');
 
       document.getElementById("editVolumeModal").classList.add("active");
+    }
+
+    async function fetchVolumeTracksFromDiscogs() {
+      const discogsId = document.getElementById("editVolDiscogsId").value.trim();
+      if (!discogsId) {
+        alert("Veuillez saisir un ID Discogs.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://api.discogs.com/releases/${discogsId}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        if (data.tracklist && data.tracklist.length > 0) {
+          const fetched = data.tracklist.map(t => {
+            return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
+          }).join('\n');
+
+          document.getElementById("editVolTracks").value = fetched;
+          if (data.images && data.images.length && !document.getElementById("editVolCover").value) {
+            document.getElementById("editVolCover").value = data.images[0].resource_url || data.images[0].uri;
+          }
+          alert("Pistes importées depuis Discogs avec succès pour ce disque !");
+        } else {
+          alert("Aucune piste trouvée pour cet ID Discogs.");
+        }
+      } catch(e) {
+        alert("Erreur lors de la récupération des pistes sur Discogs.");
+      }
     }
 
     function saveEditedVolume() {
@@ -1245,7 +1260,6 @@
       document.getElementById("formCatalogNumber").value = '';
       document.getElementById("formStyle").value = '';
       document.getElementById("formConductor").value = '';
-      document.getElementById("formTracks").value = '';
       document.getElementById("formSupport").value = 'Vinyle';
       document.getElementById("formYear").value = '';
       document.getElementById("formCountry").value = '';
@@ -1279,14 +1293,6 @@
       document.getElementById("formCatalogNumber").value = album.catalogNumber || '';
       document.getElementById("formStyle").value = album.style || '';
       document.getElementById("formConductor").value = album.conductor || '';
-      
-      if (!album.isBoxSet && album.tracks && album.tracks.length > 0) {
-        document.getElementById("formTracks").value = album.tracks.map(t => {
-          return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
-        }).join('\n');
-      } else {
-        document.getElementById("formTracks").value = '';
-      }
 
       document.getElementById("formSupport").value = album.support || 'Vinyle';
       document.getElementById("formYear").value = album.year || '';
@@ -1347,22 +1353,6 @@
         }
       }
 
-      const tracksText = document.getElementById("formTracks").value.trim();
-      let manualTracks = [];
-      if (!isBoxSet && tracksText) {
-        manualTracks = tracksText.split('\n').map(line => {
-          const cleanLine = line.trim();
-          const match = cleanLine.match(/^([A-Za-z0-9]+[.-]?)\s*(.*)$/);
-          if (match && match[2]) {
-            return { position: match[1].replace(/[.-]$/, ''), title: match[2], duration: '' };
-          }
-          return { position: '', title: cleanLine, duration: '' };
-        }).filter(t => t.title.length > 0);
-      }
-
-      const existingTracks = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].tracks) ? collection[selectedAlbumIndex].tracks : [];
-      const tracks = isBoxSet ? [] : ((manualTracks.length > 0) ? manualTracks : ((currentFetchedTracks.length > 0) ? currentFetchedTracks : existingTracks));
-
       const albumData = {
         title: title,
         artist: artist,
@@ -1383,7 +1373,7 @@
         isAudiophile: isAudiophile,
         discsCount: discsCount,
         volumes: volumes,
-        tracks: tracks
+        tracks: []
       };
 
       if (selectedAlbumIndex >= 0) {
@@ -1533,19 +1523,6 @@
         if (data.country) document.getElementById("formCountry").value = data.country;
         if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
 
-        if (data.tracklist && data.tracklist.length) {
-          currentFetchedTracks = data.tracklist.map(t => ({
-            position: t.position || '',
-            title: t.title || '',
-            duration: t.duration || ''
-          }));
-          if (!document.getElementById("isBoxSet").checked) {
-            document.getElementById("formTracks").value = currentFetchedTracks.map(t => {
-              return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
-            }).join('\n');
-          }
-        }
-
         alert("Données remplies depuis Discogs avec succès !");
       } catch(e) {
         alert("Impossible de charger les données pour cet ID Discogs.");
@@ -1589,22 +1566,6 @@
       }
       if (currentVal !== '' || currentRow.length > 0) { currentRow.push(currentVal); rows.push(currentRow); }
       return rows;
-    }
-
-    function cleanImportDate(val) {
-      if (!val) return '';
-      val = val.trim().replace(/\//g, '-');
-      const parts = val.split(' ')[0].split('-');
-      if (parts.length === 3) {
-        if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
-        if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-      }
-      return val;
-    }
-
-    function cleanImportPrice(val) {
-      if (!val) return '';
-      return val.replace(/[^0-9.,]/g, '').replace(',', '.').trim();
     }
 
     function importFromCSV(event) {
