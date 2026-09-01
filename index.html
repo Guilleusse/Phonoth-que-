@@ -173,7 +173,7 @@
 </head>
 <body>
 
-  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026</div>
+  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — 01-09-2026</div>
 
   <header>
     <div class="top-bar">
@@ -270,7 +270,6 @@
           <div class="details-row"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
         </div>
 
-        <!-- Section des Titres / Pistes (pour album simple) -->
         <div id="tracksSection" style="display:none; margin-bottom: 15px;">
           <h3 style="font-size: 15px; margin-bottom: 8px; color: white;">🎵 Titres / Pistes :</h3>
           <div class="volumes-box" id="tracksList"></div>
@@ -325,14 +324,17 @@
           <input type="url" id="editVolCover" placeholder="https://..." autocomplete="off">
         </div>
 
-        <!-- RECHERCHE DISCOGS DÉDIÉE AU DISQUE (POUR COFFRET) -->
+        <!-- RECHERCHE DISCOGS DÉDIÉE AU DISQUE AVEC FILTRE EXACT -->
         <div class="form-group" style="background:#2c2c2e; padding:10px; border-radius:10px; margin-bottom:15px;">
-          <label style="color:white; font-size:11px; margin-bottom:6px;">Filtrer les pistes de ce disque (ex: taper "1." ou "A" ou "CD1")</label>
+          <label style="color:white; font-size:11px; margin-bottom:6px;">Importer les pistes de ce disque (remplace la liste)</label>
           <div style="display:flex; gap:6px; margin-bottom:6px;">
             <input type="text" id="editVolDiscogsId" placeholder="ID Discogs..." style="font-size:13px; padding:8px 10px; flex:3;" autocomplete="off">
             <button type="button" class="btn-secondary" style="flex:1; background:var(--accent-blue); color:white; padding:0 4px; font-size:12px;" onclick="fetchVolumeTracksFromDiscogs()">🔍 Charger</button>
           </div>
-          <input type="text" id="editVolTrackFilter" placeholder="Filtre (ex: 1., A1, CD1...)" style="font-size:13px; padding:8px 10px;" autocomplete="off">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:11px; color:var(--text-sub); white-space:nowrap;">Préfixe requis (ex: 1., 1-, A) :</span>
+            <input type="text" id="editVolTrackFilter" placeholder="ex: 1." style="font-size:13px; padding:6px 10px;" autocomplete="off">
+          </div>
         </div>
 
         <div class="form-group">
@@ -403,7 +405,6 @@
             <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
-          <!-- CHAMP DES PISTES RESTAURÉ POUR ALBUMS SIMPLES -->
           <div class="form-group" id="formTracksGroup">
             <label>Titres des morceaux (un par ligne)</label>
             <textarea id="formTracks" rows="6" placeholder="A1. Malaxe&#10;A2. La Nuit Je Mens..." style="font-size:14px; line-height:1.4; resize:vertical;"></textarea>
@@ -1185,8 +1186,11 @@
       document.getElementById("editVolIndex").value = volIdx;
       document.getElementById("editVolTitle").value = title;
       document.getElementById("editVolCover").value = cover;
-      document.getElementById("editVolDiscogsId").value = "";
-      document.getElementById("editVolTrackFilter").value = `1-${volIdx+1}`;
+      document.getElementById("editVolDiscogsId").value = album.discogsId || '';
+      
+      // Suggérer automatiquement le filtre selon le numéro du disque (ex: "1" pour Disque 1, "2" pour Disque 2...)
+      document.getElementById("editVolTrackFilter").value = (volIdx + 1).toString();
+
       document.getElementById("editVolTracks").value = tracks.map(t => {
         return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
       }).join('\n');
@@ -1196,7 +1200,7 @@
 
     async function fetchVolumeTracksFromDiscogs() {
       const discogsId = document.getElementById("editVolDiscogsId").value.trim();
-      const filterText = document.getElementById("editVolTrackFilter").value.trim().toLowerCase();
+      const filterPrefix = document.getElementById("editVolTrackFilter").value.trim().toLowerCase();
       if (!discogsId) {
         alert("Veuillez saisir un ID Discogs.");
         return;
@@ -1210,13 +1214,15 @@
         if (data.tracklist && data.tracklist.length > 0) {
           let tracks = data.tracklist;
           
-          if (filterText) {
+          if (filterPrefix) {
             tracks = tracks.filter(t => {
-              const pos = (t.position || '').toLowerCase();
-              return pos.startsWith(filterText) || pos.includes(filterText);
+              const pos = (t.position || '').trim().toLowerCase();
+              // Vérifie si la position commence par le filtre (ex: "1" matche "1", "1-1", "1.1", "A1" si filtré par A...)
+              return pos === filterPrefix || pos.startsWith(filterPrefix + '.') || pos.startsWith(filterPrefix + '-') || pos.startsWith(filterPrefix + ' ');
             });
             if (tracks.length === 0) {
-              tracks = data.tracklist; // fallback si le filtre ne matche rien
+              // Recherche plus souple si rien de strict trouvé
+              tracks = data.tracklist.filter(t => (t.position || '').toLowerCase().includes(filterPrefix));
             }
           }
 
@@ -1224,11 +1230,12 @@
             return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
           }).join('\n');
 
+          // REMPLACE TOTALEMENT la zone de texte (plus d'accumulation)
           document.getElementById("editVolTracks").value = fetched;
           if (data.images && data.images.length && !document.getElementById("editVolCover").value) {
             document.getElementById("editVolCover").value = data.images[0].resource_url || data.images[0].uri;
           }
-          alert("Pistes importées et filtrées pour ce disque avec succès !");
+          alert(`Pistes du disque chargées et remplacées (${tracks.length} pistes trouvées) !`);
         } else {
           alert("Aucune piste trouvée pour cet ID Discogs.");
         }
