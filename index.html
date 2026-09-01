@@ -324,12 +324,12 @@
           <input type="url" id="editVolCover" placeholder="https://..." autocomplete="off">
         </div>
 
-        <!-- RECHERCHE DISCOGS AUTOMATIQUE (FILTRAGE INTELLIGENT 1.x, 2.x...) -->
+        <!-- RECHERCHE DISCOGS SANS LOUPE POUR PLUS D'AIR -->
         <div class="form-group" style="background:#2c2c2e; padding:12px; border-radius:12px; margin-bottom:15px;">
           <label style="color:white; font-size:11px; margin-bottom:6px;">Extraction automatique des pistes Discogs pour ce disque</label>
           <div style="display:flex; gap:6px;">
             <input type="text" id="editVolDiscogsId" placeholder="ID Discogs..." style="font-size:13px; padding:8px 10px; flex:3;" autocomplete="off">
-            <button type="button" class="btn-submit" style="flex:1; padding:0 4px; font-size:13px;" onclick="fetchVolumeTracksFromDiscogs()">🔍 Isoler ce disque</button>
+            <button type="button" class="btn-submit" style="flex:1; padding:0 4px; font-size:13px;" onclick="fetchVolumeTracksFromDiscogs()">Isoler ce disque</button>
           </div>
           <div style="font-size:11px; color:var(--text-sub); margin-top:6px;">Détecte automatiquement les pistes de type 1.1, 1.2... pour le disque 1, 2.1, 2.2... pour le disque 2, etc.</div>
         </div>
@@ -1195,7 +1195,7 @@
     async function fetchVolumeTracksFromDiscogs() {
       const discogsId = document.getElementById("editVolDiscogsId").value.trim();
       const volIdx = parseInt(document.getElementById("editVolIndex").value) || 0;
-      const targetDiscNum = (volIdx + 1).toString(); // Disque 1 -> "1", Disque 2 -> "2", etc.
+      const targetDiscNum = (volIdx + 1).toString();
 
       if (!discogsId) {
         alert("Veuillez saisir un ID Discogs.");
@@ -1208,17 +1208,14 @@
         const data = await res.json();
 
         if (data.tracklist && data.tracklist.length > 0) {
-          // Filtrage automatique ultra-précis basé sur la numérotation Discogs (ex: "1.1", "1-1", ou commençant par "1.")
           let tracks = data.tracklist.filter(t => {
             const pos = (t.position || '').trim();
-            // Vérifie si la position commence par "N." ou "N-" ou "N" (où N est le numéro du disque)
             return pos === targetDiscNum || 
                    pos.startsWith(targetDiscNum + '.') || 
                    pos.startsWith(targetDiscNum + '-') ||
                    pos.startsWith(targetDiscNum + ' ');
           });
 
-          // Si le format de la release n'a pas de préfixe de disque (ex: juste 1, 2, 3... par disque sans point), on découpe par tranches ou on prend tout si c'est un disque unique
           if (tracks.length === 0) {
             tracks = data.tracklist; 
           }
@@ -1227,7 +1224,6 @@
             return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
           }).join('\n');
 
-          // Remplace proprement la liste existante pour ce disque sans rien cumuler
           document.getElementById("editVolTracks").value = fetched;
           if (data.images && data.images.length && !document.getElementById("editVolCover").value) {
             document.getElementById("editVolCover").value = data.images[0].resource_url || data.images[0].uri;
