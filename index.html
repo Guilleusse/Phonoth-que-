@@ -173,7 +173,7 @@
 </head>
 <body>
 
-  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026</div>
+  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — 01-09-2026 20:30</div>
 
   <header>
     <div class="top-bar">
@@ -869,7 +869,7 @@
         subParts.push(`<b>${album.artist}</b>`);
       }
       if (album.label) subParts.push(album.label);
-      if (album.catalogNumber) subParts.push(`<span style="color:var(--accent-blue);">${album.catalogNumber}</span>`);
+      // Le numéro de catalogue a été retiré ici pour alléger l'affichage
       if (album.year) subParts.push(album.year);
       if (album.country) {
         const cleanCountry = (album.country || '').replace(/"/g, '&quot;');
@@ -1683,7 +1683,7 @@
                   isAudiophile: cols[16] === 'true',
                   discsCount: parseInt(cols[17]) || 0,
                   volumes: [],
-                    tracks: []
+                  tracks: []
                 });
               }
             }
@@ -1702,7 +1702,6 @@
       event.target.value = '';
     }
 
-    // EXPORT CORRIGÉ : Téléchargement direct sans fichier .txt parasite
     function exportToCSV() {
       let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;DiscsCount;Volumes;Tracks\n";
       collection.forEach(a => {
