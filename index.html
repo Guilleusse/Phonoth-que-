@@ -324,22 +324,19 @@
           <input type="url" id="editVolCover" placeholder="https://..." autocomplete="off">
         </div>
 
-        <!-- RECHERCHE DISCOGS DÉDIÉE AU DISQUE AVEC FILTRE EXACT -->
-        <div class="form-group" style="background:#2c2c2e; padding:10px; border-radius:10px; margin-bottom:15px;">
-          <label style="color:white; font-size:11px; margin-bottom:6px;">Importer les pistes de ce disque (remplace la liste)</label>
-          <div style="display:flex; gap:6px; margin-bottom:6px;">
+        <!-- RECHERCHE DISCOGS AUTOMATIQUE (FILTRAGE INTELLIGENT 1.x, 2.x...) -->
+        <div class="form-group" style="background:#2c2c2e; padding:12px; border-radius:12px; margin-bottom:15px;">
+          <label style="color:white; font-size:11px; margin-bottom:6px;">Extraction automatique des pistes Discogs pour ce disque</label>
+          <div style="display:flex; gap:6px;">
             <input type="text" id="editVolDiscogsId" placeholder="ID Discogs..." style="font-size:13px; padding:8px 10px; flex:3;" autocomplete="off">
-            <button type="button" class="btn-secondary" style="flex:1; background:var(--accent-blue); color:white; padding:0 4px; font-size:12px;" onclick="fetchVolumeTracksFromDiscogs()">🔍 Charger</button>
+            <button type="button" class="btn-submit" style="flex:1; padding:0 4px; font-size:13px;" onclick="fetchVolumeTracksFromDiscogs()">🔍 Isoler ce disque</button>
           </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span style="font-size:11px; color:var(--text-sub); white-space:nowrap;">Préfixe requis (ex: 1., 1-, A) :</span>
-            <input type="text" id="editVolTrackFilter" placeholder="ex: 1." style="font-size:13px; padding:6px 10px;" autocomplete="off">
-          </div>
+          <div style="font-size:11px; color:var(--text-sub); margin-top:6px;">Détecte automatiquement les pistes de type 1.1, 1.2... pour le disque 1, 2.1, 2.2... pour le disque 2, etc.</div>
         </div>
 
         <div class="form-group">
           <label>Titres des morceaux de ce disque (un par ligne)</label>
-          <textarea id="editVolTracks" rows="8" placeholder="1. Roman Photos&#10;2. L'Amour C'Est Pas Confortable..." style="font-size:14px; line-height:1.4; resize:vertical;"></textarea>
+          <textarea id="editVolTracks" rows="8" placeholder="1.1. Roman Photos&#10;1.2. L'Amour C'Est Pas Confortable..." style="font-size:14px; line-height:1.4; resize:vertical;"></textarea>
         </div>
         <button type="button" class="btn-submit" onclick="saveEditedVolume()">Enregistrer ce disque</button>
       </div>
@@ -1187,9 +1184,6 @@
       document.getElementById("editVolTitle").value = title;
       document.getElementById("editVolCover").value = cover;
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
-      
-      // Suggérer automatiquement le filtre selon le numéro du disque (ex: "1" pour Disque 1, "2" pour Disque 2...)
-      document.getElementById("editVolTrackFilter").value = (volIdx + 1).toString();
 
       document.getElementById("editVolTracks").value = tracks.map(t => {
         return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
@@ -1200,7 +1194,9 @@
 
     async function fetchVolumeTracksFromDiscogs() {
       const discogsId = document.getElementById("editVolDiscogsId").value.trim();
-      const filterPrefix = document.getElementById("editVolTrackFilter").value.trim().toLowerCase();
+      const volIdx = parseInt(document.getElementById("editVolIndex").value) || 0;
+      const targetDiscNum = (volIdx + 1).toString(); // Disque 1 -> "1", Disque 2 -> "2", etc.
+
       if (!discogsId) {
         alert("Veuillez saisir un ID Discogs.");
         return;
@@ -1212,30 +1208,31 @@
         const data = await res.json();
 
         if (data.tracklist && data.tracklist.length > 0) {
-          let tracks = data.tracklist;
-          
-          if (filterPrefix) {
-            tracks = tracks.filter(t => {
-              const pos = (t.position || '').trim().toLowerCase();
-              // Vérifie si la position commence par le filtre (ex: "1" matche "1", "1-1", "1.1", "A1" si filtré par A...)
-              return pos === filterPrefix || pos.startsWith(filterPrefix + '.') || pos.startsWith(filterPrefix + '-') || pos.startsWith(filterPrefix + ' ');
-            });
-            if (tracks.length === 0) {
-              // Recherche plus souple si rien de strict trouvé
-              tracks = data.tracklist.filter(t => (t.position || '').toLowerCase().includes(filterPrefix));
-            }
+          // Filtrage automatique ultra-précis basé sur la numérotation Discogs (ex: "1.1", "1-1", ou commençant par "1.")
+          let tracks = data.tracklist.filter(t => {
+            const pos = (t.position || '').trim();
+            // Vérifie si la position commence par "N." ou "N-" ou "N" (où N est le numéro du disque)
+            return pos === targetDiscNum || 
+                   pos.startsWith(targetDiscNum + '.') || 
+                   pos.startsWith(targetDiscNum + '-') ||
+                   pos.startsWith(targetDiscNum + ' ');
+          });
+
+          // Si le format de la release n'a pas de préfixe de disque (ex: juste 1, 2, 3... par disque sans point), on découpe par tranches ou on prend tout si c'est un disque unique
+          if (tracks.length === 0) {
+            tracks = data.tracklist; 
           }
 
           const fetched = tracks.map(t => {
             return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
           }).join('\n');
 
-          // REMPLACE TOTALEMENT la zone de texte (plus d'accumulation)
+          // Remplace proprement la liste existante pour ce disque sans rien cumuler
           document.getElementById("editVolTracks").value = fetched;
           if (data.images && data.images.length && !document.getElementById("editVolCover").value) {
             document.getElementById("editVolCover").value = data.images[0].resource_url || data.images[0].uri;
           }
-          alert(`Pistes du disque chargées et remplacées (${tracks.length} pistes trouvées) !`);
+          alert(`Disque ${targetDiscNum} isolé et chargé avec succès (${tracks.length} pistes) !`);
         } else {
           alert("Aucune piste trouvée pour cet ID Discogs.");
         }
@@ -1258,7 +1255,7 @@
       if (tracksText) {
         parsedTracks = tracksText.split('\n').map(line => {
           const cleanLine = line.trim();
-          const match = cleanLine.match(/^([A-Za-z0-9]+[.-]?)\s*(.*)$/);
+          const match = cleanLine.match(/^([A-Za-z0-9.]+)\s+(.*)$/);
           if (match && match[2]) {
             return { position: match[1].replace(/[.-]$/, ''), title: match[2], duration: '' };
           }
@@ -1417,7 +1414,7 @@
       if (!isBoxSet && tracksText) {
         manualTracks = tracksText.split('\n').map(line => {
           const cleanLine = line.trim();
-          const match = cleanLine.match(/^([A-Za-z0-9]+[.-]?)\s*(.*)$/);
+          const match = cleanLine.match(/^([A-Za-z0-9.]+)\s+(.*)$/);
           if (match && match[2]) {
             return { position: match[1].replace(/[.-]$/, ''), title: match[2], duration: '' };
           }
