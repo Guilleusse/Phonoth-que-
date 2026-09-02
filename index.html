@@ -173,7 +173,7 @@
 </head>
 <body>
 
-  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 01:55</div>
+  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 01:32</div>
 
   <header>
     <div class="top-bar">
@@ -283,9 +283,9 @@
         <button id="buyWantlistBtn" class="btn-submit" style="background:#10b981; display:none; margin-bottom:15px;" onclick="convertToPurchased()">🛒 J'ai acheté cet album !</button>
 
         <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 10px;">
-          <a id="discogsLink" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center; cursor:pointer;" onclick="openExternalUrl(event, this.dataset.url)">⚫️ Voir sur Discogs</a>
-          <a id="fnacLink" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center; cursor:pointer;" onclick="openExternalUrl(event, this.dataset.url)">🟡 Voir sur FNAC</a>
-          <a id="jpcLink" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center; cursor:pointer;" onclick="openExternalUrl(event, this.dataset.url)">🟢 Voir sur JPC</a>
+          <a id="discogsLink" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center; cursor:pointer;" onclick="openExternalLink(this.dataset.url)">⚫️ Voir sur Discogs</a>
+          <a id="fnacLink" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center; cursor:pointer;" onclick="openExternalLink(this.dataset.url)">🟡 Voir sur FNAC</a>
+          <a id="jpcLink" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center; cursor:pointer;" onclick="openExternalLink(this.dataset.url)">🟢 Voir sur JPC</a>
         </div>
       </div>
     </div>
@@ -1033,10 +1033,9 @@
       document.getElementById("detailsModal").classList.add("active");
     }
 
-    function openExternalUrl(e, url) {
-      if (e) e.preventDefault();
+    function openExternalLink(url) {
       if (url) {
-        window.open(url, '_blank');
+        window.open(url, '_system');
       }
     }
 
