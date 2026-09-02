@@ -173,7 +173,7 @@
 </head>
 <body>
 
-  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 02-09-2026 01:32</div>
+  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 01:32</div>
 
   <header>
     <div class="top-bar">
@@ -283,9 +283,9 @@
         <button id="buyWantlistBtn" class="btn-submit" style="background:#10b981; display:none; margin-bottom:15px;" onclick="convertToPurchased()">🛒 J'ai acheté cet album !</button>
 
         <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 10px;">
-          <a id="discogsLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">⚫️ Voir sur Discogs</a>
-          <a id="fnacLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">🟡 Voir sur FNAC</a>
-          <a id="jpcLink" target="_blank" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center;">🟢 Voir sur JPC</a>
+          <a id="discogsLink" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center; cursor:pointer;" onclick="openExternalLink(this.dataset.url)">⚫️ Voir sur Discogs</a>
+          <a id="fnacLink" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center; cursor:pointer;" onclick="openExternalLink(this.dataset.url)">🟡 Voir sur FNAC</a>
+          <a id="jpcLink" class="btn-secondary" style="text-decoration:none; display:none; justify-content:center; cursor:pointer;" onclick="openExternalLink(this.dataset.url)">🟢 Voir sur JPC</a>
         </div>
       </div>
     </div>
@@ -1005,7 +1005,7 @@
 
       const discogsBtn = document.getElementById("discogsLink");
       if (album.discogsId) {
-        discogsBtn.href = `https://www.discogs.com/release/${album.discogsId}`;
+        discogsBtn.dataset.url = `https://www.discogs.com/release/${album.discogsId}`;
         discogsBtn.style.display = 'inline-flex';
       } else { discogsBtn.style.display = 'none'; }
 
@@ -1014,10 +1014,10 @@
       const jpcBtn = document.getElementById("jpcLink");
 
       if (searchQuery) {
-        fnacBtn.href = `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${searchQuery}`;
+        fnacBtn.dataset.url = `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${searchQuery}`;
         fnacBtn.style.display = 'inline-flex';
 
-        jpcBtn.href = `https://www.jpc.de/s/${searchQuery}`;
+        jpcBtn.dataset.url = `https://www.jpc.de/s/${searchQuery}`;
         jpcBtn.style.display = 'inline-flex';
       } else {
         fnacBtn.style.display = 'none';
@@ -1031,6 +1031,12 @@
       } else { volSection.style.display = 'none'; }
 
       document.getElementById("detailsModal").classList.add("active");
+    }
+
+    function openExternalLink(url) {
+      if (url) {
+        window.open(url, '_system');
+      }
     }
 
     function convertToPurchased() {
@@ -1124,7 +1130,6 @@
       document.getElementById("bulkModal").classList.add("active");
     }
 
-    // COLLAGE EN MASSE DES NOMS DE DISQUES/ALBUMS (Une ligne = un titre de disque)
     function submitBulkVolumes() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
@@ -1135,7 +1140,6 @@
         
         if (!album.volumes) album.volumes = [];
 
-        // Attribue chaque ligne de texte au titre d'un disque du coffret
         lines.forEach((line, idx) => {
           if (album.volumes[idx]) {
             album.volumes[idx].title = line;
