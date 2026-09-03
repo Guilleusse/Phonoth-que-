@@ -134,10 +134,28 @@
     .filter-chip.active { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
     .filter-chip-wantlist { margin-left: auto; }
     
-    /* MODIFICATION ICI : scroll-margin-top passé de 290px à 260px */
-    .artist-group-header { font-size: 18px; font-weight: 700; color: var(--accent-blue); margin: 15px 0 10px 0; display: flex; justify-content: flex-start; align-items: baseline; gap: 8px; scroll-margin-top: 335px; }
+    /* GESTION RESPONSIVE DE L'ENTÊTE DES ARTISTES */
+    /* Valeur pour les mobiles */
+    .artist-group-header { 
+      font-size: 18px; 
+      font-weight: 700; 
+      color: var(--accent-blue); 
+      margin: 15px 0 10px 0; 
+      display: flex; 
+      justify-content: flex-start; 
+      align-items: baseline; 
+      gap: 8px; 
+      scroll-margin-top: 300px; /* À affiner selon le besoin exact */
+    }
     .artist-group-header:first-of-type { margin-top: 0px; }
     
+    /* Valeur pour les grands écrans (PC/Mac) */
+    @media (min-width: 768px) {
+      .artist-group-header {
+        scroll-margin-top: 260px;
+      }
+    }
+
     .artist-count { font-size: 13px; color: var(--text-sub); font-weight: normal; }
     .album-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; margin-bottom: 10px; display: flex; gap: 12px; position: relative; cursor: pointer; }
     .cover-box { width: 75px; height: 75px; border-radius: 10px; background: #2a2a2a; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-sub); font-size: 10px; text-align: center; }
@@ -225,7 +243,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 16:15</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 17:08</div>
 
     <header>
       <div class="top-bar">
