@@ -155,8 +155,11 @@
     .card-actions { position: absolute; right: 12px; bottom: 12px; }
     .card-delete-top { position: absolute; right: 12px; top: 12px; }
     .card-action-btn { background: none; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; }
-    .az-index { position: fixed; right: 4px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 1px; z-index: 10; font-size: 9px; font-weight: bold; color: var(--text-sub); background: rgba(18, 18, 18, 0.75); padding: 4px 2px; border-radius: 10px; backdrop-filter: blur(5px); }
+    
+    /* MODIFICATION ICI : top: calc(50% + 140px); pour descendre la barre */
+    .az-index { position: fixed; right: 4px; top: calc(50% + 140px); transform: translateY(-50%); display: flex; flex-direction: column; gap: 1px; z-index: 10; font-size: 9px; font-weight: bold; color: var(--text-sub); background: rgba(18, 18, 18, 0.75); padding: 4px 2px; border-radius: 10px; backdrop-filter: blur(5px); }
     .az-index a { color: inherit; text-decoration: none; text-align: center; width: 14px; }
+    
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; z-index: 1000; }
     .modal-overlay.active { display: flex; }
     .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 98vh; max-height: 98dvh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); }
@@ -190,7 +193,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 14:15</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 14:28</div>
 
     <header>
       <div class="top-bar">
