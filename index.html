@@ -42,16 +42,32 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    
     body { 
       background-color: var(--bg-color); 
       color: var(--text-main); 
-      padding-top: calc(env(safe-area-inset-top) + 12px);
       padding-bottom: 80px;
       padding-left: 15px;
       padding-right: 25px;
       max-width: 650px; 
       margin: 0 auto; 
     }
+
+    .sticky-zone {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-color);
+      z-index: 100;
+      padding-top: calc(env(safe-area-inset-top) + 12px);
+      padding-bottom: 12px;
+      margin-left: -15px;
+      margin-right: -25px;
+      padding-left: 15px;
+      padding-right: 25px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
     header { margin-bottom: 0px; }
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
@@ -117,7 +133,7 @@
     .filter-chip { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-sub); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
     .filter-chip.active { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
     .filter-chip-wantlist { margin-left: auto; }
-    .artist-group-header { font-size: 18px; font-weight: 700; color: var(--accent-blue); margin: 15px 0 10px 0; display: flex; justify-content: flex-start; align-items: baseline; gap: 8px; scroll-margin-top: 45px; }
+    .artist-group-header { font-size: 18px; font-weight: 700; color: var(--accent-blue); margin: 15px 0 10px 0; display: flex; justify-content: flex-start; align-items: baseline; gap: 8px; scroll-margin-top: 290px; }
     .artist-group-header:first-of-type { margin-top: 0px; }
     .artist-count { font-size: 13px; color: var(--text-sub); font-weight: normal; }
     .album-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; margin-bottom: 10px; display: flex; gap: 12px; position: relative; cursor: pointer; }
@@ -173,52 +189,54 @@
 </head>
 <body>
 
-  <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 01:32</div>
+  <div class="sticky-zone">
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 14:15</div>
 
-  <header>
-    <div class="top-bar">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <h1>Phonothèque</h1>
-        <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation avec Firebase..."></div>
+    <header>
+      <div class="top-bar">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <h1>Phonothèque</h1>
+          <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation avec Firebase..."></div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="getRandomAlbum()" title="Album au hasard">🎲</button>
+          <button class="icon-btn btn-add" onclick="openAddModal()">+</button>
+        </div>
       </div>
-      <div class="header-actions">
-        <button class="icon-btn" onclick="getRandomAlbum()" title="Album au hasard">🎲</button>
-        <button class="icon-btn btn-add" onclick="openAddModal()">+</button>
+      <div class="stats-line" id="statsLine">Chargement des albums...</div>
+
+      <div class="io-bar">
+        <button class="btn-secondary" onclick="exportToCSV()">📤 Exporter</button>
+        <button class="btn-secondary" onclick="document.getElementById('csvInput').click()">📥 Importer</button>
+        <button class="btn-secondary btn-danger-soft" onclick="clearCollection()">🗑️ Vider</button>
+        <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="importFromCSV(event)">
       </div>
-    </div>
-    <div class="stats-line" id="statsLine">Chargement des albums...</div>
 
-    <div class="io-bar">
-      <button class="btn-secondary" onclick="exportToCSV()">📤 Exporter</button>
-      <button class="btn-secondary" onclick="document.getElementById('csvInput').click()">📥 Importer</button>
-      <button class="btn-secondary btn-danger-soft" onclick="clearCollection()">🗑️ Vider</button>
-      <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="importFromCSV(event)">
-    </div>
-
-    <div class="search-row">
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍  Titre, artiste, genre, éditeur, réf..." oninput="onSearchInput()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-        <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">✕</button>
+      <div class="search-row">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔍  Titre, artiste, genre, éditeur, réf..." oninput="onSearchInput()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">✕</button>
+        </div>
+        <select id="sortSelect" class="sort-select" onchange="renderCollection()">
+          <option value="artist-az">Artiste (A-Z)</option>
+          <option value="artist-za">Artiste (Z-A)</option>
+          <option value="title-az">Titre (A-Z)</option>
+          <option value="purchase-desc">Date d'achat (Récents)</option>
+          <option value="year-desc">Année sortie (Récents)</option>
+          <option value="year-asc">Année sortie (Anciens)</option>
+        </select>
       </div>
-      <select id="sortSelect" class="sort-select" onchange="renderCollection()">
-        <option value="artist-az">Artiste (A-Z)</option>
-        <option value="artist-za">Artiste (Z-A)</option>
-        <option value="title-az">Titre (A-Z)</option>
-        <option value="purchase-desc">Date d'achat (Récents)</option>
-        <option value="year-desc">Année sortie (Récents)</option>
-        <option value="year-asc">Année sortie (Anciens)</option>
-      </select>
-    </div>
 
-    <div class="filters-scroll">
-      <button class="filter-chip active" onclick="setFilter('all', this)">Tous</button>
-      <button class="filter-chip" onclick="setFilter('Vinyle', this)">Vinyles</button>
-      <button class="filter-chip" onclick="setFilter('CD', this)">CD</button>
-      <button class="filter-chip" onclick="setFilter('SACD', this)">SACD</button>
-      <button class="filter-chip" onclick="setFilter('Coffret', this)">Coffrets</button>
-      <button class="filter-chip filter-chip-wantlist" onclick="setFilter('Wantlist', this)">Liste de souhaits</button>
-    </div>
-  </header>
+      <div class="filters-scroll">
+        <button class="filter-chip active" onclick="setFilter('all', this)">Tous</button>
+        <button class="filter-chip" onclick="setFilter('Vinyle', this)">Vinyles</button>
+        <button class="filter-chip" onclick="setFilter('CD', this)">CD</button>
+        <button class="filter-chip" onclick="setFilter('SACD', this)">SACD</button>
+        <button class="filter-chip" onclick="setFilter('Coffret', this)">Coffrets</button>
+        <button class="filter-chip filter-chip-wantlist" onclick="setFilter('Wantlist', this)">Liste de souhaits</button>
+      </div>
+    </header>
+  </div>
 
   <main id="collectionContainer"></main>
   <div class="az-index" id="azIndex"></div>
