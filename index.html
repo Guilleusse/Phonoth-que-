@@ -156,10 +156,40 @@
     .card-delete-top { position: absolute; right: 12px; top: 12px; }
     .card-action-btn { background: none; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; }
     
-    /* MODIFICATION ICI : top: calc(50% + 140px); pour descendre la barre */
     .az-index { position: fixed; right: 4px; top: calc(50% + 140px); transform: translateY(-50%); display: flex; flex-direction: column; gap: 1px; z-index: 10; font-size: 9px; font-weight: bold; color: var(--text-sub); background: rgba(18, 18, 18, 0.75); padding: 4px 2px; border-radius: 10px; backdrop-filter: blur(5px); }
     .az-index a { color: inherit; text-decoration: none; text-align: center; width: 14px; }
     
+    /* Bouton Retour en haut discret */
+    .back-to-top-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 42px;
+      height: 42px;
+      background: rgba(30, 30, 30, 0.85);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      backdrop-filter: blur(5px);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .back-to-top-btn.visible {
+      opacity: 0.75;
+      pointer-events: auto;
+    }
+    .back-to-top-btn:active {
+      transform: scale(0.92);
+    }
+
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; z-index: 1000; }
     .modal-overlay.active { display: flex; }
     .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 98vh; max-height: 98dvh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); }
@@ -193,7 +223,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 14:28</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 15:50</div>
 
     <header>
       <div class="top-bar">
@@ -243,6 +273,9 @@
 
   <main id="collectionContainer"></main>
   <div class="az-index" id="azIndex"></div>
+
+  <!-- Bouton Retour en haut -->
+  <button id="backToTopBtn" class="back-to-top-btn" onclick="scrollToTop()" title="Revenir en haut">↑</button>
 
   <!-- MODALE CONNEXION -->
   <div class="modal-overlay" id="loginModal" style="align-items: center;">
@@ -528,6 +561,21 @@
     let html5QrCode = null;
     let savedScrollPosition = 0;
     let currentFetchedTracks = [];
+
+    // Gestion de l'affichage du bouton retour en haut au défilement
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('backToTopBtn');
+      if (!btn) return;
+      if (window.scrollY > 400) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     function handleCoverFileSelect(event) {
       const file = event.target.files[0];
