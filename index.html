@@ -135,7 +135,6 @@
     .filter-chip-wantlist { margin-left: auto; }
     
     /* GESTION RESPONSIVE DE L'ENTÊTE DES ARTISTES */
-    /* Valeur pour les mobiles */
     .artist-group-header { 
       font-size: 18px; 
       font-weight: 700; 
@@ -145,11 +144,10 @@
       justify-content: flex-start; 
       align-items: baseline; 
       gap: 8px; 
-      scroll-margin-top: 380px; /* À affiner selon le besoin exact */
+      scroll-margin-top: 300px; 
     }
     .artist-group-header:first-of-type { margin-top: 0px; }
     
-    /* Valeur pour les grands écrans (PC/Mac) */
     @media (min-width: 768px) {
       .artist-group-header {
         scroll-margin-top: 260px;
@@ -243,7 +241,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 03-09-2026 17:08</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 04-09-2026 02:19</div>
 
     <header>
       <div class="top-bar">
@@ -1069,9 +1067,10 @@
       const trackBox = document.getElementById("tracksList");
       if (!album.isBoxSet && album.tracks && album.tracks.length > 0) {
         trackSection.style.display = 'block';
+        /* CORRECTION ICI : passage de var(--accent-blue) à var(--text-sub) pour le numéro de piste */
         trackBox.innerHTML = album.tracks.map((t, i) => `
           <div style="font-size:13px; padding:6px 0; border-bottom:1px solid #3a3a3c; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-            <span style="color:white;"><b style="color:var(--accent-blue);">${t.position || (i+1)}</b>. ${t.title || ''}</span>
+            <span style="color:white;"><b style="color:var(--text-sub);">${t.position || (i+1)}</b>. ${t.title || ''}</span>
             <span style="color:var(--text-sub); font-size:11px; flex-shrink:0;">${t.duration || ''}</span>
           </div>
         `).join('');
