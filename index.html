@@ -241,7 +241,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 04-09-2026 04:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 05-09-2026 03:14</div>
 
     <header>
       <div class="top-bar">
@@ -331,6 +331,7 @@
 
         <div class="details-grid">
           <div class="details-row"><span class="details-label">Support :</span><span class="details-val" id="modalDetailSupport"></span></div>
+          <div class="details-row" id="rowSpeed"><span class="details-label">Vitesse (RPM) :</span><span class="details-val" id="modalDetailSpeed"></span></div>
           <div class="details-row" id="rowLabel"><span class="details-label">Éditeur / Label :</span><span class="details-val" id="modalDetailLabel"></span></div>
           <div class="details-row" id="rowCatalog"><span class="details-label">Réf. Catalogue :</span><span class="details-val" id="modalDetailCatalog"></span></div>
           <div class="details-row"><span class="details-label">Genre / Style :</span><span class="details-val" id="modalDetailStyle"></span></div>
@@ -491,11 +492,17 @@
 
           <div class="form-group">
             <label>Support *</label>
-            <select id="formSupport">
+            <select id="formSupport" onchange="toggleVinylSpeedField()">
               <option value="Vinyle">Vinyle</option>
               <option value="CD">CD</option>
               <option value="SACD">SACD</option>
             </select>
+          </div>
+
+          <!-- Champ Vitesse Vinyle (affiché uniquement si Vinyle) -->
+          <div class="checkbox-group" id="vinylSpeedGroup" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
+            <input type="checkbox" id="is45RPM">
+            <label for="is45RPM" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Vinyle 45 Tours (RPM)</label>
           </div>
 
           <div class="form-row">
@@ -858,7 +865,8 @@
           });
           const matchTracks = album.tracks && album.tracks.some(t => matchText(t.title, search));
           const matchAudiophile = album.isAudiophile && matchText('audiophile', search);
-          return matchTitle || matchArtist || matchLabel || matchCatalog || matchConductor || matchCountry || matchStyle || matchVolumes || matchTracks || matchAudiophile;
+          const matchRPM = album.is45RPM && (search.includes('45') || search.includes('rpm'));
+          return matchTitle || matchArtist || matchLabel || matchCatalog || matchConductor || matchCountry || matchStyle || matchVolumes || matchTracks || matchAudiophile || matchRPM;
         }
         return true;
       });
@@ -1027,6 +1035,17 @@
       renderCollection();
     }
 
+    function toggleVinylSpeedField() {
+      const support = document.getElementById("formSupport").value;
+      const speedGroup = document.getElementById("vinylSpeedGroup");
+      if (support === 'Vinyle') {
+        speedGroup.style.display = 'flex';
+      } else {
+        speedGroup.style.display = 'none';
+        document.getElementById("is45RPM").checked = false;
+      }
+    }
+
     function showDetails(index) {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
@@ -1037,6 +1056,14 @@
       document.getElementById("modalDetailArtist").textContent = album.artist || '';
       document.getElementById("modalDetailSupport").textContent = album.isBoxSet ? `Coffret (${album.support})` : album.support;
       
+      const speedRow = document.getElementById("rowSpeed");
+      if (album.support === 'Vinyle') {
+        speedRow.style.display = 'flex';
+        document.getElementById("modalDetailSpeed").textContent = album.is45RPM ? "45 Tours (RPM)" : "33 Tours (RPM)";
+      } else {
+        speedRow.style.display = 'none';
+      }
+
       const labelRow = document.getElementById("rowLabel");
       if (album.label) {
         labelRow.style.display = 'flex';
@@ -1067,7 +1094,6 @@
       const trackBox = document.getElementById("tracksList");
       if (!album.isBoxSet && album.tracks && album.tracks.length > 0) {
         trackSection.style.display = 'block';
-        /* CORRECTION ICI : passage de var(--accent-blue) à var(--text-sub) pour le numéro de piste */
         trackBox.innerHTML = album.tracks.map((t, i) => `
           <div style="font-size:13px; padding:6px 0; border-bottom:1px solid #3a3a3c; display:flex; justify-content:space-between; align-items:center; gap:10px;">
             <span style="color:white;"><b style="color:var(--text-sub);">${t.position || (i+1)}</b>. ${t.title || ''}</span>
@@ -1393,6 +1419,7 @@
   
       document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
       document.getElementById("isAudiophile").checked = false;
+      document.getElementById("is45RPM").checked = false;
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
       document.getElementById("formLabel").value = '';
@@ -1410,6 +1437,7 @@
       document.getElementById("formCover").value = '';
       document.getElementById("formDiscsCount").value = '';
   
+      toggleVinylSpeedField();
       document.getElementById("isBoxSet").checked = false;
       toggleBoxSetFields();
       document.getElementById("formModal").classList.add("active");
@@ -1424,7 +1452,11 @@
   
       document.getElementById("isWantlist").checked = !!album.isWantlist;
       document.getElementById("isAudiophile").checked = !!album.isAudiophile;
+      document.getElementById("is45RPM").checked = !!album.is45RPM;
       document.getElementById("isBoxSet").checked = !!album.isBoxSet;
+      
+      document.getElementById("formSupport").value = album.support || 'Vinyle';
+      toggleVinylSpeedField();
       toggleBoxSetFields();
 
       document.getElementById("formTitle").value = album.title || '';
@@ -1442,7 +1474,6 @@
         document.getElementById("formTracks").value = '';
       }
 
-      document.getElementById("formSupport").value = album.support || 'Vinyle';
       document.getElementById("formYear").value = album.year || '';
       document.getElementById("formCountry").value = album.country || '';
       document.getElementById("formPurchaseDate").value = album.purchaseDate || '';
@@ -1490,6 +1521,8 @@
       const isBoxSet = document.getElementById("isBoxSet").checked;
       const isWantlist = document.getElementById("isWantlist").checked;
       const isAudiophile = document.getElementById("isAudiophile").checked;
+      const support = document.getElementById("formSupport").value;
+      const is45RPM = (support === 'Vinyle') ? document.getElementById("is45RPM").checked : false;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
   
       const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
@@ -1524,7 +1557,7 @@
         catalogNumber: document.getElementById("formCatalogNumber").value.trim(),
         style: document.getElementById("formStyle").value.trim(),
         conductor: document.getElementById("formConductor").value.trim(),
-        support: document.getElementById("formSupport").value,
+        support: support,
         year: document.getElementById("formYear").value.trim(),
         country: document.getElementById("formCountry").value.trim(),
         purchaseDate: document.getElementById("formPurchaseDate").value.trim(),
@@ -1535,6 +1568,7 @@
         isBoxSet: isBoxSet,
         isWantlist: isWantlist,
         isAudiophile: isAudiophile,
+        is45RPM: is45RPM,
         discsCount: discsCount,
         volumes: volumes,
         tracks: tracks
@@ -1778,7 +1812,8 @@
                   isBoxSet: cols[14] === 'true',
                   isWantlist: cols[15] === 'true',
                   isAudiophile: cols[16] === 'true',
-                  discsCount: parseInt(cols[17]) || 0,
+                  is45RPM: cols[17] === 'true',
+                  discsCount: parseInt(cols[18]) || 0,
                   volumes: [],
                   tracks: []
                 });
@@ -1800,7 +1835,7 @@
     }
 
     function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;DiscsCount;Volumes;Tracks\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
           if (typeof v === 'object' && v !== null) {
@@ -1812,7 +1847,7 @@
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
 
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.discsCount||0}";"${vols}";"${trks}"\n`;
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
