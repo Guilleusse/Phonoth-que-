@@ -241,7 +241,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 05-09-2026 03:14</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 05-09-2026 22:50</div>
 
     <header>
       <div class="top-bar">
@@ -824,7 +824,18 @@
 
           let p = 0;
           if (a.purchasePrice !== undefined && a.purchasePrice !== null) {
-            p = parseFloat(a.purchasePrice.toString().replace(',', '.')) || 0;
+            // NETTOYAGE ROBUSTE DU PRIX POUR GÉRER LES MILLIERS
+            let priceStr = a.purchasePrice.toString().replace(/[\s€a-zA-Z]/g, '');
+            if (priceStr.includes('.') && priceStr.includes(',')) {
+              if (priceStr.lastIndexOf(',') > priceStr.lastIndexOf('.')) {
+                priceStr = priceStr.replace(/\./g, '').replace(',', '.');
+              } else {
+                priceStr = priceStr.replace(/,/g, '');
+              }
+            } else if (priceStr.includes(',')) {
+              priceStr = priceStr.replace(',', '.');
+            }
+            p = parseFloat(priceStr) || 0;
           }
           totalPrice += p;
         }
