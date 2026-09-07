@@ -241,7 +241,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 00:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 01:00</div>
 
     <header>
       <div class="top-bar">
@@ -751,10 +751,6 @@
     }
 
     function saveCollection() {
-      // Mesure et affichage du poids de la collection dans la console
-      const dataSize = new Blob([JSON.stringify(collection)]).size;
-      console.log(`Poids total de la phonothèque : ${(dataSize / 1024).toFixed(2)} Ko`);
-
       localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
       if (db && auth && auth.currentUser) {
         showSpinner();
@@ -886,13 +882,17 @@
         }
       });
 
+      // Calcul du poids total de la phonothèque en Ko pour affichage direct sur l'interface
+      const dataSize = new Blob([JSON.stringify(collection)]).size;
+      const sizeKo = (dataSize / 1024).toFixed(1);
+
       const formattedTotal = totalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
       const totalOwned = collection.length - countWantlist;
 
       const statsElem = document.getElementById("statsLine");
       if (statsElem) {
         statsElem.innerHTML = 
-          `${totalDiscsPhysical} disques (${totalOwned} réf.) • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • ${countWantlist} souhaits`;
+          `${totalDiscsPhysical} disques (${totalOwned} réf.) • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • ${countWantlist} souhaits • 📦 ${sizeKo} Ko`;
       }
 
       let filtered = collection.filter((album) => {
