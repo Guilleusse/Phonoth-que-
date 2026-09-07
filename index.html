@@ -241,7 +241,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 07-09-2026 00:35</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 07-09-2026 17:05</div>
 
     <header>
       <div class="top-bar">
@@ -809,7 +809,7 @@
           const explicitDiscs = parseInt(a.discsCount) || 0;
           const subBoxes = (a.volumes && a.volumes.length > 0) ? a.volumes.length : 1;
 
-          const realBoxCount = a.isBoxSet ? subBoxes : 0;
+          const realBoxCount = a.isBoxSet ? 1 : 0;
           const realDiscsCount = explicitDiscs > 0 ? explicitDiscs : (a.isBoxSet ? subBoxes * 2 : 1);
 
           totalDiscsPhysical += realDiscsCount;
