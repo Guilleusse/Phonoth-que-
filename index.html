@@ -241,7 +241,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 01:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 13:20</div>
 
     <header>
       <div class="top-bar">
@@ -718,16 +718,47 @@
         });
     }
 
+    function getAlbumsRef() {
+      const user = auth.currentUser;
+      if (!user) return null;
+      return db.collection("phonotheque_v2").doc(user.uid).collection("albums");
+    }
+
     function subscribeFirestore() {
-      if (db) {
-        db.collection("phonotheque").doc("main").onSnapshot(doc => {
-          if (doc.exists && doc.data().list) {
-            collection = doc.data().list;
-            localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-            renderCollection();
-          }
-        }, err => console.log("Données locales conservées"));
-      }
+      const albumsRef = getAlbumsRef();
+      if (!albumsRef) return;
+
+      // Migration automatique depuis l'ancien document unique 'main' si besoin
+      const oldDocRef = db.collection("phonotheque").doc("main");
+      oldDocRef.get().then(doc => {
+        if (doc.exists && doc.data().list) {
+          const oldList = doc.data().list;
+          albumsRef.get().then(snapshot => {
+            if (snapshot.empty && oldList.length > 0) {
+              console.log("Migration vers l'architecture multi-documents...");
+              const batch = db.batch();
+              oldList.forEach(album => {
+                const newRef = albumsRef.doc();
+                const dataToSave = { ...album };
+                delete dataToSave.firestoreId;
+                batch.set(newRef, dataToSave);
+              });
+              batch.commit().then(() => {
+                console.log("Migration réussie !");
+              });
+            }
+          });
+        }
+      });
+
+      // Écoute en temps réel de la sous-collection Firestore
+      albumsRef.onSnapshot(snapshot => {
+        collection = snapshot.docs.map(doc => ({ firestoreId: doc.id, ...doc.data() }));
+        localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+        renderCollection();
+      }, err => {
+        console.log("Erreur de synchronisation subcollection", err);
+      });
     }
 
     function loadLocal() {
@@ -750,27 +781,69 @@
       if (s) s.style.display = "none";
     }
 
-    function saveCollection() {
+    function syncAlbumToFirestore(album) {
       localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
       if (db && auth && auth.currentUser) {
         showSpinner();
-        db.collection("phonotheque").doc("main").set({ list: collection })
-          .then(() => {
-            setTimeout(hideSpinner, 400);
-          })
-          .catch(err => {
-            console.log("Erreur synchro cloud", err);
-            hideSpinner();
-          });
+        const albumsRef = getAlbumsRef();
+        if (!albumsRef) return;
+
+        const dataToSave = { ...album };
+        delete dataToSave.firestoreId;
+
+        if (album.firestoreId) {
+          albumsRef.doc(album.firestoreId).set(dataToSave)
+            .then(() => setTimeout(hideSpinner, 300))
+            .catch(err => { console.log("Erreur MAJ album", err); hideSpinner(); });
+        } else {
+          albumsRef.add(dataToSave)
+            .then(docRef => {
+              album.firestoreId = docRef.id;
+              localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+              setTimeout(hideSpinner, 300);
+            })
+            .catch(err => { console.log("Erreur ajout album", err); hideSpinner(); });
+        }
+      }
+      renderCollection();
+    }
+
+    function deleteAlbumFromFirestore(firestoreId) {
+      localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+      if (db && auth && auth.currentUser && firestoreId) {
+        showSpinner();
+        const albumsRef = getAlbumsRef();
+        if (albumsRef) {
+          albumsRef.doc(firestoreId).delete()
+            .then(() => setTimeout(hideSpinner, 300))
+            .catch(err => { console.log("Erreur suppression album", err); hideSpinner(); });
+        }
       }
       renderCollection();
     }
 
     function clearCollection() {
       if (confirm("ATTENTION : Voulez-vous vraiment vider toute votre phonothèque ?")) {
-        collection = [];
-        saveCollection();
-        alert("La phonothèque a été vidée.");
+        const albumsRef = getAlbumsRef();
+        if (db && auth && auth.currentUser && albumsRef) {
+          showSpinner();
+          albumsRef.get().then(snapshot => {
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+            batch.commit().then(() => {
+              collection = [];
+              localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+              hideSpinner();
+              renderCollection();
+              alert("La phonothèque a été vidée.");
+            });
+          });
+        } else {
+          collection = [];
+          localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+          renderCollection();
+          alert("La phonothèque a été vidée.");
+        }
       }
     }
 
@@ -778,8 +851,9 @@
       if (e) e.stopPropagation();
       const album = collection[index];
       if (confirm(`Voulez-vous vraiment supprimer "${album.title || 'cet album'}" ?`)) {
+        const firestoreId = album.firestoreId;
         collection.splice(index, 1);
-        saveCollection();
+        deleteAlbumFromFirestore(firestoreId);
       }
     }
 
@@ -882,7 +956,6 @@
         }
       });
 
-      // Calcul du poids total de la phonothèque en Ko pour affichage direct sur l'interface
       const dataSize = new Blob([JSON.stringify(collection)]).size;
       const sizeKo = (dataSize / 1024).toFixed(1);
 
@@ -1216,7 +1289,7 @@
         if (!collection[selectedAlbumIndex].purchaseDate) {
           collection[selectedAlbumIndex].purchaseDate = today;
         }
-        saveCollection();
+        syncAlbumToFirestore(collection[selectedAlbumIndex]);
         closeModal("detailsModal");
         openEditModal(selectedAlbumIndex);
       }
@@ -1323,7 +1396,7 @@
         });
 
         album.discsCount = album.volumes.length;
-        saveCollection();
+        syncAlbumToFirestore(album);
         closeModal("bulkModal");
         showDetails(selectedAlbumIndex);
       }
@@ -1343,7 +1416,7 @@
           tracks: []
         });
         album.discsCount = album.volumes.length;
-        saveCollection();
+        syncAlbumToFirestore(album);
         showDetails(selectedAlbumIndex);
       }
     }
@@ -1443,7 +1516,7 @@
         tracks: parsedTracks
       };
 
-      saveCollection();
+      syncAlbumToFirestore(album);
       closeModal("editVolumeModal");
       showDetails(selectedAlbumIndex);
     }
@@ -1456,7 +1529,7 @@
       if (confirm(`Supprimer "${titleText}" ?`)) {
         album.volumes.splice(volIdx, 1);
         album.discsCount = album.volumes.length;
-        saveCollection();
+        syncAlbumToFirestore(album);
         showDetails(selectedAlbumIndex);
       }
     }
@@ -1606,7 +1679,10 @@
       const existingTracks = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].tracks) ? collection[selectedAlbumIndex].tracks : [];
       const tracks = isBoxSet ? [] : ((manualTracks.length > 0) ? manualTracks : ((currentFetchedTracks.length > 0) ? currentFetchedTracks : existingTracks));
 
+      const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
+
       const albumData = {
+        firestoreId: firestoreId,
         title: title,
         artist: artist,
         label: document.getElementById("formLabel").value.trim(),
@@ -1636,7 +1712,7 @@
         collection.unshift(albumData);
       }
 
-      saveCollection();
+      syncAlbumToFirestore(albumData);
       closeModal("formModal");
     }
 
@@ -1881,8 +1957,28 @@
         if (newAlbums.length > 0) {
           if (confirm(`Voulez-vous importer les ${newAlbums.length} références ?`)) {
             collection = newAlbums;
-            saveCollection();
-            alert("Importation réussie !");
+            localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+            
+            const albumsRef = getAlbumsRef();
+            if (db && auth && auth.currentUser && albumsRef) {
+              showSpinner();
+              albumsRef.get().then(snapshot => {
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                newAlbums.forEach(album => {
+                  const newRef = albumsRef.doc();
+                  batch.set(newRef, album);
+                });
+                batch.commit().then(() => {
+                  hideSpinner();
+                  renderCollection();
+                  alert("Importation et synchronisation réussies !");
+                });
+              });
+            } else {
+              renderCollection();
+              alert("Importation réussie !");
+            }
           }
         }
       };
