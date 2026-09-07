@@ -241,7 +241,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 07-09-2026 18:09</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 07-09-2026 22:27</div>
 
     <header>
       <div class="top-bar">
@@ -395,6 +395,8 @@
         <div class="form-group">
           <label>URL de la vignette (facultatif)</label>
           <input type="url" id="editVolCover" placeholder="https://..." autocomplete="off">
+          <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('editVolCoverFileInput').click()">Choisir une image (Photos / Fichiers)</button>
+          <input type="file" id="editVolCoverFileInput" accept="image/*" style="display:none;" onchange="handleEditVolCoverFileSelect(event)">
         </div>
 
         <div class="form-group" style="background:#2c2c2e; padding:12px; border-radius:12px; margin-bottom:15px;">
@@ -642,6 +644,46 @@
       event.target.value = '';
     }
 
+    function handleEditVolCoverFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement("canvas");
+          const maxDim = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
+          document.getElementById("editVolCover").value = dataUrl;
+          alert("Image du disque chargée et optimisée avec succès !");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
     function initApp() {
       loadLocal();
 
@@ -824,7 +866,6 @@
 
           let p = 0;
           if (a.purchasePrice !== undefined && a.purchasePrice !== null) {
-            // NETTOYAGE ROBUSTE DU PRIX POUR GÉRER LES MILLIERS
             let priceStr = a.purchasePrice.toString().replace(/[\s€a-zA-Z]/g, '');
             if (priceStr.includes('.') && priceStr.includes(',')) {
               if (priceStr.lastIndexOf(',') > priceStr.lastIndexOf('.')) {
