@@ -252,7 +252,7 @@ h1 {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 18:35</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 18:54</div>
 
     <header>
       <div class="top-bar">
@@ -600,6 +600,10 @@ h1 {
     let savedScrollPosition = 0;
     let currentFetchedTracks = [];
 
+    // Variables tampons pour stocker le Base64 en mémoire sans polluer les inputs texte
+    let pendingCoverBase64 = "";
+    let pendingEditVolCoverBase64 = "";
+
     // Gestion de l'affichage du bouton retour en haut au défilement
     window.addEventListener('scroll', () => {
       const btn = document.getElementById('backToTopBtn');
@@ -645,8 +649,8 @@ h1 {
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
 
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
-          document.getElementById("formCover").value = dataUrl;
+          pendingCoverBase64 = canvas.toDataURL("image/jpeg", 0.75);
+          document.getElementById("formCover").value = "✓ Image chargée en mémoire";
           alert("Image chargée et optimisée avec succès !");
         };
         img.src = e.target.result;
@@ -685,8 +689,8 @@ h1 {
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
 
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
-          document.getElementById("editVolCover").value = dataUrl;
+          pendingEditVolCoverBase64 = canvas.toDataURL("image/jpeg", 0.75);
+          document.getElementById("editVolCover").value = "✓ Image du disque chargée en mémoire";
           alert("Image du disque chargée et optimisée avec succès !");
         };
         img.src = e.target.result;
@@ -1437,9 +1441,11 @@ h1 {
       const cover = typeof current === 'object' ? (current.cover || '') : '';
       const tracks = (typeof current === 'object' && current.tracks) ? current.tracks : [];
 
+      pendingEditVolCoverBase64 = cover; // Charger en mémoire
+
       document.getElementById("editVolIndex").value = volIdx;
       document.getElementById("editVolTitle").value = title;
-      document.getElementById("editVolCover").value = cover;
+      document.getElementById("editVolCover").value = cover ? (cover.startsWith("data:image") ? "✓ Image chargée en mémoire" : cover) : "";
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
 
       document.getElementById("editVolTracks").value = tracks.map(t => {
@@ -1482,8 +1488,9 @@ h1 {
           }).join('\n');
 
           document.getElementById("editVolTracks").value = fetched;
-          if (data.images && data.images.length && !document.getElementById("editVolCover").value) {
-            document.getElementById("editVolCover").value = data.images[0].resource_url || data.images[0].uri;
+          if (data.images && data.images.length && !pendingEditVolCoverBase64) {
+            pendingEditVolCoverBase64 = data.images[0].resource_url || data.images[0].uri;
+            document.getElementById("editVolCover").value = pendingEditVolCoverBase64;
           }
           alert(`Disque ${targetDiscNum} isolé et chargé avec succès (${tracks.length} pistes) !`);
         } else {
@@ -1501,7 +1508,15 @@ h1 {
       if (isNaN(volIdx) || !album.volumes || !album.volumes[volIdx]) return;
 
       const newTitle = document.getElementById("editVolTitle").value.trim();
-      const newCover = document.getElementById("editVolCover").value.trim();
+      
+      // Utiliser l'image en mémoire si elle a été modifiée/chargée, sinon l'input
+      let newCover = pendingEditVolCoverBase64 || document.getElementById("editVolCover").value.trim();
+      if (newCover.startsWith("✓")) {
+        // Si le message d'aide est resté, on récupère l'ancienne image de l'objet
+        const current = album.volumes[volIdx];
+        newCover = (typeof current === 'object' ? current.cover : '') || '';
+      }
+
       const tracksText = document.getElementById("editVolTracks").value.trim();
 
       let parsedTracks = [];
@@ -1522,6 +1537,7 @@ h1 {
         tracks: parsedTracks
       };
 
+      pendingEditVolCoverBase64 = ""; // Reset
       syncAlbumToFirestore(album);
       closeModal("editVolumeModal");
       showDetails(selectedAlbumIndex);
@@ -1550,6 +1566,7 @@ h1 {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = -1;
       currentFetchedTracks = [];
+      pendingCoverBase64 = "";
       document.getElementById("formModalTitle").textContent = "Ajouter une référence";
   
       document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
@@ -1615,7 +1632,10 @@ h1 {
       document.getElementById("formPurchasePrice").value = album.purchasePrice || '';
       document.getElementById("formPurchaseLocation").value = album.purchaseLocation || '';
       document.getElementById("formDiscogsId").value = album.discogsId || '';
-      document.getElementById("formCover").value = album.cover || '';
+      
+      pendingCoverBase64 = album.cover || '';
+      document.getElementById("formCover").value = album.cover ? (album.cover.startsWith("data:image") ? "✓ Image chargée en mémoire" : album.cover) : '';
+      
       document.getElementById("formDiscsCount").value = album.discsCount || '';
 
       closeModal("detailsModal");
@@ -1687,6 +1707,12 @@ h1 {
 
       const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
 
+      // Récupération propre de l'URL ou du Base64 stocké en mémoire tampon
+      let finalCover = pendingCoverBase64 || document.getElementById("formCover").value.trim();
+      if (finalCover.startsWith("✓")) {
+        finalCover = (selectedAlbumIndex >= 0 ? collection[selectedAlbumIndex].cover : '') || '';
+      }
+
       const albumData = {
         firestoreId: firestoreId,
         title: title,
@@ -1702,7 +1728,7 @@ h1 {
         purchasePrice: document.getElementById("formPurchasePrice").value.trim(),
         purchaseLocation: document.getElementById("formPurchaseLocation").value.trim(),
         discogsId: discogsId,
-        cover: document.getElementById("formCover").value.trim(),
+        cover: finalCover,
         isBoxSet: isBoxSet,
         isWantlist: isWantlist,
         isAudiophile: isAudiophile,
@@ -1711,6 +1737,8 @@ h1 {
         volumes: volumes,
         tracks: tracks
       };
+
+      pendingCoverBase64 = ""; // Reset
 
       if (selectedAlbumIndex >= 0) {
         collection[selectedAlbumIndex] = albumData;
@@ -1857,7 +1885,10 @@ h1 {
 
         if (data.year) document.getElementById("formYear").value = data.year;
         if (data.country) document.getElementById("formCountry").value = data.country;
-        if (data.images && data.images.length) document.getElementById("formCover").value = data.images[0].resource_url || data.images[0].uri;
+        if (data.images && data.images.length) {
+          pendingCoverBase64 = data.images[0].resource_url || data.images[0].uri;
+          document.getElementById("formCover").value = pendingCoverBase64;
+        }
 
         if (data.tracklist && data.tracklist.length) {
           currentFetchedTracks = data.tracklist.map(t => ({
@@ -2060,8 +2091,17 @@ h1 {
                   const ctx = canvas.getContext("2d");
                   ctx.drawImage(img, 0, 0, width, height);
 
-                  input.value = canvas.toDataURL("image/jpeg", 0.75);
-                  console.log("Image du presse-papiers convertie et insérée avec succès.");
+                  const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
+                  
+                  // Stocker dans la bonne variable tampon selon l'input cible
+                  if (input.id === 'formCover') {
+                    pendingCoverBase64 = dataUrl;
+                  } else if (input.id === 'editVolCover') {
+                    pendingEditVolCoverBase64 = dataUrl;
+                  }
+
+                  input.value = "✓ Image chargée en mémoire";
+                  console.log("Image du presse-papiers interceptée et mise en tampon.");
                 };
                 img.src = event.target.result;
               };
