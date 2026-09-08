@@ -252,12 +252,12 @@ h1 {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 18:54</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 09-09-2026 00:25</div>
 
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
-          <h1>   Phonothèque</h1>
+          <h1>Phonothèque</h1>
           <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation avec Firebase..."></div>
         </div>
         <div class="header-actions">
@@ -975,7 +975,7 @@ h1 {
       const statsElem = document.getElementById("statsLine");
       if (statsElem) {
         statsElem.innerHTML = 
-          `${totalDiscsPhysical} disques (${totalOwned} réf.) • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • ${countWantlist} souhaits • ☁️ ${collection.length} réf/cloud`;
+          `${totalDiscsPhysical} disques (${totalOwned} réf.) • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • ${countWantlist} souhaits • ☁️ ${collection.length} Réf/Cloud`;
       }
 
       let filtered = collection.filter((album) => {
