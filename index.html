@@ -252,7 +252,7 @@ h1 {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 15:05</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 18:35</div>
 
     <header>
       <div class="top-bar">
@@ -2019,6 +2019,59 @@ h1 {
       link.click();
       document.body.removeChild(link);
     }
+
+    // Interception globale du collage d'images (App Photos iPhone/Mac) sur les champs URL
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlInputs = document.querySelectorAll('input[type="url"]');
+      urlInputs.forEach(input => {
+        input.addEventListener('paste', function(e) {
+          const items = (e.clipboardData || window.clipboardData).items;
+          if (!items) return;
+
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+              e.preventDefault();
+              const file = items[i].getAsFile();
+              if (!file) return;
+
+              const reader = new FileReader();
+              reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                  const canvas = document.createElement("canvas");
+                  const maxDim = 600;
+                  let width = img.width;
+                  let height = img.height;
+
+                  if (width > height) {
+                    if (width > maxDim) {
+                      height = Math.round((height * maxDim) / width);
+                      width = maxDim;
+                    }
+                  } else {
+                    if (height > maxDim) {
+                      width = Math.round((width * maxDim) / height);
+                      height = maxDim;
+                    }
+                  }
+
+                  canvas.width = width;
+                  canvas.height = height;
+                  const ctx = canvas.getContext("2d");
+                  ctx.drawImage(img, 0, 0, width, height);
+
+                  input.value = canvas.toDataURL("image/jpeg", 0.75);
+                  console.log("Image du presse-papiers convertie et insérée avec succès.");
+                };
+                img.src = event.target.result;
+              };
+              reader.readAsDataURL(file);
+              break;
+            }
+          }
+        });
+      });
+    });
 
     window.onload = initApp;
     loadLocal();
