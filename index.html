@@ -253,7 +253,7 @@ h1 {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 09-09-2026 01:05</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 09-09-2026 01:15</div>
 
     <header>
       <div class="top-bar">
@@ -338,8 +338,8 @@ h1 {
       </div>
       <div class="modal-body">
         <img id="modalDetailCover" class="modal-cover" src="" alt="Pochette">
-        <h2 id="modalDetailAlbumName" style="font-size: 20px;"></h2>
-        <h3 id="modalDetailArtist" style="font-size: 15px; color: var(--accent-blue); margin-bottom: 10px;"></h3>
+        <h2 id="modalDetailArtist" style="font-size: 20px; font-weight: 700; color: var(--accent-blue); margin-bottom: 2px;"></h2>
+        <h3 id="modalDetailAlbumName" style="font-size: 15px; font-weight: 600; color: var(--text-sub); margin-bottom: 15px;"></h3>
 
         <div class="details-grid">
           <div class="details-row"><span class="details-label">Support :</span><span class="details-val" id="modalDetailSupport"></span></div>
@@ -1190,8 +1190,8 @@ h1 {
       const album = collection[index];
 
       document.getElementById("modalDetailTitle").textContent = album.isWantlist ? "💡 Élément recherché (Wantlist)" : (album.isBoxSet ? "Détails du Coffret" : "Détails de l'album");
-      document.getElementById("modalDetailAlbumName").textContent = album.title || '';
       document.getElementById("modalDetailArtist").textContent = album.artist || '';
+      document.getElementById("modalDetailAlbumName").textContent = album.title || '';
       document.getElementById("modalDetailSupport").textContent = album.isBoxSet ? `Coffret (${album.support})` : album.support;
       
       const speedRow = document.getElementById("rowSpeed");
