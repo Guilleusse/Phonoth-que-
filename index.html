@@ -241,7 +241,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 13:20</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 08-09-2026 14:05</div>
 
     <header>
       <div class="top-bar">
@@ -728,7 +728,6 @@
       const albumsRef = getAlbumsRef();
       if (!albumsRef) return;
 
-      // Migration automatique depuis l'ancien document unique 'main' si besoin
       const oldDocRef = db.collection("phonotheque").doc("main");
       oldDocRef.get().then(doc => {
         if (doc.exists && doc.data().list) {
@@ -751,7 +750,6 @@
         }
       });
 
-      // Écoute en temps réel de la sous-collection Firestore
       albumsRef.onSnapshot(snapshot => {
         collection = snapshot.docs.map(doc => ({ firestoreId: doc.id, ...doc.data() }));
         localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
@@ -956,16 +954,13 @@
         }
       });
 
-      const dataSize = new Blob([JSON.stringify(collection)]).size;
-      const sizeKo = (dataSize / 1024).toFixed(1);
-
       const formattedTotal = totalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
       const totalOwned = collection.length - countWantlist;
 
       const statsElem = document.getElementById("statsLine");
       if (statsElem) {
         statsElem.innerHTML = 
-          `${totalDiscsPhysical} disques (${totalOwned} réf.) • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • ${countWantlist} souhaits • 📦 ${sizeKo} Ko`;
+          `${totalDiscsPhysical} disques (${totalOwned} réf.) • ${countVinyle} Vinyles • ${countCD} CD • ${countSACD} SACD • ${countCoffret} Coffrets • Valeur : ${formattedTotal} € • ${countWantlist} souhaits • ☁️ ${collection.length} en ligne`;
       }
 
       let filtered = collection.filter((album) => {
