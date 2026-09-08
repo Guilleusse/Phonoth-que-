@@ -170,7 +170,8 @@ h1 {
     .cover-box { width: 75px; height: 75px; border-radius: 10px; background: #2a2a2a; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-sub); font-size: 10px; text-align: center; }
     .cover-box img { width: 100%; height: 100%; object-fit: cover; }
     .album-info { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-right: 40px; }
-    .album-title { font-size: 15px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+    .album-artist { font-size: 16px; font-weight: 700; color: var(--accent-blue); line-height: 1.2; margin-bottom: 2px; }
+    .album-title { font-size: 13px; font-weight: 600; color: var(--text-sub); line-height: 1.3; margin-bottom: 4px; }
     .album-sub { font-size: 13px; color: var(--text-sub); line-height: 1.3; }
     .clickable-tag { color: var(--text-sub); text-decoration: underline; cursor: pointer; }
     .clickable-tag:hover { color: var(--text-main); }
@@ -252,7 +253,7 @@ h1 {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 09-09-2026 00:25</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 09-09-2026 01:05</div>
 
     <header>
       <div class="top-bar">
@@ -1103,9 +1104,6 @@ h1 {
       const coverSrc = album.cover ? album.cover : '';
 
       let subParts = [];
-      if (album.artist && (document.getElementById("sortSelect").value !== 'artist-az' && document.getElementById("sortSelect").value !== 'artist-za')) {
-        subParts.push(`<b>${album.artist}</b>`);
-      }
       if (album.label) subParts.push(album.label);
       if (album.year) subParts.push(album.year);
       if (album.country) {
@@ -1126,6 +1124,7 @@ h1 {
         </div>
         <div class="album-info">
           <span class="badge ${badgeClass}">${badgeText}</span>
+          <div class="album-artist">${album.artist || 'Artiste inconnu'}</div>
           <div class="album-title">${album.title || 'Sans titre'}</div>
           <div class="album-sub">${subText}</div>
           ${genreBadgesHtml}
