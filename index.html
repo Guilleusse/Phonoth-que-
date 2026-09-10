@@ -255,7 +255,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 03:20</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 03:32</div>
 
     <header>
       <div class="top-bar">
@@ -1790,12 +1790,8 @@
         html5QrCode = new Html5Qrcode("reader");
       }
 
-      // Demande explicite d'une haute résolution pour éviter le flou de près
-      const cameraConfig = { 
-        facingMode: "environment",
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      };
+      // Exactement 1 seule clé pour respecter la bibliothèque
+      const cameraConfig = { facingMode: "environment" };
 
       const config = { 
         fps: 30, 
@@ -1805,7 +1801,7 @@
           let height = Math.floor(width * 0.40);
           return { width: width, height: height };
         },
-        // Active le moteur natif de Safari/iOS (exactement comme MusicBuddy)
+        // Active le moteur natif de Safari / iOS
         experimentalFeatures: {
           useBarCodeDetectorIfSupported: true
         },
@@ -1814,7 +1810,13 @@
           Html5QrcodeSupportedFormats.EAN_8, 
           Html5QrcodeSupportedFormats.UPC_A, 
           Html5QrcodeSupportedFormats.UPC_E 
-        ]
+        ],
+        // Les contraintes de résolution haute définition se placent ici dans le config
+        videoConstraints: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "environment"
+        }
       };
 
       try {
