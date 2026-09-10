@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 04:19</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 04:38</div>
 
     <header>
       <div class="top-bar">
@@ -1801,9 +1801,17 @@
     async function startLiveScanner() {
       document.getElementById("scannerModal").classList.add("active");
   
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
+      // Nettoyage et destruction stricte de l'ancienne instance si elle existe pour éviter tout blocage
+      if (html5QrCode) {
+        try {
+          if (html5QrCode.isScanning) {
+            await html5QrCode.stop();
+          }
+          await html5QrCode.clear();
+        } catch(e) {}
       }
+
+      html5QrCode = new Html5Qrcode("reader");
 
       const cameraConfig = { facingMode: "environment" };
 
@@ -1827,7 +1835,8 @@
         videoConstraints: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
-          facingMode: "environment"
+          facingMode: "environment",
+          advanced: [{ focusMode: "continuous" }] // Force l'autofocus continu pour booster la sensibilité de détection
         }
       };
 
@@ -1854,6 +1863,7 @@
           if (html5QrCode.isScanning) {
             await html5QrCode.stop();
           }
+          await html5QrCode.clear();
         } catch(e) {}
       }
       document.getElementById("scannerModal").classList.remove("active");
