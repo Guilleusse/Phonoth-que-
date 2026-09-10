@@ -251,7 +251,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 02:18</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 02:28</div>
 
     <header>
       <div class="top-bar">
@@ -1786,12 +1786,8 @@
         html5QrCode = new Html5Qrcode("reader");
       }
 
-      // Contraintes vidéo HD pour forcer l'autofocus et la netteté sur Safari / iOS
-      const videoConstraints = {
-        facingMode: "environment",
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      };
+      // Correction : Respect du format exigé par html5-qrcode ({ facingMode: "environment" })
+      const cameraConfig = { facingMode: "environment" };
 
       const config = { 
         fps: 20, 
@@ -1806,7 +1802,7 @@
 
       try {
         await html5QrCode.start(
-          videoConstraints,
+          cameraConfig,
           config,
           async (decodedText) => {
             await stopLiveScanner();
