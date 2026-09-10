@@ -240,8 +240,12 @@
     .btn-danger { background: var(--danger); }
     .volumes-box { background: #2c2c2e; border-radius: 14px; padding: 12px; margin-top: 10px; }
     
-    #reader video { width: 100% !important; border-radius: 12px; }
-    #reader__scan_region { display: flex; justify-content: center; align-items: center; }
+    /* Styles personnalisés pour imiter MusicBuddy (Fenêtre de visée compacte et nette) */
+    #reader { border: none !important; background: transparent !important; }
+    #reader video { width: 100% !important; border-radius: 16px; object-fit: cover; }
+    #reader__dashboard { padding: 8px !important; }
+    #reader__dashboard_section_csr button { background: var(--card-bg) !important; color: white !important; border: 1px solid var(--card-border) !important; padding: 6px 12px !important; border-radius: 8px !important; font-size: 13px !important; }
+    #reader__scan_region { background: transparent !important; }
 
     /* Modal Connexion */
     #loginModal { z-index: 3000; }
@@ -251,7 +255,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 02:54</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 03:07</div>
 
     <header>
       <div class="top-bar">
@@ -1788,9 +1792,15 @@
 
       const cameraConfig = { facingMode: "environment" };
 
-      // Suppression de la contrainte qrbox pour scanner sur toute la surface vidéo
+      // Cadre de visée rectangulaire (qrbox) optimisé pour les codes-barres (style MusicBuddy)
       const config = { 
-        fps: 20, 
+        fps: 25, 
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+          let minSide = Math.min(viewfinderWidth, viewfinderHeight);
+          let width = Math.floor(minSide * 0.85);
+          let height = Math.floor(width * 0.35); // Format rectangulaire étiré idéal pour les codes-barres
+          return { width: width, height: height };
+        },
         formatsToSupport: [ 
           Html5QrcodeSupportedFormats.EAN_13, 
           Html5QrcodeSupportedFormats.EAN_8, 
@@ -2111,7 +2121,7 @@
                     pendingEditVolCoverBase64 = dataUrl;
                   }
 
-                  input.value = "✓ Image chargée en mémoire";
+                input.value = "✓ Image chargée en mémoire";
                 };
                 img.src = event.target.result;
               };
