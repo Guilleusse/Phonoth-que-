@@ -240,10 +240,25 @@
     .btn-danger { background: var(--danger); }
     .volumes-box { background: #2c2c2e; border-radius: 14px; padding: 12px; margin-top: 10px; }
     
-    /* Styles pour un rendu ultra propre et natif */
-    #reader { border: none !important; background: transparent !important; }
-    #reader video { width: 100% !important; border-radius: 16px; object-fit: cover; }
-    #reader__dashboard { padding: 8px !important; }
+    /* Styles stricts et verrouillés pour éviter tout décalage du flux vidéo sur iOS Safari */
+    #reader { 
+      position: relative !important;
+      width: 100% !important; 
+      height: 380px !important;
+      background: #000 !important; 
+      border-radius: 16px !important; 
+      overflow: hidden !important;
+      border: none !important;
+    }
+    #reader video { 
+      width: 100% !important; 
+      height: 100% !important; 
+      object-fit: cover !important; 
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+    }
+    #reader__dashboard { padding: 8px !important; position: relative !important; z-index: 10 !important; }
     #reader__dashboard_section_csr button { background: var(--card-bg) !important; color: white !important; border: 1px solid var(--card-border) !important; padding: 6px 12px !important; border-radius: 8px !important; font-size: 13px !important; }
     #reader__scan_region { background: transparent !important; }
 
@@ -255,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 03:58</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 04:19</div>
 
     <header>
       <div class="top-bar">
@@ -588,7 +603,7 @@
         <button class="modal-close" onclick="stopLiveScanner()">✕</button>
       </div>
       <div class="modal-body" style="padding:15px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <div id="reader" style="width:100%; max-width:360px; background:#1c1c1e; border-radius:16px; overflow:hidden;"></div>
+        <div id="reader" style="width:100%; max-width:360px;"></div>
       </div>
     </div>
   </div>
@@ -1792,13 +1807,12 @@
 
       const cameraConfig = { facingMode: "environment" };
 
-      // Réintroduction d'une fenêtre de visée rectangulaire confortable (ni trop grande, ni trop fine)
       const config = { 
         fps: 30, 
         qrbox: function(viewfinderWidth, viewfinderHeight) {
           return {
-            width: Math.floor(viewfinderWidth * 0.82),
-            height: Math.floor(viewfinderHeight * 0.32)
+            width: Math.floor(viewfinderWidth * 0.85),
+            height: Math.floor(viewfinderHeight * 0.35)
           };
         },
         experimentalFeatures: {
