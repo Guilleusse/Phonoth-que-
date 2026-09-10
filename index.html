@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 04:38</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 04:55</div>
 
     <header>
       <div class="top-bar">
@@ -1801,7 +1801,6 @@
     async function startLiveScanner() {
       document.getElementById("scannerModal").classList.add("active");
   
-      // Nettoyage et destruction stricte de l'ancienne instance si elle existe pour éviter tout blocage
       if (html5QrCode) {
         try {
           if (html5QrCode.isScanning) {
@@ -1815,8 +1814,9 @@
 
       const cameraConfig = { facingMode: "environment" };
 
+      // 60 FPS, autofocus continu, haute résolution et retour à la zone de visée initiale (0.85 / 0.35)
       const config = { 
-        fps: 30, 
+        fps: 60, 
         qrbox: function(viewfinderWidth, viewfinderHeight) {
           return {
             width: Math.floor(viewfinderWidth * 0.85),
@@ -1830,13 +1830,14 @@
           Html5QrcodeSupportedFormats.EAN_13, 
           Html5QrcodeSupportedFormats.EAN_8, 
           Html5QrcodeSupportedFormats.UPC_A, 
-          Html5QrcodeSupportedFormats.UPC_E 
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.CODE_128 
         ],
         videoConstraints: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
           facingMode: "environment",
-          advanced: [{ focusMode: "continuous" }] // Force l'autofocus continu pour booster la sensibilité de détection
+          advanced: [{ focusMode: "continuous" }]
         }
       };
 
