@@ -255,7 +255,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 03:45</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 03:58</div>
 
     <header>
       <div class="top-bar">
@@ -1792,9 +1792,15 @@
 
       const cameraConfig = { facingMode: "environment" };
 
-      // Suppression de qrbox pour permettre la lecture sur toute la surface de la caméra
+      // Réintroduction d'une fenêtre de visée rectangulaire confortable (ni trop grande, ni trop fine)
       const config = { 
         fps: 30, 
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+          return {
+            width: Math.floor(viewfinderWidth * 0.82),
+            height: Math.floor(viewfinderHeight * 0.32)
+          };
+        },
         experimentalFeatures: {
           useBarCodeDetectorIfSupported: true
         },
