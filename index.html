@@ -251,7 +251,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 09-09-2026 15:14</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 02:18</div>
 
     <header>
       <div class="top-bar">
@@ -1786,9 +1786,16 @@
         html5QrCode = new Html5Qrcode("reader");
       }
 
+      // Contraintes vidéo HD pour forcer l'autofocus et la netteté sur Safari / iOS
+      const videoConstraints = {
+        facingMode: "environment",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      };
+
       const config = { 
-        fps: 15, 
-        qrbox: { width: 260, height: 160 },
+        fps: 20, 
+        qrbox: { width: 320, height: 120 },
         formatsToSupport: [ 
           Html5QrcodeSupportedFormats.EAN_13, 
           Html5QrcodeSupportedFormats.EAN_8, 
@@ -1799,7 +1806,7 @@
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" },
+          videoConstraints,
           config,
           async (decodedText) => {
             await stopLiveScanner();
@@ -1809,7 +1816,7 @@
           () => {}
         );
       } catch (err) {
-        alert("Erreur ou refus d'accès à la caméra.");
+        alert("Erreur ou refus d'accès à la caméra : " + err);
         await stopLiveScanner();
       }
     }
