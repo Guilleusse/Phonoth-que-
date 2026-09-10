@@ -255,7 +255,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 03:32</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 03:45</div>
 
     <header>
       <div class="top-bar">
@@ -1790,18 +1790,11 @@
         html5QrCode = new Html5Qrcode("reader");
       }
 
-      // Exactement 1 seule clé pour respecter la bibliothèque
       const cameraConfig = { facingMode: "environment" };
 
+      // Suppression de qrbox pour permettre la lecture sur toute la surface de la caméra
       const config = { 
         fps: 30, 
-        qrbox: function(viewfinderWidth, viewfinderHeight) {
-          let minSide = Math.min(viewfinderWidth, viewfinderHeight);
-          let width = Math.floor(minSide * 0.88);
-          let height = Math.floor(width * 0.40);
-          return { width: width, height: height };
-        },
-        // Active le moteur natif de Safari / iOS
         experimentalFeatures: {
           useBarCodeDetectorIfSupported: true
         },
@@ -1811,7 +1804,6 @@
           Html5QrcodeSupportedFormats.UPC_A, 
           Html5QrcodeSupportedFormats.UPC_E 
         ],
-        // Les contraintes de résolution haute définition se placent ici dans le config
         videoConstraints: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
