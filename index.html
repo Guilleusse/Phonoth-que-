@@ -240,7 +240,7 @@
     .btn-danger { background: var(--danger); }
     .volumes-box { background: #2c2c2e; border-radius: 14px; padding: 12px; margin-top: 10px; }
     
-    /* Styles personnalisés pour imiter MusicBuddy (Fenêtre de visée compacte et nette) */
+    /* Styles pour un rendu ultra propre et natif */
     #reader { border: none !important; background: transparent !important; }
     #reader video { width: 100% !important; border-radius: 16px; object-fit: cover; }
     #reader__dashboard { padding: 8px !important; }
@@ -255,7 +255,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 03:07</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 10-09-2026 03:20</div>
 
     <header>
       <div class="top-bar">
@@ -1790,16 +1790,24 @@
         html5QrCode = new Html5Qrcode("reader");
       }
 
-      const cameraConfig = { facingMode: "environment" };
+      // Demande explicite d'une haute résolution pour éviter le flou de près
+      const cameraConfig = { 
+        facingMode: "environment",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      };
 
-      // Cadre de visée rectangulaire (qrbox) optimisé pour les codes-barres (style MusicBuddy)
       const config = { 
-        fps: 25, 
+        fps: 30, 
         qrbox: function(viewfinderWidth, viewfinderHeight) {
           let minSide = Math.min(viewfinderWidth, viewfinderHeight);
-          let width = Math.floor(minSide * 0.85);
-          let height = Math.floor(width * 0.35); // Format rectangulaire étiré idéal pour les codes-barres
+          let width = Math.floor(minSide * 0.88);
+          let height = Math.floor(width * 0.40);
           return { width: width, height: height };
+        },
+        // Active le moteur natif de Safari/iOS (exactement comme MusicBuddy)
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true
         },
         formatsToSupport: [ 
           Html5QrcodeSupportedFormats.EAN_13, 
@@ -2121,7 +2129,7 @@
                     pendingEditVolCoverBase64 = dataUrl;
                   }
 
-                input.value = "✓ Image chargée en mémoire";
+                  input.value = "✓ Image chargée en mémoire";
                 };
                 img.src = event.target.result;
               };
