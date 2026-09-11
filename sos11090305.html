@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 10-09-2026 04:55</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 11-09-2026 00:27</div>
 
     <header>
       <div class="top-bar">
@@ -384,7 +384,8 @@
           <div class="details-row" id="rowConductor"><span class="details-label">Chef d'orchestre :</span><span class="details-val" id="modalDetailConductor"></span></div>
           <div class="details-row"><span class="details-label">Date d'achat :</span><span class="details-val" id="modalDetailDate"></span></div>
           <div class="details-row"><span class="details-label">Prix d'achat :</span><span class="details-val" id="modalDetailPrice"></span></div>
-          <div class="details-row"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
+          <div class="details-row" id="rowLocation"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
+          <div class="details-row" id="rowNotes"><span class="details-label">Notes :</span><span class="details-val" id="modalDetailNotes"></span></div>
         </div>
 
         <div id="tracksSection" style="display:none; margin-bottom: 15px;">
@@ -565,6 +566,11 @@
           <div class="form-group">
             <label>Lieu d'achat</label>
             <input type="text" id="formPurchaseLocation" placeholder="ex: Discogs, Fnac, JPC..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          </div>
+
+          <div class="form-group">
+            <label>Notes / Particularités</label>
+            <textarea id="formNotes" rows="3" placeholder="ex: État neuf, pressage rare..." style="font-size:14px; line-height:1.4; resize:vertical;" autocomplete="off"></textarea>
           </div>
 
           <div class="form-group">
@@ -1040,6 +1046,7 @@
           const matchConductor = matchText(album.conductor, search);
           const matchCountry = matchText(album.country, search);
           const matchStyle = matchText(album.style, search);
+          const matchNotes = matchText(album.notes, search);
           const matchVolumes = album.volumes && album.volumes.some(v => {
             const vText = typeof v === 'object' ? v.title : v;
             const vTracks = (v.tracks && v.tracks.some(t => matchText(t.title, search)));
@@ -1048,7 +1055,7 @@
           const matchTracks = album.tracks && album.tracks.some(t => matchText(t.title, search));
           const matchAudiophile = album.isAudiophile && matchText('audiophile', search);
           const matchRPM = album.is45RPM && (search.includes('45') || search.includes('rpm'));
-          return matchTitle || matchArtist || matchLabel || matchCatalog || matchConductor || matchCountry || matchStyle || matchVolumes || matchTracks || matchAudiophile || matchRPM;
+          return matchTitle || matchArtist || matchLabel || matchCatalog || matchConductor || matchCountry || matchStyle || matchNotes || matchVolumes || matchTracks || matchAudiophile || matchRPM;
         }
         return true;
       });
@@ -1279,6 +1286,14 @@
       document.getElementById("modalDetailDate").textContent = formatDateFR(album.purchaseDate);
       document.getElementById("modalDetailPrice").textContent = album.purchasePrice ? `${album.purchasePrice} €` : '-';
       document.getElementById("modalDetailLocation").textContent = album.purchaseLocation || '-';
+
+      const notesRow = document.getElementById("rowNotes");
+      if (album.notes && album.notes.trim()) {
+        notesRow.style.display = 'flex';
+        document.getElementById("modalDetailNotes").textContent = album.notes;
+      } else {
+        notesRow.style.display = 'none';
+      }
 
       const trackSection = document.getElementById("tracksSection");
       const trackBox = document.getElementById("tracksList");
@@ -1634,6 +1649,7 @@
       document.getElementById("formPurchaseDate").value = '';
       document.getElementById("formPurchasePrice").value = '';
       document.getElementById("formPurchaseLocation").value = '';
+      document.getElementById("formNotes").value = '';
       document.getElementById("formDiscogsId").value = '';
       document.getElementById("formCover").value = '';
       document.getElementById("formDiscsCount").value = '';
@@ -1680,6 +1696,7 @@
       document.getElementById("formPurchaseDate").value = album.purchaseDate || '';
       document.getElementById("formPurchasePrice").value = album.purchasePrice || '';
       document.getElementById("formPurchaseLocation").value = album.purchaseLocation || '';
+      document.getElementById("formNotes").value = album.notes || '';
       document.getElementById("formDiscogsId").value = album.discogsId || '';
       
       pendingCoverBase64 = album.cover || '';
@@ -1775,6 +1792,7 @@
         purchaseDate: document.getElementById("formPurchaseDate").value.trim(),
         purchasePrice: document.getElementById("formPurchasePrice").value.trim(),
         purchaseLocation: document.getElementById("formPurchaseLocation").value.trim(),
+        notes: document.getElementById("formNotes").value.trim(),
         discogsId: discogsId,
         cover: finalCover,
         isBoxSet: isBoxSet,
@@ -1814,7 +1832,7 @@
 
       const cameraConfig = { facingMode: "environment" };
 
-      // 60 FPS, autofocus continu, haute résolution et retour à la zone de visée initiale (0.85 / 0.35)
+      // 60 FPS, autofocus continu, haute résolution et zone de visée initiale (0.85 / 0.35)
       const config = { 
         fps: 60, 
         qrbox: function(viewfinderWidth, viewfinderHeight) {
@@ -2031,14 +2049,15 @@
                   purchaseDate: cols[8] || '',
                   purchasePrice: cols[9] || '',
                   purchaseLocation: cols[10] || '',
-                  support: cols[11] || 'CD',
-                  discogsId: cols[12] || '',
-                  cover: cols[13] || '',
-                  isBoxSet: cols[14] === 'true',
-                  isWantlist: cols[15] === 'true',
-                  isAudiophile: cols[16] === 'true',
-                  is45RPM: cols[17] === 'true',
-                  discsCount: parseInt(cols[18]) || 0,
+                  notes: cols[11] || '',
+                  support: cols[12] || 'CD',
+                  discogsId: cols[13] || '',
+                  cover: cols[14] || '',
+                  isBoxSet: cols[15] === 'true',
+                  isWantlist: cols[16] === 'true',
+                  isAudiophile: cols[17] === 'true',
+                  is45RPM: cols[18] === 'true',
+                  discsCount: parseInt(cols[19]) || 0,
                   volumes: [],
                   tracks: []
                 });
@@ -2080,7 +2099,7 @@
     }
 
     function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
           if (typeof v === 'object' && v !== null) {
@@ -2092,7 +2111,7 @@
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
 
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}"\n`;
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.notes||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
