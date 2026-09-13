@@ -218,8 +218,8 @@
       transform: scale(0.92);
     }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; z-index: 1000; }
-    .modal-overlay.active { display: flex; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.15s ease; }
+    .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
     .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 98vh; max-height: 98dvh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); }
     .modal-header { flex-shrink: 0; height: 58px; padding: 0 20px; background: #2c2c2e; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; }
     .modal-title { font-size: 17px; font-weight: 700; color: white; }
@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Claude: 13-09-2026 01:40</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 11-09-2026 00:27</div>
 
     <header>
       <div class="top-bar">
@@ -462,11 +462,12 @@
     </div>
   </div>
 
-  <!-- MODALE AJOUT / EDITION (Croix de fermeture retirée pour éviter les pertes accidentelles) -->
+  <!-- MODALE AJOUT / EDITION -->
   <div class="modal-overlay" id="formModal">
     <div class="modal-content">
       <div class="modal-header">
         <span class="modal-title" id="formModalTitle">Ajouter une référence</span>
+        <button class="modal-close" onclick="closeModal('formModal')">✕</button>
       </div>
       <div class="modal-body">
         <div id="albumFormContainer">
