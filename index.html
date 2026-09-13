@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 13-09-2026 23:31</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 13-09-2026 23:52</div>
 
     <header>
       <div class="top-bar">
@@ -1126,12 +1126,24 @@
           groups[artist].push(album);
         });
 
-        // Clé de tri : le "Nom de tri" facultatif s'il est renseigné sur au moins
-        // un album de l'artiste, sinon le nom complet affiché (comportement par défaut).
+        // Clé de tri, par ordre de priorité :
+        // 1) "Nom de tri" manuel si renseigné sur au moins un album de l'artiste
+        // 2) Détection automatique "Classical" → dernier mot du nom (heuristique nom de famille)
+        // 3) Nom complet affiché (comportement par défaut)
+        const getLastWord = (fullName) => {
+          const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
+          return parts.length ? parts[parts.length - 1] : fullName;
+        };
+
         const sortKeyFor = (artistName) => {
           const albumsForArtist = groups[artistName] || [];
           const withSortName = albumsForArtist.find(al => al.sortName && al.sortName.trim());
-          return withSortName ? withSortName.sortName.trim() : artistName;
+          if (withSortName) return withSortName.sortName.trim();
+
+          const isClassical = albumsForArtist.some(al => (al.style || '').toLowerCase().includes('classical'));
+          if (isClassical) return getLastWord(artistName);
+
+          return artistName;
         };
 
         const sortedArtists = Object.keys(groups).sort((a, b) => {
