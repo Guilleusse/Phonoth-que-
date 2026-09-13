@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 13-09-2026 21:32</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 13-09-2026 21:53</div>
 
     <header>
       <div class="top-bar">
@@ -953,11 +953,6 @@
       return 0;
     }
 
-    function getSignificantWords(fullName) {
-      if (!fullName) return [];
-      return fullName.trim().split(/\s+/).filter(Boolean);
-    }
-
     function onCountryClick(el, e) {
       if (e) e.stopPropagation();
       const country = el.getAttribute('data-country');
@@ -1239,11 +1234,8 @@
       az.innerHTML = "";
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       letters.forEach(l => {
-        // Un artiste est éligible pour cette lettre si N'IMPORTE LEQUEL de ses mots
-        // commence par elle (ex: "Pink Floyd" est accessible via P ET via F).
-        const matching = artists.find(a =>
-          getSignificantWords(a).some(word => word.toUpperCase().startsWith(l))
-        );
+        // Correspondance simple : première lettre du nom complet affiché.
+        const matching = artists.find(a => a.toUpperCase().startsWith(l));
         const item = document.createElement("div");
         item.className = "az-letter";
         item.textContent = l;
