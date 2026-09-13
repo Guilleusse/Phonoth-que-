@@ -186,7 +186,7 @@
     .card-action-btn { background: none; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; }
     
     .az-index { position: fixed; right: 4px; top: calc(50% + 140px); transform: translateY(-50%); display: flex; flex-direction: column; gap: 1px; z-index: 10; font-size: 9px; font-weight: bold; color: var(--text-sub); background: rgba(18, 18, 18, 0.75); padding: 4px 2px; border-radius: 10px; backdrop-filter: blur(5px); }
-    .az-index a { color: inherit; text-decoration: none; text-align: center; width: 20px; padding: 2px 0; display: block; }
+    .az-index .az-letter { color: inherit; text-decoration: none; text-align: center; width: 14px; padding: 2px 0; display: block; user-select: none; }
     
     .back-to-top-btn {
       position: fixed;
@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 13-09-2026 03:59</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 13-09-2026 22:51</div>
 
     <header>
       <div class="top-bar">
@@ -953,11 +953,6 @@
       return 0;
     }
 
-    function getSignificantWords(fullName) {
-      if (!fullName) return [];
-      return fullName.trim().split(/\s+/).filter(Boolean);
-    }
-
     function onCountryClick(el, e) {
       if (e) e.stopPropagation();
       const country = el.getAttribute('data-country');
@@ -1227,25 +1222,34 @@
       container.appendChild(card);
     }
 
+    function scrollToArtistGroup(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
     function renderAZIndex(artists) {
       const az = document.getElementById("azIndex");
       az.innerHTML = "";
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       letters.forEach(l => {
-        // Un artiste est éligible pour cette lettre si N'IMPORTE LEQUEL de ses mots
-        // commence par elle (ex: "Pink Floyd" est accessible via P ET via F).
-        const matching = artists.find(a =>
-          getSignificantWords(a).some(word => word.toUpperCase().startsWith(l))
-        );
-        const a = document.createElement("a");
-        a.textContent = l;
+        // Correspondance simple : première lettre du nom complet affiché.
+        const matching = artists.find(a => a.toUpperCase().startsWith(l));
+        const item = document.createElement("div");
+        item.className = "az-letter";
+        item.textContent = l;
         if (matching) {
-          a.href = "#artist-" + matching.replace(/[^a-zA-Z0-9]/g, '');
-          a.style.opacity = "1";
+          const targetId = "artist-" + matching.replace(/[^a-zA-Z0-9]/g, '');
+          item.style.opacity = "1";
+          item.style.cursor = "pointer";
+          // Défilement piloté en JS (scrollIntoView) plutôt qu'un lien #ancre :
+          // la navigation par ancre est capricieuse en mode PWA standalone sur iOS.
+          item.addEventListener('click', () => scrollToArtistGroup(targetId));
         } else {
-          a.style.opacity = "0.2";
+          item.style.opacity = "0.2";
         }
-        az.appendChild(a);
+        az.appendChild(item);
       });
     }
 
