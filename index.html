@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 11-09-2026 04:13</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 11-09-2026 04:24</div>
 
     <header>
       <div class="top-bar">
@@ -623,6 +623,10 @@
       messagingSenderId: "535162805091",
       appId: "1:535162805091:web:e0933e8e203c5323ee9156"
     };
+
+    // Force iOS Safari à traiter le tactile immédiatement (évite le délai
+    // aléatoire de reconnaissance des taps, notamment en mode PWA)
+    document.addEventListener('touchstart', function() {}, { passive: true });
 
     let db = null;
     let auth = null;
