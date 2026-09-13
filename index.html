@@ -218,10 +218,9 @@
       transform: scale(0.92);
     }
 
-    /* Modale parfaitement ancrée en haut (sans espace noir) et adaptée à iOS */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.94); display: none; align-items: flex-end; justify-content: center; z-index: 1000; pointer-events: auto; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; z-index: 1000; }
     .modal-overlay.active { display: flex; }
-    .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: calc(100dvh - env(safe-area-inset-top) - 10px); max-height: calc(100dvh - env(safe-area-inset-top) - 10px); display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); pointer-events: auto; }
+    .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 98vh; max-height: 98dvh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); }
     .modal-header { flex-shrink: 0; height: 58px; padding: 0 20px; background: #2c2c2e; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; }
     .modal-title { font-size: 17px; font-weight: 700; color: white; }
     .modal-close { background: #3a3a3c; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -241,7 +240,7 @@
     .btn-danger { background: var(--danger); }
     .volumes-box { background: #2c2c2e; border-radius: 14px; padding: 12px; margin-top: 10px; }
     
-    /* Styles stricts et verrouillés pour le flux vidéo scanner */
+    /* Styles stricts et verrouillés pour éviter tout décalage du flux vidéo sur iOS Safari */
     #reader { 
       position: relative !important;
       width: 100% !important; 
@@ -271,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Fix Hauteur Modale iOS: 13-09-2026 03:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Claude: 13-09-2026 01:40</div>
 
     <header>
       <div class="top-bar">
@@ -347,7 +346,7 @@
     </div>
   </div>
 
-  <!-- MODALE STATISTIQUES -->
+  <!-- MODALE STATISTIQUES (CENTRÉE EN HAUTEUR) -->
   <div class="modal-overlay" id="statsModal" style="align-items: center;">
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
       <div class="modal-header" style="border-radius: 20px 20px 0 0;">
@@ -355,7 +354,9 @@
         <button class="modal-close" onclick="closeModal('statsModal')">✕</button>
       </div>
       <div class="modal-body" style="padding: 15px;">
-        <div class="details-grid" style="margin: 0;" id="statsModalContent"></div>
+        <div class="details-grid" style="margin: 0;" id="statsModalContent">
+          <!-- Rempli dynamiquement -->
+        </div>
       </div>
     </div>
   </div>
@@ -461,7 +462,7 @@
     </div>
   </div>
 
-  <!-- MODALE AJOUT / EDITION -->
+  <!-- MODALE AJOUT / EDITION (Croix de fermeture retirée pour éviter les pertes accidentelles) -->
   <div class="modal-overlay" id="formModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -544,7 +545,7 @@
             </select>
           </div>
 
-          <!-- Champ Vitesse Vinyle -->
+          <!-- Champ Vitesse Vinyle (affiché uniquement si Vinyle) -->
           <div class="checkbox-group" id="vinylSpeedGroup" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
             <input type="checkbox" id="is45RPM">
             <label for="is45RPM" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Vinyle 45 Tours (RPM)</label>
@@ -601,7 +602,7 @@
 
   <!-- MODALE SCANNER CAMERA HTML5 EN DIRECT -->
   <div class="modal-overlay" id="scannerModal" style="z-index: 2000;">
-    <div class="modal-content" style="height: 75vh; background: #000;">
+    <div class="modal-content" style="height: 75vh; max-height:75dvh; background: #000;">
       <div class="modal-header">
         <span class="modal-title">Scanner un code-barres</span>
         <button class="modal-close" onclick="stopLiveScanner()">✕</button>
@@ -956,7 +957,6 @@
     }
 
     function openStatsModal() {
-      if (document.activeElement) document.activeElement.blur();
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, countWantlist = 0, totalPrice = 0;
       let totalDiscsPhysical = 0;
@@ -1243,7 +1243,6 @@
     }
 
     function showDetails(index) {
-      if (document.activeElement) document.activeElement.blur();
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
@@ -1444,7 +1443,6 @@
     }
 
     function addBulkVolumesToCurrentAlbum() {
-      if (document.activeElement) document.activeElement.blur();
       if (selectedAlbumIndex < 0) return;
       document.getElementById("bulkInput").value = "";
       document.getElementById("bulkModal").classList.add("active");
@@ -1499,7 +1497,6 @@
     }
 
     function openEditVolumeModal(volIdx) {
-      if (document.activeElement) document.activeElement.blur();
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       if (!album.volumes || !album.volumes[volIdx]) return;
@@ -1629,7 +1626,6 @@
     }
 
     function openAddModal() {
-      if (document.activeElement) document.activeElement.blur();
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = -1;
       currentFetchedTracks = [];
@@ -1664,7 +1660,6 @@
     }
 
     function openEditModal(index) {
-      if (document.activeElement) document.activeElement.blur();
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       currentFetchedTracks = [];
@@ -1821,7 +1816,6 @@
     }
 
     async function startLiveScanner() {
-      if (document.activeElement) document.activeElement.blur();
       document.getElementById("scannerModal").classList.add("active");
   
       if (html5QrCode) {
@@ -1837,6 +1831,7 @@
 
       const cameraConfig = { facingMode: "environment" };
 
+      // 60 FPS, autofocus continu, haute résolution et zone de visée initiale (0.85 / 0.35)
       const config = { 
         fps: 60, 
         qrbox: function(viewfinderWidth, viewfinderHeight) {
@@ -2038,17 +2033,15 @@
     }
 
     function closeModal(id) {
-      if (document.activeElement) {
-        document.activeElement.blur();
-      }
-      
       if (id === 'scannerModal') {
         stopLiveScanner();
       } else {
         document.getElementById(id).classList.remove("active");
-        setTimeout(() => {
-          window.scrollTo(window.scrollX, window.scrollY);
-        }, 50);
+        if (id === 'detailsModal' || id === 'formModal' || id === 'bulkModal' || id === 'editVolumeModal' || id === 'statsModal') {
+          setTimeout(() => {
+            window.scrollTo(0, savedScrollPosition);
+          }, 10);
+        }
       }
     }
 
