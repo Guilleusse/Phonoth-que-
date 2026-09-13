@@ -218,10 +218,10 @@
       transform: scale(0.92);
     }
 
-    /* Modale corrigée pour iOS : hauteur fixe en pixels/pourcentage et suppression des unités dynamiques vh/dvh qui plantent le clavier */
+    /* Modale parfaitement ancrée en haut (sans espace noir) et adaptée à iOS */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.94); display: none; align-items: flex-end; justify-content: center; z-index: 1000; pointer-events: auto; }
     .modal-overlay.active { display: flex; }
-    .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 92vh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); pointer-events: auto; }
+    .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: calc(100dvh - env(safe-area-inset-top) - 10px); max-height: calc(100dvh - env(safe-area-inset-top) - 10px); display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); pointer-events: auto; }
     .modal-header { flex-shrink: 0; height: 58px; padding: 0 20px; background: #2c2c2e; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; }
     .modal-title { font-size: 17px; font-weight: 700; color: white; }
     .modal-close { background: #3a3a3c; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -271,7 +271,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Anti-Gel Clavier iOS: 13-09-2026 02:46</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Fix Hauteur Modale iOS: 13-09-2026 03:00</div>
 
     <header>
       <div class="top-bar">
@@ -2038,7 +2038,6 @@
     }
 
     function closeModal(id) {
-      // Force un blur immédiat pour libérer le focus clavier et réinitialiser les coordonnées tactiles sur iOS
       if (document.activeElement) {
         document.activeElement.blur();
       }
@@ -2047,11 +2046,9 @@
         stopLiveScanner();
       } else {
         document.getElementById(id).classList.remove("active");
-        if (id === 'detailsModal' || id === 'formModal' || id === 'bulkModal' || id === 'editVolumeModal' || id === 'statsModal') {
-          setTimeout(() => {
-            window.scrollTo(0, savedScrollPosition);
-          }, 10);
-        }
+        setTimeout(() => {
+          window.scrollTo(window.scrollX, window.scrollY);
+        }, 50);
       }
     }
 
