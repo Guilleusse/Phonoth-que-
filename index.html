@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 13-09-2026 04:24</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 11-09-2026 00:27</div>
 
     <header>
       <div class="top-bar">
@@ -952,6 +952,13 @@
       return 0;
     }
 
+    function getArtistSortKey(fullName) {
+      if (!fullName) return '';
+      const parts = fullName.trim().split(/\s+/).filter(Boolean);
+      if (parts.length <= 1) return fullName.trim();
+      return parts[parts.length - 1];
+    }
+
     function onCountryClick(el, e) {
       if (e) e.stopPropagation();
       const country = el.getAttribute('data-country');
@@ -1098,10 +1105,12 @@
         });
 
         const sortedArtists = Object.keys(groups).sort((a, b) => {
+          const keyA = getArtistSortKey(a);
+          const keyB = getArtistSortKey(b);
           if (sortVal === 'artist-za') {
-            return b.localeCompare(a, 'fr', { sensitivity: 'base' });
+            return keyB.localeCompare(keyA, 'fr', { sensitivity: 'base' });
           }
-          return a.localeCompare(b, 'fr', { sensitivity: 'base' });
+          return keyA.localeCompare(keyB, 'fr', { sensitivity: 'base' });
         });
 
         renderAZIndex(sortedArtists);
@@ -1204,7 +1213,7 @@
       az.innerHTML = "";
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       letters.forEach(l => {
-        const matching = artists.find(a => a.toUpperCase().startsWith(l));
+        const matching = artists.find(a => getArtistSortKey(a).toUpperCase().startsWith(l));
         const a = document.createElement("a");
         a.textContent = l;
         if (matching) {
