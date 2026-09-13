@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 13-09-2026 22:51</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 13-09-2026 23:31</div>
 
     <header>
       <div class="top-bar">
@@ -494,6 +494,12 @@
           <div class="form-group">
             <label>Artiste / Compositeur *</label>
             <input type="text" id="formArtist" placeholder="ex: Avishai Cohen" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          </div>
+
+          <div class="form-group">
+            <label>Nom de tri (facultatif)</label>
+            <input type="text" id="formSortName" placeholder="ex: Bach, Johann Sebastian  •  ou  Beatles" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <div style="font-size:11px; color:var(--text-sub); margin-top:6px;">Utilisé uniquement pour le tri et l'index A-Z. L'affichage garde toujours le nom complet ci-dessus. Laisser vide pour un classement par nom complet (par défaut).</div>
           </div>
 
           <div class="form-group">
@@ -1120,14 +1126,24 @@
           groups[artist].push(album);
         });
 
+        // Clé de tri : le "Nom de tri" facultatif s'il est renseigné sur au moins
+        // un album de l'artiste, sinon le nom complet affiché (comportement par défaut).
+        const sortKeyFor = (artistName) => {
+          const albumsForArtist = groups[artistName] || [];
+          const withSortName = albumsForArtist.find(al => al.sortName && al.sortName.trim());
+          return withSortName ? withSortName.sortName.trim() : artistName;
+        };
+
         const sortedArtists = Object.keys(groups).sort((a, b) => {
+          const keyA = sortKeyFor(a);
+          const keyB = sortKeyFor(b);
           if (sortVal === 'artist-za') {
-            return b.localeCompare(a, 'fr', { sensitivity: 'base' });
+            return keyB.localeCompare(keyA, 'fr', { sensitivity: 'base' });
           }
-          return a.localeCompare(b, 'fr', { sensitivity: 'base' });
+          return keyA.localeCompare(keyB, 'fr', { sensitivity: 'base' });
         });
 
-        renderAZIndex(sortedArtists);
+        renderAZIndex(sortedArtists, sortKeyFor);
 
         sortedArtists.forEach(artist => {
           const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
@@ -1229,13 +1245,14 @@
       }
     }
 
-    function renderAZIndex(artists) {
+    function renderAZIndex(artists, sortKeyFor) {
       const az = document.getElementById("azIndex");
       az.innerHTML = "";
+      const getKey = sortKeyFor || (a => a);
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       letters.forEach(l => {
-        // Correspondance simple : première lettre du nom complet affiché.
-        const matching = artists.find(a => a.toUpperCase().startsWith(l));
+        // Correspondance sur la clé de tri (Nom de tri s'il existe, sinon nom complet affiché).
+        const matching = artists.find(a => getKey(a).toUpperCase().startsWith(l));
         const item = document.createElement("div");
         item.className = "az-letter";
         item.textContent = l;
@@ -1681,6 +1698,7 @@
       document.getElementById("is45RPM").checked = false;
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
+      document.getElementById("formSortName").value = '';
       document.getElementById("formLabel").value = '';
       document.getElementById("formCatalogNumber").value = '';
       document.getElementById("formStyle").value = '';
@@ -1721,6 +1739,7 @@
 
       document.getElementById("formTitle").value = album.title || '';
       document.getElementById("formArtist").value = album.artist || '';
+      document.getElementById("formSortName").value = album.sortName || '';
       document.getElementById("formLabel").value = album.label || '';
       document.getElementById("formCatalogNumber").value = album.catalogNumber || '';
       document.getElementById("formStyle").value = album.style || '';
@@ -1754,6 +1773,7 @@
     function saveAlbumForm() {
       const title = document.getElementById("formTitle").value.trim();
       const artist = document.getElementById("formArtist").value.trim();
+      const sortName = document.getElementById("formSortName").value.trim();
       const discogsId = document.getElementById("formDiscogsId").value.trim();
 
       if (!title || !artist) {
@@ -1825,6 +1845,7 @@
         firestoreId: firestoreId,
         title: title,
         artist: artist,
+        sortName: sortName,
         label: document.getElementById("formLabel").value.trim(),
         catalogNumber: document.getElementById("formCatalogNumber").value.trim(),
         style: document.getElementById("formStyle").value.trim(),
@@ -2125,6 +2146,7 @@
                   isAudiophile: cols[17] === 'true',
                   is45RPM: cols[18] === 'true',
                   discsCount: parseInt(cols[19]) || 0,
+                  sortName: cols[22] || '',
                   volumes: [],
                   tracks: []
                 });
@@ -2166,7 +2188,7 @@
     }
 
     function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
           if (typeof v === 'object' && v !== null) {
@@ -2178,7 +2200,7 @@
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
 
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.notes||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}"\n`;
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.notes||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
