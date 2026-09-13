@@ -186,7 +186,7 @@
     .card-action-btn { background: none; border: none; color: var(--text-sub); font-size: 16px; cursor: pointer; }
     
     .az-index { position: fixed; right: 4px; top: calc(50% + 140px); transform: translateY(-50%); display: flex; flex-direction: column; gap: 1px; z-index: 10; font-size: 9px; font-weight: bold; color: var(--text-sub); background: rgba(18, 18, 18, 0.75); padding: 4px 2px; border-radius: 10px; backdrop-filter: blur(5px); }
-    .az-index a { color: inherit; text-decoration: none; text-align: center; width: 14px; }
+    .az-index a { color: inherit; text-decoration: none; text-align: center; width: 20px; padding: 2px 0; display: block; }
     
     .back-to-top-btn {
       position: fixed;
@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 13-09-2026 04:24</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 13-09-2026 03:59</div>
 
     <header>
       <div class="top-bar">
@@ -638,6 +638,7 @@
 
     let collection = [];
     let currentFilter = 'all';
+    let activeExactFilter = null; // { field: 'country'|'artist', value: '...' } — filtre exact posé par un tap sur un tag
     let selectedAlbumIndex = -1;
     let html5QrCode = null;
     let savedScrollPosition = 0;
@@ -952,12 +953,32 @@
       return 0;
     }
 
+    function getSignificantWords(fullName) {
+      if (!fullName) return [];
+      return fullName.trim().split(/\s+/).filter(Boolean);
+    }
+
     function onCountryClick(el, e) {
       if (e) e.stopPropagation();
       const country = el.getAttribute('data-country');
       if (country) {
-        document.getElementById("searchInput").value = country;
-        onSearchInput();
+        activeExactFilter = { field: 'country', value: country };
+        const input = document.getElementById("searchInput");
+        input.value = country;
+        document.getElementById("searchClearBtn").style.display = "flex";
+        renderCollection();
+      }
+    }
+
+    function onArtistClick(el, e) {
+      if (e) e.stopPropagation();
+      const artist = el.getAttribute('data-artist');
+      if (artist) {
+        activeExactFilter = { field: 'artist', value: artist };
+        const input = document.getElementById("searchInput");
+        input.value = artist;
+        document.getElementById("searchClearBtn").style.display = "flex";
+        renderCollection();
       }
     }
 
@@ -1040,6 +1061,13 @@
           if (album.isWantlist) return false;
           if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
           if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
+        }
+
+        // Filtre exact posé par un tap sur un tag (pays ou artiste) : prioritaire,
+        // ignore la recherche floue multi-champs pour éviter les faux positifs.
+        if (activeExactFilter) {
+          const fieldVal = (album[activeExactFilter.field] || '').toString().trim().toLowerCase();
+          return fieldVal === activeExactFilter.value.trim().toLowerCase();
         }
 
         if (search) {
@@ -1204,7 +1232,11 @@
       az.innerHTML = "";
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       letters.forEach(l => {
-        const matching = artists.find(a => a.toUpperCase().startsWith(l));
+        // Un artiste est éligible pour cette lettre si N'IMPORTE LEQUEL de ses mots
+        // commence par elle (ex: "Pink Floyd" est accessible via P ET via F).
+        const matching = artists.find(a =>
+          getSignificantWords(a).some(word => word.toUpperCase().startsWith(l))
+        );
         const a = document.createElement("a");
         a.textContent = l;
         if (matching) {
@@ -1218,12 +1250,15 @@
     }
 
     function onSearchInput() {
+      // Un vrai tap clavier annule le filtre exact posé par un tag (pays/artiste)
+      activeExactFilter = null;
       const val = document.getElementById("searchInput").value;
       document.getElementById("searchClearBtn").style.display = val ? "flex" : "none";
       renderCollection();
     }
 
     function clearSearch() {
+      activeExactFilter = null;
       document.getElementById("searchInput").value = "";
       document.getElementById("searchClearBtn").style.display = "none";
       renderCollection();
