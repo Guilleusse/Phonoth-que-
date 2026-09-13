@@ -218,9 +218,10 @@
       transform: scale(0.92);
     }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; z-index: 1000; pointer-events: auto; }
+    /* Modale corrigée pour iOS : hauteur fixe en pixels/pourcentage et suppression des unités dynamiques vh/dvh qui plantent le clavier */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.94); display: none; align-items: flex-end; justify-content: center; z-index: 1000; pointer-events: auto; }
     .modal-overlay.active { display: flex; }
-    .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 98vh; max-height: 98dvh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); pointer-events: auto; }
+    .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 92vh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); pointer-events: auto; }
     .modal-header { flex-shrink: 0; height: 58px; padding: 0 20px; background: #2c2c2e; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; }
     .modal-title { font-size: 17px; font-weight: 700; color: white; }
     .modal-close { background: #3a3a3c; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -240,7 +241,7 @@
     .btn-danger { background: var(--danger); }
     .volumes-box { background: #2c2c2e; border-radius: 14px; padding: 12px; margin-top: 10px; }
     
-    /* Styles stricts et verrouillés pour éviter tout décalage du flux vidéo sur iOS Safari */
+    /* Styles stricts et verrouillés pour le flux vidéo scanner */
     #reader { 
       position: relative !important;
       width: 100% !important; 
@@ -270,7 +271,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Fix iOS Touch: 13-09-2026 02:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Anti-Gel Clavier iOS: 13-09-2026 02:46</div>
 
     <header>
       <div class="top-bar">
@@ -346,7 +347,7 @@
     </div>
   </div>
 
-  <!-- MODALE STATISTIQUES (CENTRÉE EN HAUTEUR) -->
+  <!-- MODALE STATISTIQUES -->
   <div class="modal-overlay" id="statsModal" style="align-items: center;">
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
       <div class="modal-header" style="border-radius: 20px 20px 0 0;">
@@ -354,9 +355,7 @@
         <button class="modal-close" onclick="closeModal('statsModal')">✕</button>
       </div>
       <div class="modal-body" style="padding: 15px;">
-        <div class="details-grid" style="margin: 0;" id="statsModalContent">
-          <!-- Rempli dynamiquement -->
-        </div>
+        <div class="details-grid" style="margin: 0;" id="statsModalContent"></div>
       </div>
     </div>
   </div>
@@ -545,7 +544,7 @@
             </select>
           </div>
 
-          <!-- Champ Vitesse Vinyle (affiché uniquement si Vinyle) -->
+          <!-- Champ Vitesse Vinyle -->
           <div class="checkbox-group" id="vinylSpeedGroup" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
             <input type="checkbox" id="is45RPM">
             <label for="is45RPM" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Vinyle 45 Tours (RPM)</label>
@@ -602,7 +601,7 @@
 
   <!-- MODALE SCANNER CAMERA HTML5 EN DIRECT -->
   <div class="modal-overlay" id="scannerModal" style="z-index: 2000;">
-    <div class="modal-content" style="height: 75vh; max-height:75dvh; background: #000;">
+    <div class="modal-content" style="height: 75vh; background: #000;">
       <div class="modal-header">
         <span class="modal-title">Scanner un code-barres</span>
         <button class="modal-close" onclick="stopLiveScanner()">✕</button>
@@ -2039,6 +2038,11 @@
     }
 
     function closeModal(id) {
+      // Force un blur immédiat pour libérer le focus clavier et réinitialiser les coordonnées tactiles sur iOS
+      if (document.activeElement) {
+        document.activeElement.blur();
+      }
+      
       if (id === 'scannerModal') {
         stopLiveScanner();
       } else {
@@ -2202,7 +2206,7 @@
                     pendingEditVolCoverBase64 = dataUrl;
                   }
 
-                 input.value = "✓ Image chargée en mémoire";
+                  input.value = "✓ Image chargée en mémoire";
                 };
                 img.src = event.target.result;
               };
