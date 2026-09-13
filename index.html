@@ -218,7 +218,8 @@
       transform: scale(0.92);
     }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; z-index: 1000; pointer-events: auto; }
+    /* Modale sans backdrop-filter pour éviter le gel d'iOS Safari après saisie/inactivité */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.94); display: none; align-items: flex-end; justify-content: center; z-index: 1000; pointer-events: auto; }
     .modal-overlay.active { display: flex; }
     .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 98vh; max-height: 98dvh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); pointer-events: auto; }
     .modal-header { flex-shrink: 0; height: 58px; padding: 0 20px; background: #2c2c2e; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; }
@@ -270,7 +271,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Fix iOS Touch: 13-09-2026 02:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Fix iOS Freeze: 13-09-2026 02:07</div>
 
     <header>
       <div class="top-bar">
@@ -2202,7 +2203,7 @@
                     pendingEditVolCoverBase64 = dataUrl;
                   }
 
-                 input.value = "✓ Image chargée en mémoire";
+                  input.value = "✓ Image chargée en mémoire";
                 };
                 img.src = event.target.result;
               };
