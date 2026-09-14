@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 15-09-2026 00:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 15-09-2026 01:17</div>
 
     <header>
       <div class="top-bar">
@@ -1126,10 +1126,9 @@
           groups[artist].push(album);
         });
 
-        // Clé(s) d'index, par ordre de priorité :
+        // Clé de tri, par ordre de priorité :
         // 1) "Nom de tri" manuel si renseigné sur au moins un album de l'artiste
-        // 2) Détection automatique "Classical" → dernier mot de CHAQUE compositeur
-        //    (gère aussi les albums à plusieurs compositeurs : "Smetana, Dvořák")
+        // 2) Détection automatique "Classical" → dernier mot du nom (heuristique nom de famille)
         // 3) Nom complet affiché, article "The" ignoré (comportement par défaut)
         const getLastWord = (fullName) => {
           const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
@@ -1140,38 +1139,27 @@
           return (fullName || '').replace(/^(the)\s+/i, '');
         };
 
-        const splitComposers = (fullName) => {
-          return (fullName || '').split(/\s*(?:,|;|&| et | and )\s*/i).map(s => s.trim()).filter(Boolean);
-        };
-
-        // Renvoie TOUS les mots valides pour atteindre cet artiste via l'index A-Z.
-        // Le premier élément sert aussi de clé de tri (position dans la liste).
-        const getIndexWords = (artistName) => {
+        const sortKeyFor = (artistName) => {
           const albumsForArtist = groups[artistName] || [];
           const withSortName = albumsForArtist.find(al => al.sortName && al.sortName.trim());
-          if (withSortName) return [withSortName.sortName.trim()];
+          if (withSortName) return withSortName.sortName.trim();
 
           const isClassical = albumsForArtist.some(al => (al.style || '').toLowerCase().includes('classical'));
-          if (isClassical) {
-            const composers = splitComposers(artistName);
-            return composers.length > 1
-              ? composers.map(getLastWord)
-              : [getLastWord(artistName)];
-          }
+          if (isClassical) return getLastWord(artistName);
 
-          return [stripLeadingArticle(artistName)];
+          return stripLeadingArticle(artistName);
         };
 
         const sortedArtists = Object.keys(groups).sort((a, b) => {
-          const keyA = getIndexWords(a)[0];
-          const keyB = getIndexWords(b)[0];
+          const keyA = sortKeyFor(a);
+          const keyB = sortKeyFor(b);
           if (sortVal === 'artist-za') {
             return keyB.localeCompare(keyA, 'fr', { sensitivity: 'base' });
           }
           return keyA.localeCompare(keyB, 'fr', { sensitivity: 'base' });
         });
 
-        renderAZIndex(sortedArtists, getIndexWords);
+        renderAZIndex(sortedArtists, sortKeyFor);
 
         sortedArtists.forEach(artist => {
           const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
@@ -1273,15 +1261,14 @@
       }
     }
 
-    function renderAZIndex(artists, getWordsFor) {
+    function renderAZIndex(artists, sortKeyFor) {
       const az = document.getElementById("azIndex");
       az.innerHTML = "";
-      const getWords = getWordsFor || (a => [a]);
+      const getKey = sortKeyFor || (a => a);
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       letters.forEach(l => {
-        // Un artiste est éligible pour cette lettre si N'IMPORTE LEQUEL de ses mots
-        // d'index (ex: chaque compositeur d'un album à plusieurs noms) commence par elle.
-        const matching = artists.find(a => getWords(a).some(w => w.toUpperCase().startsWith(l)));
+        // Correspondance sur la clé de tri (Nom de tri s'il existe, sinon nom complet affiché).
+        const matching = artists.find(a => getKey(a).toUpperCase().startsWith(l));
         const item = document.createElement("div");
         item.className = "az-letter";
         item.textContent = l;
