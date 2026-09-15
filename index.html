@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Date : 15-09-2026 23:20</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Fix Blocage Stockage : 16-09-2026 00:50</div>
 
     <header>
       <div class="top-bar">
@@ -346,7 +346,7 @@
     </div>
   </div>
 
-  <!-- MODALE STATISTIQUES (CENTRÉE EN HAUTEUR) -->
+  <!-- MODALE STATISTIQUES -->
   <div class="modal-overlay" id="statsModal" style="align-items: center;">
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
       <div class="modal-header" style="border-radius: 20px 20px 0 0;">
@@ -354,9 +354,7 @@
         <button class="modal-close" onclick="closeModal('statsModal')">✕</button>
       </div>
       <div class="modal-body" style="padding: 15px;">
-        <div class="details-grid" style="margin: 0;" id="statsModalContent">
-          <!-- Rempli dynamiquement -->
-        </div>
+        <div class="details-grid" style="margin: 0;" id="statsModalContent"></div>
       </div>
     </div>
   </div>
@@ -552,7 +550,7 @@
             </select>
           </div>
 
-          <!-- Champ Vitesse Vinyle (affiché uniquement si Vinyle) -->
+          <!-- Champ Vitesse Vinyle -->
           <div class="checkbox-group" id="vinylSpeedGroup" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
             <input type="checkbox" id="is45RPM">
             <label for="is45RPM" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Vinyle 45 Tours (RPM)</label>
@@ -630,8 +628,6 @@
       appId: "1:535162805091:web:e0933e8e203c5323ee9156"
     };
 
-    // Force iOS Safari à traiter le tactile immédiatement (évite le délai
-    // aléatoire de reconnaissance des taps, notamment en mode PWA)
     document.addEventListener('touchstart', function() {}, { passive: true });
 
     let db = null;
@@ -644,7 +640,7 @@
 
     let collection = [];
     let currentFilter = 'all';
-    let activeExactFilter = null; // { field: 'country'|'artist', value: '...' } — filtre exact posé par un tap sur un tag
+    let activeExactFilter = null;
     let selectedAlbumIndex = -1;
     let html5QrCode = null;
     let savedScrollPosition = 0;
@@ -791,31 +787,13 @@
       const albumsRef = getAlbumsRef();
       if (!albumsRef) return;
 
-      const oldDocRef = db.collection("phonotheque").doc("main");
-      oldDocRef.get().then(doc => {
-        if (doc.exists && doc.data().list) {
-          const oldList = doc.data().list;
-          albumsRef.get().then(snapshot => {
-            if (snapshot.empty && oldList.length > 0) {
-              console.log("Migration vers l'architecture multi-documents...");
-              const batch = db.batch();
-              oldList.forEach(album => {
-                const newRef = albumsRef.doc();
-                const dataToSave = { ...album };
-                delete dataToSave.firestoreId;
-                batch.set(newRef, dataToSave);
-              });
-              batch.commit().then(() => {
-                console.log("Migration réussie !");
-              });
-            }
-          });
-        }
-      });
-
       albumsRef.onSnapshot(snapshot => {
         collection = snapshot.docs.map(doc => ({ firestoreId: doc.id, ...doc.data() }));
-        localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+        try {
+          localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+        } catch(e) {
+          console.warn("LocalStorage plein ou bloqué, sauvegarde locale ignorée.");
+        }
         renderCollection();
       }, err => {
         console.log("Erreur de synchronisation subcollection", err);
@@ -843,7 +821,12 @@
     }
 
     function syncAlbumToFirestore(album) {
-      localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+      try {
+        localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+      } catch(e) {
+        console.warn("LocalStorage saturé.");
+      }
+
       if (db && auth && auth.currentUser) {
         showSpinner();
         const albumsRef = getAlbumsRef();
@@ -860,7 +843,9 @@
           albumsRef.add(dataToSave)
             .then(docRef => {
               album.firestoreId = docRef.id;
-              localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+              try {
+                localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+              } catch(e) {}
               setTimeout(hideSpinner, 300);
             })
             .catch(err => { console.log("Erreur ajout album", err); hideSpinner(); });
@@ -870,7 +855,10 @@
     }
 
     function deleteAlbumFromFirestore(firestoreId) {
-      localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+      try {
+        localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+      } catch(e) {}
+
       if (db && auth && auth.currentUser && firestoreId) {
         showSpinner();
         const albumsRef = getAlbumsRef();
@@ -893,7 +881,7 @@
             snapshot.docs.forEach(doc => batch.delete(doc.ref));
             batch.commit().then(() => {
               collection = [];
-              localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+              try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
               hideSpinner();
               renderCollection();
               alert("La phonothèque a été vidée.");
@@ -901,7 +889,7 @@
           });
         } else {
           collection = [];
-          localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+          try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
           renderCollection();
           alert("La phonothèque a été vidée.");
         }
@@ -1064,8 +1052,6 @@
           if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
         }
 
-        // Filtre exact posé par un tap sur un tag (pays ou artiste) : prioritaire,
-        // ignore la recherche floue multi-champs pour éviter les faux positifs.
         if (activeExactFilter) {
           const fieldVal = (album[activeExactFilter.field] || '').toString().trim().toLowerCase();
           return fieldVal === activeExactFilter.value.trim().toLowerCase();
@@ -1126,10 +1112,6 @@
           groups[artist].push(album);
         });
 
-        // Clé de tri, par ordre de priorité :
-        // 1) "Nom de tri" manuel si renseigné sur au moins un album de l'artiste
-        // 2) Détection automatique "Classical" → dernier mot du nom (heuristique nom de famille)
-        // 3) Nom complet affiché, article "The" ignoré (comportement par défaut)
         const getLastWord = (fullName) => {
           const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
           return parts.length ? parts[parts.length - 1] : fullName;
@@ -1267,7 +1249,6 @@
       const getKey = sortKeyFor || (a => a);
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       letters.forEach(l => {
-        // Correspondance sur la clé de tri (Nom de tri s'il existe, sinon nom complet affiché).
         const matching = artists.find(a => getKey(a).toUpperCase().startsWith(l));
         const item = document.createElement("div");
         item.className = "az-letter";
@@ -1276,8 +1257,6 @@
           const targetId = "artist-" + matching.replace(/[^a-zA-Z0-9]/g, '');
           item.style.opacity = "1";
           item.style.cursor = "pointer";
-          // Défilement piloté en JS (scrollIntoView) plutôt qu'un lien #ancre :
-          // la navigation par ancre est capricieuse en mode PWA standalone sur iOS.
           item.addEventListener('click', () => scrollToArtistGroup(targetId));
         } else {
           item.style.opacity = "0.2";
@@ -1287,7 +1266,6 @@
     }
 
     function onSearchInput() {
-      // Un vrai tap clavier annule le filtre exact posé par un tag (pays/artiste)
       activeExactFilter = null;
       const val = document.getElementById("searchInput").value;
       document.getElementById("searchClearBtn").style.display = val ? "flex" : "none";
@@ -1829,9 +1807,6 @@
       let volumes = isBoxSet ? existingVols : [];
 
       if (isBoxSet && discsCount > volumes.length) {
-        // Complète les disques manquants sans toucher à ceux déjà renseignés
-        // (titre, pochette, pistes) — corrige le cas où on augmente le nombre
-        // de disques d'un coffret qui en a déjà quelques-uns de détaillés.
         for (let i = volumes.length + 1; i <= discsCount; i++) {
           volumes.push({ title: `Disque ${i}`, cover: '', tracks: [] });
         }
@@ -1915,7 +1890,6 @@
 
       const cameraConfig = { facingMode: "environment" };
 
-      // 60 FPS, autofocus continu, haute résolution et zone de visée initiale (0.85 / 0.35)
       const config = { 
         fps: 60, 
         qrbox: function(viewfinderWidth, viewfinderHeight) {
@@ -2177,7 +2151,7 @@
         if (newAlbums.length > 0) {
           if (confirm(`Voulez-vous importer les ${newAlbums.length} références ?`)) {
             collection = newAlbums;
-            localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+            try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
             
             const albumsRef = getAlbumsRef();
             if (db && auth && auth.currentUser && albumsRef) {
