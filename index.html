@@ -270,7 +270,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Fix Blocage Stockage : 16-09-2026 00:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Subcollections Volumes : 16-09-2026 01:50</div>
 
     <header>
       <div class="top-bar">
@@ -431,6 +431,7 @@
       </div>
       <div class="modal-body" style="padding:15px;">
         <input type="hidden" id="editVolIndex">
+        <input type="hidden" id="editVolSubId">
         <div class="form-group">
           <label>Nom / Titre du disque</label>
           <input type="text" id="editVolTitle" placeholder="ex: Disque 1 - Lyla" autocomplete="off">
@@ -792,7 +793,7 @@
         try {
           localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
         } catch(e) {
-          console.warn("LocalStorage plein ou bloqué, sauvegarde locale ignorée.");
+          console.warn("LocalStorage plein ou bloqué.");
         }
         renderCollection();
       }, err => {
@@ -823,9 +824,7 @@
     function syncAlbumToFirestore(album) {
       try {
         localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-      } catch(e) {
-        console.warn("LocalStorage saturé.");
-      }
+      } catch(e) {}
 
       if (db && auth && auth.currentUser) {
         showSpinner();
@@ -834,6 +833,7 @@
 
         const dataToSave = { ...album };
         delete dataToSave.firestoreId;
+        delete dataToSave.volumes; // Les volumes sont gérés dans leur propre sous-collection
 
         if (album.firestoreId) {
           albumsRef.doc(album.firestoreId).set(dataToSave)
@@ -843,9 +843,7 @@
           albumsRef.add(dataToSave)
             .then(docRef => {
               album.firestoreId = docRef.id;
-              try {
-                localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-              } catch(e) {}
+              try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
               setTimeout(hideSpinner, 300);
             })
             .catch(err => { console.log("Erreur ajout album", err); hideSpinner(); });
@@ -854,10 +852,38 @@
       renderCollection();
     }
 
-    function deleteAlbumFromFirestore(firestoreId) {
+    async function fetchVolumesForAlbum(album) {
+      if (!db || !auth.currentUser || !album.firestoreId) return album.volumes || [];
       try {
-        localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
+        const snap = await getAlbumsRef().doc(album.firestoreId).collection("volumes").get();
+        if (!snap.empty) {
+          return snap.docs.map(d => ({ subId: d.id, ...d.data() }));
+        }
       } catch(e) {}
+      return album.volumes || [];
+    }
+
+    async function saveVolumeToFirestore(albumId, volumeData, subId) {
+      if (!db || !auth.currentUser || !albumId) return;
+      const volsRef = getAlbumsRef().doc(albumId).collection("volumes");
+      const cleanData = { ...volumeData };
+      delete cleanData.subId;
+      if (subId) {
+        await volsRef.doc(subId).set(cleanData);
+        return subId;
+      } else {
+        const docRef = await volsRef.add(cleanData);
+        return docRef.id;
+      }
+    }
+
+    async function deleteVolumeFromFirestore(albumId, subId) {
+      if (!db || !auth.currentUser || !albumId || !subId) return;
+      await getAlbumsRef().doc(albumId).collection("volumes").doc(subId).delete();
+    }
+
+    function deleteAlbumFromFirestore(firestoreId) {
+      try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
 
       if (db && auth && auth.currentUser && firestoreId) {
         showSpinner();
@@ -1297,7 +1323,7 @@
       }
     }
 
-    function showDetails(index) {
+    async function showDetails(index) {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
@@ -1400,8 +1426,12 @@
       const volSection = document.getElementById("volumesSection");
       if (album.isBoxSet) {
         volSection.style.display = 'block';
-        renderVolumesList(album.volumes || [], album.cover);
-      } else { volSection.style.display = 'none'; }
+        const vols = await fetchVolumesForAlbum(album);
+        album.volumes = vols;
+        renderVolumesList(vols, album.cover);
+      } else { 
+        volSection.style.display = 'none'; 
+      }
 
       document.getElementById("detailsModal").classList.add("active");
     }
@@ -1449,10 +1479,9 @@
       }
 
       vols.forEach((v, idx) => {
-        const isObj = (typeof v === 'object' && v !== null);
-        const titleText = isObj ? (v.title || '') : v;
-        let coverUrl = isObj ? (v.cover || '') : '';
-        const vTracks = (isObj && v.tracks) ? v.tracks : [];
+        const titleText = v.title || '';
+        let coverUrl = v.cover || '';
+        const vTracks = v.tracks || [];
         
         if (!coverUrl && parentCover) {
           coverUrl = parentCover;
@@ -1503,27 +1532,24 @@
       document.getElementById("bulkModal").classList.add("active");
     }
 
-    function submitBulkVolumes() {
+    async function submitBulkVolumes() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       const text = document.getElementById("bulkInput").value.trim();
       
       if (text) {
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        
         if (!album.volumes) album.volumes = [];
 
-        lines.forEach((line, idx) => {
-          if (album.volumes[idx]) {
-            album.volumes[idx].title = line;
-          } else {
-            album.volumes.push({
-              title: line,
-              cover: album.cover || '',
-              tracks: []
-            });
-          }
-        });
+        for (let idx = 0; idx < lines.length; idx++) {
+          const line = lines[idx];
+          let volData = album.volumes[idx] || { title: line, cover: album.cover || '', tracks: [] };
+          volData.title = line;
+          
+          const subId = await saveVolumeToFirestore(album.firestoreId, volData, volData.subId);
+          volData.subId = subId;
+          album.volumes[idx] = volData;
+        }
 
         album.discsCount = album.volumes.length;
         syncAlbumToFirestore(album);
@@ -1532,7 +1558,7 @@
       }
     }
 
-    function addNewVolumeToCurrentAlbum() {
+    async function addNewVolumeToCurrentAlbum() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       const titleVal = prompt("Nom / Détail du nouveau disque (ex: Vol. 1 - Roman Photos) :");
@@ -1540,11 +1566,15 @@
         const coverVal = prompt("URL de la vignette / pochette pour ce disque (Facultatif) :", "") || "";
         if (!album.volumes) album.volumes = [];
         
-        album.volumes.push({
+        const newVol = {
           title: titleVal.trim(),
           cover: coverVal.trim(),
           tracks: []
-        });
+        };
+
+        const subId = await saveVolumeToFirestore(album.firestoreId, newVol);
+        newVol.subId = subId;
+        album.volumes.push(newVol);
         album.discsCount = album.volumes.length;
         syncAlbumToFirestore(album);
         showDetails(selectedAlbumIndex);
@@ -1557,13 +1587,14 @@
       if (!album.volumes || !album.volumes[volIdx]) return;
 
       const current = album.volumes[volIdx];
-      const title = typeof current === 'object' ? (current.title || '') : current;
-      const cover = typeof current === 'object' ? (current.cover || '') : '';
-      const tracks = (typeof current === 'object' && current.tracks) ? current.tracks : [];
+      const title = current.title || '';
+      const cover = current.cover || '';
+      const tracks = current.tracks || [];
 
       pendingEditVolCoverBase64 = cover;
 
       document.getElementById("editVolIndex").value = volIdx;
+      document.getElementById("editVolSubId").value = current.subId || '';
       document.getElementById("editVolTitle").value = title;
       document.getElementById("editVolCover").value = cover ? (cover.startsWith("data:image") ? "✓ Image chargée en mémoire" : cover) : "";
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
@@ -1621,22 +1652,20 @@
       }
     }
 
-    function saveEditedVolume() {
+    async function saveEditedVolume() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       const volIdx = parseInt(document.getElementById("editVolIndex").value);
+      const subId = document.getElementById("editVolSubId").value;
       if (isNaN(volIdx) || !album.volumes || !album.volumes[volIdx]) return;
 
       const newTitle = document.getElementById("editVolTitle").value.trim();
-      
       let newCover = pendingEditVolCoverBase64 || document.getElementById("editVolCover").value.trim();
       if (newCover.startsWith("✓")) {
-        const current = album.volumes[volIdx];
-        newCover = (typeof current === 'object' ? current.cover : '') || '';
+        newCover = album.volumes[volIdx].cover || '';
       }
 
       const tracksText = document.getElementById("editVolTracks").value.trim();
-
       let parsedTracks = [];
       if (tracksText) {
         parsedTracks = tracksText.split('\n').map(line => {
@@ -1649,24 +1678,29 @@
         }).filter(t => t.title.length > 0);
       }
 
-      album.volumes[volIdx] = {
+      const updatedVol = {
         title: newTitle,
         cover: newCover,
         tracks: parsedTracks
       };
 
+      const newSubId = await saveVolumeToFirestore(album.firestoreId, updatedVol, subId);
+      updatedVol.subId = newSubId;
+
+      album.volumes[volIdx] = updatedVol;
       pendingEditVolCoverBase64 = "";
-      syncAlbumToFirestore(album);
       closeModal("editVolumeModal");
       showDetails(selectedAlbumIndex);
     }
 
-    function deleteVolumeItem(volIdx) {
+    async function deleteVolumeItem(volIdx) {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       if (!album.volumes || !album.volumes[volIdx]) return;
-      const titleText = typeof album.volumes[volIdx] === 'object' ? album.volumes[volIdx].title : album.volumes[volIdx];
-      if (confirm(`Supprimer "${titleText}" ?`)) {
+      const vol = album.volumes[volIdx];
+      
+      if (confirm(`Supprimer "${vol.title || 'ce disque'}" ?`)) {
+        await deleteVolumeFromFirestore(album.firestoreId, vol.subId);
         album.volumes.splice(volIdx, 1);
         album.discsCount = album.volumes.length;
         syncAlbumToFirestore(album);
@@ -1715,7 +1749,7 @@
       document.getElementById("formModal").classList.add("active");
     }
 
-    function openEditModal(index) {
+    async function openEditModal(index) {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       currentFetchedTracks = [];
@@ -1764,7 +1798,7 @@
       document.getElementById("formModal").classList.add("active");
     }
 
-    function saveAlbumForm() {
+    async function saveAlbumForm() {
       const title = document.getElementById("formTitle").value.trim();
       const artist = document.getElementById("formArtist").value.trim();
       const sortName = document.getElementById("formSortName").value.trim();
@@ -1804,13 +1838,6 @@
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
   
       const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
-      let volumes = isBoxSet ? existingVols : [];
-
-      if (isBoxSet && discsCount > volumes.length) {
-        for (let i = volumes.length + 1; i <= discsCount; i++) {
-          volumes.push({ title: `Disque ${i}`, cover: '', tracks: [] });
-        }
-      }
 
       const tracksText = document.getElementById("formTracks").value.trim();
       let manualTracks = [];
@@ -1858,7 +1885,7 @@
         isAudiophile: isAudiophile,
         is45RPM: is45RPM,
         discsCount: discsCount,
-        volumes: volumes,
+        volumes: existingVols,
         tracks: tracks
       };
 
@@ -1871,6 +1898,17 @@
       }
 
       syncAlbumToFirestore(albumData);
+
+      // Si c'est un coffret, s'assurer que les disques de base sont initialisés dans la sous-collection si besoin
+      if (isBoxSet && discsCount > existingVols.length && albumData.firestoreId) {
+        for (let i = existingVols.length + 1; i <= discsCount; i++) {
+          const newVol = { title: `Disque ${i}`, cover: '', tracks: [] };
+          const subId = await saveVolumeToFirestore(albumData.firestoreId, newVol);
+          newVol.subId = subId;
+          albumData.volumes.push(newVol);
+        }
+      }
+
       closeModal("formModal");
     }
 
