@@ -268,7 +268,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — BoxSet Fix : 16-09-2026 à 19:45</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — BoxSet Title Fix : 16-09-2026 à 19:50</div>
 
     <header>
       <div class="top-bar">
@@ -1449,7 +1449,12 @@
       }
 
       vols.forEach((v, idx) => {
-        const titleText = v.title || '';
+        let titleText = v.title || '';
+        // Sécurité anti-résidu numérique (si le titre est juste un chiffre parasite)
+        if (!titleText || /^\d+$/.test(titleText)) {
+          titleText = `Disque ${idx + 1}`;
+        }
+
         let coverUrl = v.cover || '';
         const vTracks = v.tracks || [];
         
@@ -1557,7 +1562,10 @@
       if (!album.volumes || !album.volumes[volIdx]) return;
 
       const current = album.volumes[volIdx];
-      const title = current.title || '';
+      let title = current.title || '';
+      if (!title || /^\d+$/.test(title)) {
+        title = `Disque ${volIdx + 1}`;
+      }
       const cover = current.cover || '';
       const tracks = current.tracks || [];
 
