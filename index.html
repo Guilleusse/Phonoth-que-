@@ -268,7 +268,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — UI Uniformity Fix : 16-09-2026 à 22:10</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Realtime Sync : 16-09-2026 à 22:30</div>
 
     <header>
       <div class="top-bar">
@@ -634,6 +634,7 @@
     let html5QrCode = null;
     let savedScrollPosition = 0;
     let currentFetchedTracks = [];
+    let realtimeChannel = null;
 
     let pendingCoverUrl = "";
     let pendingEditVolCoverUrl = "";
@@ -725,6 +726,7 @@
         authUser = session.user;
         document.getElementById("loginModal").classList.remove("active");
         fetchCollectionFromSupabase();
+        setupRealtimeSubscription();
       } else {
         document.getElementById("loginModal").classList.add("active");
       }
@@ -735,11 +737,40 @@
           authUser = session.user;
           document.getElementById("loginModal").classList.remove("active");
           fetchCollectionFromSupabase();
+          setupRealtimeSubscription();
         } else {
           authUser = null;
+          if (realtimeChannel) {
+            supabase.removeChannel(realtimeChannel);
+            realtimeChannel = null;
+          }
           document.getElementById("loginModal").classList.add("active");
         }
       });
+    }
+
+    // Configuration du Temps Réel (Realtime WebSockets) entre les appareils
+    function setupRealtimeSubscription() {
+      if (realtimeChannel) {
+        supabase.removeChannel(realtimeChannel);
+      }
+
+      realtimeChannel = supabase
+        .channel('public:albums')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'albums'
+          },
+          (payload) => {
+            console.log('🔄 Mise à jour en temps réel reçue :', payload);
+            // Rafraîchir instantanément la collection sans recharger la page
+            fetchCollectionFromSupabase();
+          }
+        )
+        .subscribe();
     }
 
     async function loginUser() {
