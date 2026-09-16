@@ -268,7 +268,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Migration : 16-09-2026 03:47</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Migration : 16-09-2026</div>
 
     <header>
       <div class="top-bar">
@@ -618,11 +618,11 @@
   </div>
 
   <script>
-    // ----- Configuration Supabase -----
+    // ----- Configuration Supabase unique -----
     const SUPABASE_URL = 'https://mchljfhtgingnqxcjizf.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jaGxqZmh0Z2luZ25xeGNqaXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTY1NzYsImV4cCI6MjEwNTA3MjU3Nn0.aGv9w7XQB-FOVc7xScX-3HN-5ZcA3d3EM7JOBz0HCuQ';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    // ----------------------------------
+    // -----------------------------------------
 
     document.addEventListener('touchstart', function() {}, { passive: true });
 
@@ -785,12 +785,12 @@
       if (!error && data) {
         collection = data.map(row => {
           return {
-            firestoreId: row.id, // On mappe l'ID Supabase sur firestoreId pour ne pas casser le code existant
+            firestoreId: row.id,
             artist: row.artist,
             title: row.title,
             volumes: row.volumes || [],
             tracks: row.tracks || [],
-            ...(row.app_data || {}) // On récupère toutes les autres infos !
+            ...(row.app_data || {})
           };
         });
         try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
@@ -827,7 +827,6 @@
       if (authUser) {
         showSpinner();
         
-        // On prépare l'objet JSON contenant les infos libres
         const appData = { ...album };
         delete appData.firestoreId;
         delete appData.artist;
@@ -860,17 +859,14 @@
       renderCollection();
     }
 
-    // Avec Supabase, les volumes font partie intégrante de l'album ! Plus besoin d'une requête séparée.
     async function fetchVolumesForAlbum(album) {
       return album.volumes || [];
     }
 
-    // On génère juste un faux ID local, c'est l'enregistrement complet de l'album via syncAlbumToFirestore qui gère tout.
     async function saveVolumeToFirestore(albumId, volumeData, subId) {
       return subId || 'vol_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     }
 
-    // Plus besoin de suppression serveur ici, ça se fera lors de l'enregistrement de l'album avec le volume en moins.
     async function deleteVolumeFromFirestore(albumId, subId) {
       return true;
     }
@@ -2130,7 +2126,6 @@
       }
     }
 
-    // Le script d'import a été entièrement converti pour le système de base de données Supabase !
     async function importFromCSV(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -2183,7 +2178,6 @@
             
             if (authUser) {
               showSpinner();
-              // On supprime d'abord les anciens enregistrements pour repartir à zéro
               await supabase.from('albums').delete().not('id', 'is', null);
 
               const recordsToInsert = newAlbums.map(album => {
@@ -2202,11 +2196,10 @@
                 };
               });
 
-              // On balance toute la collection en une seule grosse injection dans Supabase
               const { error } = await supabase.from('albums').insert(recordsToInsert);
               if (!error) {
                 hideSpinner();
-                fetchCollectionFromSupabase(); // Pour récupérer les nouveaux identifiants
+                fetchCollectionFromSupabase();
                 alert("Importation et synchronisation Supabase réussies !");
               } else {
                 console.error("Erreur d'import Supabase", error);
