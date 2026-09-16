@@ -18,10 +18,8 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
 
-  <!-- Firebase Auth & Firestore SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- Supabase SDK & Scanner HTML5 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
@@ -270,13 +268,13 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ Fix Blocage Stockage : 16-09-2026 00:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Migration : 16-09-2026 à 17:15</div>
 
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
           <h1>Phonothèque</h1>
-          <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation avec Firebase..."></div>
+          <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation avec Supabase..."></div>
         </div>
         <div class="header-actions">
           <button class="icon-btn" onclick="getRandomAlbum()" title="Album au hasard">🎲</button>
@@ -328,7 +326,7 @@
   <div class="modal-overlay" id="loginModal" style="align-items: center;">
     <div class="login-box">
       <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px; text-align: center;">🔐 Phonothèque</h2>
-      <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px; text-align: center;">Connexion sécurisée requise</p>
+      <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px; text-align: center;">Connexion sécurisée (Supabase)</p>
       
       <div class="form-group">
         <label>E-mail</label>
@@ -431,6 +429,7 @@
       </div>
       <div class="modal-body" style="padding:15px;">
         <input type="hidden" id="editVolIndex">
+        <input type="hidden" id="editVolSubId">
         <div class="form-group">
           <label>Nom / Titre du disque</label>
           <input type="text" id="editVolTitle" placeholder="ex: Disque 1 - Lyla" autocomplete="off">
@@ -619,25 +618,15 @@
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyADp8kgtHBqXUx2PF4z1Up5Kn-o73bh_P4",
-      authDomain: "phonotheque-264a6.firebaseapp.com",
-      projectId: "phonotheque-264a6",
-      storageBucket: "phonotheque-264a6.firebasestorage.app",
-      messagingSenderId: "535162805091",
-      appId: "1:535162805091:web:e0933e8e203c5323ee9156"
-    };
+    // ----- Configuration Supabase unique -----
+    const SUPABASE_URL = 'https://mchljfhtgingnqxcjizf.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jaGxqZmh0Z2luZ25xeGNqaXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTY1NzYsImV4cCI6MjEwNTA3MjU3Nn0.aGv9w7XQB-FOVc7xScX-3HN-5ZcA3d3EM7JOBz0HCuQ';
+    window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // -----------------------------------------
 
     document.addEventListener('touchstart', function() {}, { passive: true });
 
-    let db = null;
-    let auth = null;
-    try {
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      auth = firebase.auth();
-    } catch(e) { console.log("Mode local"); }
-
+    let authUser = null;
     let collection = [];
     let currentFilter = 'all';
     let activeExactFilter = null;
@@ -743,22 +732,33 @@
       event.target.value = '';
     }
 
-    function initApp() {
+    async function initApp() {
       loadLocal();
 
-      if (auth) {
-        auth.onAuthStateChanged(user => {
-          if (user) {
-            document.getElementById("loginModal").classList.remove("active");
-            subscribeFirestore();
-          } else {
-            document.getElementById("loginModal").classList.add("active");
-          }
-        });
+      // Vérification de la session Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        authUser = session.user;
+        document.getElementById("loginModal").classList.remove("active");
+        fetchCollectionFromSupabase();
+      } else {
+        document.getElementById("loginModal").classList.add("active");
       }
+
+      // Écouteur des changements d'état
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          authUser = session.user;
+          document.getElementById("loginModal").classList.remove("active");
+          fetchCollectionFromSupabase();
+        } else {
+          authUser = null;
+          document.getElementById("loginModal").classList.add("active");
+        }
+      });
     }
 
-    function loginUser() {
+    async function loginUser() {
       const email = document.getElementById("loginEmail").value.trim();
       const pass = document.getElementById("loginPassword").value.trim();
       const errBox = document.getElementById("loginError");
@@ -770,34 +770,35 @@
         return;
       }
 
-      auth.signInWithEmailAndPassword(email, pass)
-        .catch(error => {
-          errBox.textContent = "Identifiants incorrects.";
-          errBox.style.display = "block";
+      const { data, error } = await supabase.auth.signInWithPassword({ email: email, password: pass });
+      
+      if (error) {
+        errBox.textContent = "Identifiants incorrects.";
+        errBox.style.display = "block";
+      }
+    }
+
+    async function fetchCollectionFromSupabase() {
+      if (!authUser) return;
+      showSpinner();
+      const { data, error } = await supabase.from('albums').select('*');
+      if (!error && data) {
+        collection = data.map(row => {
+          return {
+            firestoreId: row.id,
+            artist: row.artist,
+            title: row.title,
+            volumes: row.volumes || [],
+            tracks: row.tracks || [],
+            ...(row.app_data || {})
+          };
         });
-    }
-
-    function getAlbumsRef() {
-      const user = auth.currentUser;
-      if (!user) return null;
-      return db.collection("phonotheque_v2").doc(user.uid).collection("albums");
-    }
-
-    function subscribeFirestore() {
-      const albumsRef = getAlbumsRef();
-      if (!albumsRef) return;
-
-      albumsRef.onSnapshot(snapshot => {
-        collection = snapshot.docs.map(doc => ({ firestoreId: doc.id, ...doc.data() }));
-        try {
-          localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-        } catch(e) {
-          console.warn("LocalStorage plein ou bloqué, sauvegarde locale ignorée.");
-        }
-        renderCollection();
-      }, err => {
-        console.log("Erreur de synchronisation subcollection", err);
-      });
+        try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
+      } else {
+        console.error("Erreur de synchronisation Supabase", error);
+      }
+      hideSpinner();
+      renderCollection();
     }
 
     function loadLocal() {
@@ -820,78 +821,89 @@
       if (s) s.style.display = "none";
     }
 
-    function syncAlbumToFirestore(album) {
-      try {
-        localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-      } catch(e) {
-        console.warn("LocalStorage saturé.");
-      }
+    async function syncAlbumToFirestore(album) {
+      try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
 
-      if (db && auth && auth.currentUser) {
+      if (authUser) {
         showSpinner();
-        const albumsRef = getAlbumsRef();
-        if (!albumsRef) return;
+        
+        const appData = { ...album };
+        delete appData.firestoreId;
+        delete appData.artist;
+        delete appData.title;
+        delete appData.volumes;
+        delete appData.tracks;
 
-        const dataToSave = { ...album };
-        delete dataToSave.firestoreId;
+        const dbRecord = {
+          artist: album.artist,
+          title: album.title,
+          volumes: album.volumes || [],
+          tracks: album.tracks || [],
+          app_data: appData
+        };
 
         if (album.firestoreId) {
-          albumsRef.doc(album.firestoreId).set(dataToSave)
-            .then(() => setTimeout(hideSpinner, 300))
-            .catch(err => { console.log("Erreur MAJ album", err); hideSpinner(); });
-        } else {
-          albumsRef.add(dataToSave)
-            .then(docRef => {
-              album.firestoreId = docRef.id;
-              try {
-                localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-              } catch(e) {}
-              setTimeout(hideSpinner, 300);
-            })
-            .catch(err => { console.log("Erreur ajout album", err); hideSpinner(); });
+          dbRecord.id = album.firestoreId;
         }
+
+        const { data, error } = await supabase.from('albums').upsert([dbRecord]).select();
+        
+        if (!error && data && data.length > 0) {
+          album.firestoreId = data[0].id;
+          try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
+        } else {
+          console.error("Erreur MAJ album", error);
+        }
+        setTimeout(hideSpinner, 300);
       }
       renderCollection();
     }
 
-    function deleteAlbumFromFirestore(firestoreId) {
-      try {
-        localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-      } catch(e) {}
+    async function fetchVolumesForAlbum(album) {
+      return album.volumes || [];
+    }
 
-      if (db && auth && auth.currentUser && firestoreId) {
+    async function saveVolumeToFirestore(albumId, volumeData, subId) {
+      return subId || 'vol_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+
+    async function deleteVolumeFromFirestore(albumId, subId) {
+      return true;
+    }
+
+    async function deleteAlbumFromFirestore(firestoreId) {
+      try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
+
+      if (authUser && firestoreId) {
         showSpinner();
-        const albumsRef = getAlbumsRef();
-        if (albumsRef) {
-          albumsRef.doc(firestoreId).delete()
-            .then(() => setTimeout(hideSpinner, 300))
-            .catch(err => { console.log("Erreur suppression album", err); hideSpinner(); });
-        }
+        const { error } = await supabase.from('albums').delete().eq('id', firestoreId);
+        if (error) console.error("Erreur suppression album", error);
+        setTimeout(hideSpinner, 300);
       }
       renderCollection();
     }
 
     function clearCollection() {
       if (confirm("ATTENTION : Voulez-vous vraiment vider toute votre phonothèque ?")) {
-        const albumsRef = getAlbumsRef();
-        if (db && auth && auth.currentUser && albumsRef) {
+        if (authUser) {
           showSpinner();
-          albumsRef.get().then(snapshot => {
-            const batch = db.batch();
-            snapshot.docs.forEach(doc => batch.delete(doc.ref));
-            batch.commit().then(() => {
+          supabase.from('albums').delete().not('id', 'is', null).then(({error}) => {
+            if(!error) {
               collection = [];
               try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
               hideSpinner();
               renderCollection();
               alert("La phonothèque a été vidée.");
-            });
+            } else {
+              hideSpinner();
+              alert("Erreur lors du nettoyage.");
+            }
           });
         } else {
           collection = [];
           try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
           renderCollection();
-          alert("La phonothèque a été vidée.");
+          alert("La phonothèque locale a été vidée.");
         }
       }
     }
@@ -1297,7 +1309,7 @@
       }
     }
 
-    function showDetails(index) {
+    async function showDetails(index) {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
@@ -1400,8 +1412,12 @@
       const volSection = document.getElementById("volumesSection");
       if (album.isBoxSet) {
         volSection.style.display = 'block';
-        renderVolumesList(album.volumes || [], album.cover);
-      } else { volSection.style.display = 'none'; }
+        const vols = await fetchVolumesForAlbum(album);
+        album.volumes = vols;
+        renderVolumesList(vols, album.cover);
+      } else { 
+        volSection.style.display = 'none'; 
+      }
 
       document.getElementById("detailsModal").classList.add("active");
     }
@@ -1449,10 +1465,9 @@
       }
 
       vols.forEach((v, idx) => {
-        const isObj = (typeof v === 'object' && v !== null);
-        const titleText = isObj ? (v.title || '') : v;
-        let coverUrl = isObj ? (v.cover || '') : '';
-        const vTracks = (isObj && v.tracks) ? v.tracks : [];
+        const titleText = v.title || '';
+        let coverUrl = v.cover || '';
+        const vTracks = v.tracks || [];
         
         if (!coverUrl && parentCover) {
           coverUrl = parentCover;
@@ -1503,27 +1518,24 @@
       document.getElementById("bulkModal").classList.add("active");
     }
 
-    function submitBulkVolumes() {
+    async function submitBulkVolumes() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       const text = document.getElementById("bulkInput").value.trim();
       
       if (text) {
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        
         if (!album.volumes) album.volumes = [];
 
-        lines.forEach((line, idx) => {
-          if (album.volumes[idx]) {
-            album.volumes[idx].title = line;
-          } else {
-            album.volumes.push({
-              title: line,
-              cover: album.cover || '',
-              tracks: []
-            });
-          }
-        });
+        for (let idx = 0; idx < lines.length; idx++) {
+          const line = lines[idx];
+          let volData = album.volumes[idx] || { title: line, cover: album.cover || '', tracks: [] };
+          volData.title = line;
+          
+          const subId = await saveVolumeToFirestore(album.firestoreId, volData, volData.subId);
+          volData.subId = subId;
+          album.volumes[idx] = volData;
+        }
 
         album.discsCount = album.volumes.length;
         syncAlbumToFirestore(album);
@@ -1532,7 +1544,7 @@
       }
     }
 
-    function addNewVolumeToCurrentAlbum() {
+    async function addNewVolumeToCurrentAlbum() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       const titleVal = prompt("Nom / Détail du nouveau disque (ex: Vol. 1 - Roman Photos) :");
@@ -1540,11 +1552,15 @@
         const coverVal = prompt("URL de la vignette / pochette pour ce disque (Facultatif) :", "") || "";
         if (!album.volumes) album.volumes = [];
         
-        album.volumes.push({
+        const newVol = {
           title: titleVal.trim(),
           cover: coverVal.trim(),
           tracks: []
-        });
+        };
+
+        const subId = await saveVolumeToFirestore(album.firestoreId, newVol);
+        newVol.subId = subId;
+        album.volumes.push(newVol);
         album.discsCount = album.volumes.length;
         syncAlbumToFirestore(album);
         showDetails(selectedAlbumIndex);
@@ -1557,13 +1573,14 @@
       if (!album.volumes || !album.volumes[volIdx]) return;
 
       const current = album.volumes[volIdx];
-      const title = typeof current === 'object' ? (current.title || '') : current;
-      const cover = typeof current === 'object' ? (current.cover || '') : '';
-      const tracks = (typeof current === 'object' && current.tracks) ? current.tracks : [];
+      const title = current.title || '';
+      const cover = current.cover || '';
+      const tracks = current.tracks || [];
 
       pendingEditVolCoverBase64 = cover;
 
       document.getElementById("editVolIndex").value = volIdx;
+      document.getElementById("editVolSubId").value = current.subId || '';
       document.getElementById("editVolTitle").value = title;
       document.getElementById("editVolCover").value = cover ? (cover.startsWith("data:image") ? "✓ Image chargée en mémoire" : cover) : "";
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
@@ -1621,22 +1638,20 @@
       }
     }
 
-    function saveEditedVolume() {
+    async function saveEditedVolume() {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       const volIdx = parseInt(document.getElementById("editVolIndex").value);
+      const subId = document.getElementById("editVolSubId").value;
       if (isNaN(volIdx) || !album.volumes || !album.volumes[volIdx]) return;
 
       const newTitle = document.getElementById("editVolTitle").value.trim();
-      
       let newCover = pendingEditVolCoverBase64 || document.getElementById("editVolCover").value.trim();
       if (newCover.startsWith("✓")) {
-        const current = album.volumes[volIdx];
-        newCover = (typeof current === 'object' ? current.cover : '') || '';
+        newCover = album.volumes[volIdx].cover || '';
       }
 
       const tracksText = document.getElementById("editVolTracks").value.trim();
-
       let parsedTracks = [];
       if (tracksText) {
         parsedTracks = tracksText.split('\n').map(line => {
@@ -1649,24 +1664,29 @@
         }).filter(t => t.title.length > 0);
       }
 
-      album.volumes[volIdx] = {
+      const updatedVol = {
         title: newTitle,
         cover: newCover,
         tracks: parsedTracks
       };
 
+      const newSubId = await saveVolumeToFirestore(album.firestoreId, updatedVol, subId);
+      updatedVol.subId = newSubId;
+
+      album.volumes[volIdx] = updatedVol;
       pendingEditVolCoverBase64 = "";
-      syncAlbumToFirestore(album);
       closeModal("editVolumeModal");
       showDetails(selectedAlbumIndex);
     }
 
-    function deleteVolumeItem(volIdx) {
+    async function deleteVolumeItem(volIdx) {
       if (selectedAlbumIndex < 0) return;
       const album = collection[selectedAlbumIndex];
       if (!album.volumes || !album.volumes[volIdx]) return;
-      const titleText = typeof album.volumes[volIdx] === 'object' ? album.volumes[volIdx].title : album.volumes[volIdx];
-      if (confirm(`Supprimer "${titleText}" ?`)) {
+      const vol = album.volumes[volIdx];
+      
+      if (confirm(`Supprimer "${vol.title || 'ce disque'}" ?`)) {
+        await deleteVolumeFromFirestore(album.firestoreId, vol.subId);
         album.volumes.splice(volIdx, 1);
         album.discsCount = album.volumes.length;
         syncAlbumToFirestore(album);
@@ -1715,7 +1735,7 @@
       document.getElementById("formModal").classList.add("active");
     }
 
-    function openEditModal(index) {
+    async function openEditModal(index) {
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       currentFetchedTracks = [];
@@ -1764,7 +1784,7 @@
       document.getElementById("formModal").classList.add("active");
     }
 
-    function saveAlbumForm() {
+    async function saveAlbumForm() {
       const title = document.getElementById("formTitle").value.trim();
       const artist = document.getElementById("formArtist").value.trim();
       const sortName = document.getElementById("formSortName").value.trim();
@@ -1804,13 +1824,6 @@
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
   
       const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
-      let volumes = isBoxSet ? existingVols : [];
-
-      if (isBoxSet && discsCount > volumes.length) {
-        for (let i = volumes.length + 1; i <= discsCount; i++) {
-          volumes.push({ title: `Disque ${i}`, cover: '', tracks: [] });
-        }
-      }
 
       const tracksText = document.getElementById("formTracks").value.trim();
       let manualTracks = [];
@@ -1858,7 +1871,7 @@
         isAudiophile: isAudiophile,
         is45RPM: is45RPM,
         discsCount: discsCount,
-        volumes: volumes,
+        volumes: existingVols,
         tracks: tracks
       };
 
@@ -1871,6 +1884,16 @@
       }
 
       syncAlbumToFirestore(albumData);
+
+      if (isBoxSet && discsCount > existingVols.length && albumData.firestoreId) {
+        for (let i = existingVols.length + 1; i <= discsCount; i++) {
+          const newVol = { title: `Disque ${i}`, cover: '', tracks: [] };
+          const subId = await saveVolumeToFirestore(albumData.firestoreId, newVol);
+          newVol.subId = subId;
+          albumData.volumes.push(newVol);
+        }
+      }
+
       closeModal("formModal");
     }
 
@@ -2103,12 +2126,40 @@
       }
     }
 
-    function importFromCSV(event) {
+    function parseTracksCSV(trksStr) {
+      if (!trksStr) return [];
+      return trksStr.split('||').map(item => {
+        const parts = item.split(':::');
+        return {
+          position: parts[0] || '',
+          title: parts[1] || '',
+          duration: parts[2] || ''
+        };
+      }).filter(t => t.title);
+    }
+
+    function parseVolumesCSV(volsStr) {
+      if (!volsStr) return [];
+      return volsStr.split('||').map(item => {
+        const parts = item.split(':::');
+        const volTitle = parts[0] || '';
+        const volCover = parts[1] || '';
+        const volTrksStr = parts[2] || '';
+        const volTracks = parseTracksCSV(volTrksStr);
+        return {
+          title: volTitle,
+          cover: volCover,
+          tracks: volTracks
+        };
+      }).filter(v => v.title);
+    }
+
+    async function importFromCSV(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = async function(e) {
         const text = e.target.result;
         let newAlbums = [];
 
@@ -2139,9 +2190,9 @@
                   isAudiophile: cols[17] === 'true',
                   is45RPM: cols[18] === 'true',
                   discsCount: parseInt(cols[19]) || 0,
-                  sortName: cols[22] || '',
-                  volumes: [],
-                  tracks: []
+                  volumes: parseVolumesCSV(cols[20]),
+                  tracks: parseTracksCSV(cols[21]),
+                  sortName: cols[22] || ''
                 });
               }
             }
@@ -2149,29 +2200,43 @@
         }
 
         if (newAlbums.length > 0) {
-          if (confirm(`Voulez-vous importer les ${newAlbums.length} références ?`)) {
+          if (confirm(`Voulez-vous importer les ${newAlbums.length} références avec tous leurs détails ?`)) {
             collection = newAlbums;
-            try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
+            try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(err) {}
             
-            const albumsRef = getAlbumsRef();
-            if (db && auth && auth.currentUser && albumsRef) {
+            if (authUser) {
               showSpinner();
-              albumsRef.get().then(snapshot => {
-                const batch = db.batch();
-                snapshot.docs.forEach(doc => batch.delete(doc.ref));
-                newAlbums.forEach(album => {
-                  const newRef = albumsRef.doc();
-                  batch.set(newRef, album);
-                });
-                batch.commit().then(() => {
-                  hideSpinner();
-                  renderCollection();
-                  alert("Importation et synchronisation réussies !");
-                });
+              await supabase.from('albums').delete().not('id', 'is', null);
+
+              const recordsToInsert = newAlbums.map(album => {
+                const appData = { ...album };
+                delete appData.firestoreId;
+                delete appData.artist;
+                delete appData.title;
+                delete appData.volumes;
+                delete appData.tracks;
+                return {
+                  artist: album.artist,
+                  title: album.title,
+                  volumes: album.volumes || [],
+                  tracks: album.tracks || [],
+                  app_data: appData
+                };
               });
+
+              const { error } = await supabase.from('albums').insert(recordsToInsert);
+              if (!error) {
+                hideSpinner();
+                fetchCollectionFromSupabase();
+                alert("Importation et synchronisation Supabase réussies avec tous les détails !");
+              } else {
+                console.error("Erreur d'import Supabase", error);
+                hideSpinner();
+                alert("Erreur lors de l'import.");
+              }
             } else {
               renderCollection();
-              alert("Importation réussie !");
+              alert("Importation locale réussie avec tous les détails !");
             }
           }
         }
