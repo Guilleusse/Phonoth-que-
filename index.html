@@ -268,7 +268,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Realtime Sync : 16-09-2026 à 22:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Volume Track Sync Fix 16-09-2026 23:30</div>
 
     <header>
       <div class="top-bar">
@@ -749,7 +749,6 @@
       });
     }
 
-    // Configuration du Temps Réel (Realtime WebSockets) entre les appareils
     function setupRealtimeSubscription() {
       if (realtimeChannel) {
         supabase.removeChannel(realtimeChannel);
@@ -766,7 +765,6 @@
           },
           (payload) => {
             console.log('🔄 Mise à jour en temps réel reçue :', payload);
-            // Rafraîchir instantanément la collection sans recharger la page
             fetchCollectionFromSupabase();
           }
         )
@@ -1694,6 +1692,10 @@
 
       album.volumes[volIdx] = updatedVol;
       pendingEditVolCoverUrl = "";
+      
+      // SYNCHRONISATION SUPABASE CORRIGÉE ICI :
+      syncAlbumToFirestore(album);
+
       closeModal("editVolumeModal");
       showDetails(selectedAlbumIndex);
     }
