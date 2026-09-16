@@ -268,7 +268,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Migration : 16-09-2026 16:36</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Migration : 16-09-2026 à 17:15</div>
 
     <header>
       <div class="top-bar">
@@ -773,7 +773,7 @@
       const { data, error } = await supabase.auth.signInWithPassword({ email: email, password: pass });
       
       if (error) {
-        errBox.textContent = "Identifiants incorrects (As-tu bien créé ton compte dans l'onglet Authentication de Supabase ?).";
+        errBox.textContent = "Identifiants incorrects.";
         errBox.style.display = "block";
       }
     }
@@ -2126,6 +2126,34 @@
       }
     }
 
+    function parseTracksCSV(trksStr) {
+      if (!trksStr) return [];
+      return trksStr.split('||').map(item => {
+        const parts = item.split(':::');
+        return {
+          position: parts[0] || '',
+          title: parts[1] || '',
+          duration: parts[2] || ''
+        };
+      }).filter(t => t.title);
+    }
+
+    function parseVolumesCSV(volsStr) {
+      if (!volsStr) return [];
+      return volsStr.split('||').map(item => {
+        const parts = item.split(':::');
+        const volTitle = parts[0] || '';
+        const volCover = parts[1] || '';
+        const volTrksStr = parts[2] || '';
+        const volTracks = parseTracksCSV(volTrksStr);
+        return {
+          title: volTitle,
+          cover: volCover,
+          tracks: volTracks
+        };
+      }).filter(v => v.title);
+    }
+
     async function importFromCSV(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -2162,9 +2190,9 @@
                   isAudiophile: cols[17] === 'true',
                   is45RPM: cols[18] === 'true',
                   discsCount: parseInt(cols[19]) || 0,
-                  sortName: cols[22] || '',
-                  volumes: [],
-                  tracks: []
+                  volumes: parseVolumesCSV(cols[20]),
+                  tracks: parseTracksCSV(cols[21]),
+                  sortName: cols[22] || ''
                 });
               }
             }
@@ -2172,7 +2200,7 @@
         }
 
         if (newAlbums.length > 0) {
-          if (confirm(`Voulez-vous importer les ${newAlbums.length} références ?`)) {
+          if (confirm(`Voulez-vous importer les ${newAlbums.length} références avec tous leurs détails ?`)) {
             collection = newAlbums;
             try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(err) {}
             
@@ -2200,7 +2228,7 @@
               if (!error) {
                 hideSpinner();
                 fetchCollectionFromSupabase();
-                alert("Importation et synchronisation Supabase réussies !");
+                alert("Importation et synchronisation Supabase réussies avec tous les détails !");
               } else {
                 console.error("Erreur d'import Supabase", error);
                 hideSpinner();
@@ -2208,7 +2236,7 @@
               }
             } else {
               renderCollection();
-              alert("Importation locale réussie ! (Connectez-vous pour sauver sur le Cloud)");
+              alert("Importation locale réussie avec tous les détails !");
             }
           }
         }
