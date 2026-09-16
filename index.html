@@ -268,7 +268,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Storage Upload : 16-09-2026 à 18:28</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Storage Upload Fix : 16-09-2026 à 19:00</div>
 
     <header>
       <div class="top-bar">
@@ -659,7 +659,7 @@
       showSpinner();
       try {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36.substring(2, 7))}.${fileExt}`;
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
 
         const { data, error } = await supabase.storage
           .from('Pochettes')
@@ -691,7 +691,7 @@
       showSpinner();
       try {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36.substring(2, 7))}.${fileExt}`;
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
 
         const { data, error } = await supabase.storage
           .from('Pochettes')
