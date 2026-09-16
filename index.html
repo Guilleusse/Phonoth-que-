@@ -18,10 +18,8 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
 
-  <!-- Firebase Auth & Firestore SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- Supabase SDK & Scanner HTML5 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
@@ -270,13 +268,13 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Subcollections Volumes : 16-09-2026 01:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Migration : 16-09-2026 03:47</div>
 
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
           <h1>Phonothèque</h1>
-          <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation avec Firebase..."></div>
+          <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation avec Supabase..."></div>
         </div>
         <div class="header-actions">
           <button class="icon-btn" onclick="getRandomAlbum()" title="Album au hasard">🎲</button>
@@ -328,7 +326,7 @@
   <div class="modal-overlay" id="loginModal" style="align-items: center;">
     <div class="login-box">
       <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px; text-align: center;">🔐 Phonothèque</h2>
-      <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px; text-align: center;">Connexion sécurisée requise</p>
+      <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 20px; text-align: center;">Connexion sécurisée (Supabase)</p>
       
       <div class="form-group">
         <label>E-mail</label>
@@ -620,25 +618,15 @@
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyADp8kgtHBqXUx2PF4z1Up5Kn-o73bh_P4",
-      authDomain: "phonotheque-264a6.firebaseapp.com",
-      projectId: "phonotheque-264a6",
-      storageBucket: "phonotheque-264a6.firebasestorage.app",
-      messagingSenderId: "535162805091",
-      appId: "1:535162805091:web:e0933e8e203c5323ee9156"
-    };
+    // ----- Configuration Supabase -----
+    const SUPABASE_URL = 'https://mchljfhtgingnqxcjizf.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jaGxqZmh0Z2luZ25xeGNqaXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTY1NzYsImV4cCI6MjEwNTA3MjU3Nn0.aGv9w7XQB-FOVc7xScX-3HN-5ZcA3d3EM7JOBz0HCuQ';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ----------------------------------
 
     document.addEventListener('touchstart', function() {}, { passive: true });
 
-    let db = null;
-    let auth = null;
-    try {
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      auth = firebase.auth();
-    } catch(e) { console.log("Mode local"); }
-
+    let authUser = null;
     let collection = [];
     let currentFilter = 'all';
     let activeExactFilter = null;
@@ -744,22 +732,33 @@
       event.target.value = '';
     }
 
-    function initApp() {
+    async function initApp() {
       loadLocal();
 
-      if (auth) {
-        auth.onAuthStateChanged(user => {
-          if (user) {
-            document.getElementById("loginModal").classList.remove("active");
-            subscribeFirestore();
-          } else {
-            document.getElementById("loginModal").classList.add("active");
-          }
-        });
+      // Vérification de la session Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        authUser = session.user;
+        document.getElementById("loginModal").classList.remove("active");
+        fetchCollectionFromSupabase();
+      } else {
+        document.getElementById("loginModal").classList.add("active");
       }
+
+      // Écouteur des changements d'état
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          authUser = session.user;
+          document.getElementById("loginModal").classList.remove("active");
+          fetchCollectionFromSupabase();
+        } else {
+          authUser = null;
+          document.getElementById("loginModal").classList.add("active");
+        }
+      });
     }
 
-    function loginUser() {
+    async function loginUser() {
       const email = document.getElementById("loginEmail").value.trim();
       const pass = document.getElementById("loginPassword").value.trim();
       const errBox = document.getElementById("loginError");
@@ -771,34 +770,35 @@
         return;
       }
 
-      auth.signInWithEmailAndPassword(email, pass)
-        .catch(error => {
-          errBox.textContent = "Identifiants incorrects.";
-          errBox.style.display = "block";
+      const { data, error } = await supabase.auth.signInWithPassword({ email: email, password: pass });
+      
+      if (error) {
+        errBox.textContent = "Identifiants incorrects (As-tu bien créé ton compte dans l'onglet Authentication de Supabase ?).";
+        errBox.style.display = "block";
+      }
+    }
+
+    async function fetchCollectionFromSupabase() {
+      if (!authUser) return;
+      showSpinner();
+      const { data, error } = await supabase.from('albums').select('*');
+      if (!error && data) {
+        collection = data.map(row => {
+          return {
+            firestoreId: row.id, // On mappe l'ID Supabase sur firestoreId pour ne pas casser le code existant
+            artist: row.artist,
+            title: row.title,
+            volumes: row.volumes || [],
+            tracks: row.tracks || [],
+            ...(row.app_data || {}) // On récupère toutes les autres infos !
+          };
         });
-    }
-
-    function getAlbumsRef() {
-      const user = auth.currentUser;
-      if (!user) return null;
-      return db.collection("phonotheque_v2").doc(user.uid).collection("albums");
-    }
-
-    function subscribeFirestore() {
-      const albumsRef = getAlbumsRef();
-      if (!albumsRef) return;
-
-      albumsRef.onSnapshot(snapshot => {
-        collection = snapshot.docs.map(doc => ({ firestoreId: doc.id, ...doc.data() }));
-        try {
-          localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-        } catch(e) {
-          console.warn("LocalStorage plein ou bloqué.");
-        }
-        renderCollection();
-      }, err => {
-        console.log("Erreur de synchronisation subcollection", err);
-      });
+        try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
+      } else {
+        console.error("Erreur de synchronisation Supabase", error);
+      }
+      hideSpinner();
+      renderCollection();
     }
 
     function loadLocal() {
@@ -821,103 +821,93 @@
       if (s) s.style.display = "none";
     }
 
-    function syncAlbumToFirestore(album) {
-      try {
-        localStorage.setItem("phonotheque_backup", JSON.stringify(collection));
-      } catch(e) {}
+    async function syncAlbumToFirestore(album) {
+      try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
 
-      if (db && auth && auth.currentUser) {
+      if (authUser) {
         showSpinner();
-        const albumsRef = getAlbumsRef();
-        if (!albumsRef) return;
+        
+        // On prépare l'objet JSON contenant les infos libres
+        const appData = { ...album };
+        delete appData.firestoreId;
+        delete appData.artist;
+        delete appData.title;
+        delete appData.volumes;
+        delete appData.tracks;
 
-        const dataToSave = { ...album };
-        delete dataToSave.firestoreId;
-        delete dataToSave.volumes; // Les volumes sont gérés dans leur propre sous-collection
+        const dbRecord = {
+          artist: album.artist,
+          title: album.title,
+          volumes: album.volumes || [],
+          tracks: album.tracks || [],
+          app_data: appData
+        };
 
         if (album.firestoreId) {
-          albumsRef.doc(album.firestoreId).set(dataToSave)
-            .then(() => setTimeout(hideSpinner, 300))
-            .catch(err => { console.log("Erreur MAJ album", err); hideSpinner(); });
-        } else {
-          albumsRef.add(dataToSave)
-            .then(docRef => {
-              album.firestoreId = docRef.id;
-              try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
-              setTimeout(hideSpinner, 300);
-            })
-            .catch(err => { console.log("Erreur ajout album", err); hideSpinner(); });
+          dbRecord.id = album.firestoreId;
         }
+
+        const { data, error } = await supabase.from('albums').upsert([dbRecord]).select();
+        
+        if (!error && data && data.length > 0) {
+          album.firestoreId = data[0].id;
+          try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
+        } else {
+          console.error("Erreur MAJ album", error);
+        }
+        setTimeout(hideSpinner, 300);
       }
       renderCollection();
     }
 
+    // Avec Supabase, les volumes font partie intégrante de l'album ! Plus besoin d'une requête séparée.
     async function fetchVolumesForAlbum(album) {
-      if (!db || !auth.currentUser || !album.firestoreId) return album.volumes || [];
-      try {
-        const snap = await getAlbumsRef().doc(album.firestoreId).collection("volumes").get();
-        if (!snap.empty) {
-          return snap.docs.map(d => ({ subId: d.id, ...d.data() }));
-        }
-      } catch(e) {}
       return album.volumes || [];
     }
 
+    // On génère juste un faux ID local, c'est l'enregistrement complet de l'album via syncAlbumToFirestore qui gère tout.
     async function saveVolumeToFirestore(albumId, volumeData, subId) {
-      if (!db || !auth.currentUser || !albumId) return;
-      const volsRef = getAlbumsRef().doc(albumId).collection("volumes");
-      const cleanData = { ...volumeData };
-      delete cleanData.subId;
-      if (subId) {
-        await volsRef.doc(subId).set(cleanData);
-        return subId;
-      } else {
-        const docRef = await volsRef.add(cleanData);
-        return docRef.id;
-      }
+      return subId || 'vol_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     }
 
+    // Plus besoin de suppression serveur ici, ça se fera lors de l'enregistrement de l'album avec le volume en moins.
     async function deleteVolumeFromFirestore(albumId, subId) {
-      if (!db || !auth.currentUser || !albumId || !subId) return;
-      await getAlbumsRef().doc(albumId).collection("volumes").doc(subId).delete();
+      return true;
     }
 
-    function deleteAlbumFromFirestore(firestoreId) {
+    async function deleteAlbumFromFirestore(firestoreId) {
       try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
 
-      if (db && auth && auth.currentUser && firestoreId) {
+      if (authUser && firestoreId) {
         showSpinner();
-        const albumsRef = getAlbumsRef();
-        if (albumsRef) {
-          albumsRef.doc(firestoreId).delete()
-            .then(() => setTimeout(hideSpinner, 300))
-            .catch(err => { console.log("Erreur suppression album", err); hideSpinner(); });
-        }
+        const { error } = await supabase.from('albums').delete().eq('id', firestoreId);
+        if (error) console.error("Erreur suppression album", error);
+        setTimeout(hideSpinner, 300);
       }
       renderCollection();
     }
 
     function clearCollection() {
       if (confirm("ATTENTION : Voulez-vous vraiment vider toute votre phonothèque ?")) {
-        const albumsRef = getAlbumsRef();
-        if (db && auth && auth.currentUser && albumsRef) {
+        if (authUser) {
           showSpinner();
-          albumsRef.get().then(snapshot => {
-            const batch = db.batch();
-            snapshot.docs.forEach(doc => batch.delete(doc.ref));
-            batch.commit().then(() => {
+          supabase.from('albums').delete().not('id', 'is', null).then(({error}) => {
+            if(!error) {
               collection = [];
               try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
               hideSpinner();
               renderCollection();
               alert("La phonothèque a été vidée.");
-            });
+            } else {
+              hideSpinner();
+              alert("Erreur lors du nettoyage.");
+            }
           });
         } else {
           collection = [];
           try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
           renderCollection();
-          alert("La phonothèque a été vidée.");
+          alert("La phonothèque locale a été vidée.");
         }
       }
     }
@@ -1899,7 +1889,6 @@
 
       syncAlbumToFirestore(albumData);
 
-      // Si c'est un coffret, s'assurer que les disques de base sont initialisés dans la sous-collection si besoin
       if (isBoxSet && discsCount > existingVols.length && albumData.firestoreId) {
         for (let i = existingVols.length + 1; i <= discsCount; i++) {
           const newVol = { title: `Disque ${i}`, cover: '', tracks: [] };
@@ -2141,12 +2130,13 @@
       }
     }
 
-    function importFromCSV(event) {
+    // Le script d'import a été entièrement converti pour le système de base de données Supabase !
+    async function importFromCSV(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = async function(e) {
         const text = e.target.result;
         let newAlbums = [];
 
@@ -2189,27 +2179,43 @@
         if (newAlbums.length > 0) {
           if (confirm(`Voulez-vous importer les ${newAlbums.length} références ?`)) {
             collection = newAlbums;
-            try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
+            try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(err) {}
             
-            const albumsRef = getAlbumsRef();
-            if (db && auth && auth.currentUser && albumsRef) {
+            if (authUser) {
               showSpinner();
-              albumsRef.get().then(snapshot => {
-                const batch = db.batch();
-                snapshot.docs.forEach(doc => batch.delete(doc.ref));
-                newAlbums.forEach(album => {
-                  const newRef = albumsRef.doc();
-                  batch.set(newRef, album);
-                });
-                batch.commit().then(() => {
-                  hideSpinner();
-                  renderCollection();
-                  alert("Importation et synchronisation réussies !");
-                });
+              // On supprime d'abord les anciens enregistrements pour repartir à zéro
+              await supabase.from('albums').delete().not('id', 'is', null);
+
+              const recordsToInsert = newAlbums.map(album => {
+                const appData = { ...album };
+                delete appData.firestoreId;
+                delete appData.artist;
+                delete appData.title;
+                delete appData.volumes;
+                delete appData.tracks;
+                return {
+                  artist: album.artist,
+                  title: album.title,
+                  volumes: album.volumes || [],
+                  tracks: album.tracks || [],
+                  app_data: appData
+                };
               });
+
+              // On balance toute la collection en une seule grosse injection dans Supabase
+              const { error } = await supabase.from('albums').insert(recordsToInsert);
+              if (!error) {
+                hideSpinner();
+                fetchCollectionFromSupabase(); // Pour récupérer les nouveaux identifiants
+                alert("Importation et synchronisation Supabase réussies !");
+              } else {
+                console.error("Erreur d'import Supabase", error);
+                hideSpinner();
+                alert("Erreur lors de l'import.");
+              }
             } else {
               renderCollection();
-              alert("Importation réussie !");
+              alert("Importation locale réussie ! (Connectez-vous pour sauver sur le Cloud)");
             }
           }
         }
