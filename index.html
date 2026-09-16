@@ -268,7 +268,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Storage Upload Fix : 16-09-2026 à 19:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — BoxSet Fix : 16-09-2026 à 19:45</div>
 
     <header>
       <div class="top-bar">
@@ -1759,7 +1759,7 @@
       pendingCoverUrl = album.cover || '';
       document.getElementById("formCover").value = album.cover || '';
       
-      document.getElementById("formDiscsCount").value = album.discsCount || '';
+      document.getElementById("formDiscsCount").value = album.discsCount || (album.volumes ? album.volumes.length : '') || '';
 
       closeModal("detailsModal");
       document.getElementById("formModal").classList.add("active");
@@ -1804,7 +1804,27 @@
       const is45RPM = (support === 'Vinyle') ? document.getElementById("is45RPM").checked : false;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
   
-      const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
+      let existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? [...collection[selectedAlbumIndex].volumes] : [];
+
+      if (isBoxSet) {
+        const targetCount = discsCount > 0 ? discsCount : (existingVols.length > 0 ? existingVols.length : 2);
+        
+        while (existingVols.length < targetCount) {
+          const i = existingVols.length + 1;
+          const newVol = { title: `Disque ${i}`, cover: '', tracks: [] };
+          const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
+          if (firestoreId) {
+            const subId = await saveVolumeToFirestore(firestoreId, newVol);
+            newVol.subId = subId;
+          }
+          existingVols.push(newVol);
+        }
+        if (existingVols.length > targetCount) {
+          existingVols = existingVols.slice(0, targetCount);
+        }
+      } else {
+        existingVols = [];
+      }
 
       const tracksText = document.getElementById("formTracks").value.trim();
       let manualTracks = [];
@@ -1848,7 +1868,7 @@
         isWantlist: isWantlist,
         isAudiophile: isAudiophile,
         is45RPM: is45RPM,
-        discsCount: discsCount,
+        discsCount: isBoxSet ? existingVols.length : 0,
         volumes: existingVols,
         tracks: tracks
       };
@@ -1862,16 +1882,6 @@
       }
 
       syncAlbumToFirestore(albumData);
-
-      if (isBoxSet && discsCount > existingVols.length && albumData.firestoreId) {
-        for (let i = existingVols.length + 1; i <= discsCount; i++) {
-          const newVol = { title: `Disque ${i}`, cover: '', tracks: [] };
-          const subId = await saveVolumeToFirestore(albumData.firestoreId, newVol);
-          newVol.subId = subId;
-          albumData.volumes.push(newVol);
-        }
-      }
-
       closeModal("formModal");
     }
 
