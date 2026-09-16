@@ -268,7 +268,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — BoxSet Title Fix : 16-09-2026 à 19:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — UI Uniformity Fix : 16-09-2026 à 22:10</div>
 
     <header>
       <div class="top-bar">
@@ -437,7 +437,7 @@
         <div class="form-group">
           <label>URL de la vignette (facultatif)</label>
           <input type="url" id="editVolCover" placeholder="https://..." autocomplete="off">
-          <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('editVolCoverFileInput').click()">Choisir une image (Photos / Fichiers)</button>
+          <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('editVolCoverFileInput').click()">📷 Envoyer une photo sur Supabase Storage</button>
           <input type="file" id="editVolCoverFileInput" accept="image/*" style="display:none;" onchange="handleEditVolCoverFileSelect(event)">
         </div>
 
@@ -1450,7 +1450,6 @@
 
       vols.forEach((v, idx) => {
         let titleText = v.title || '';
-        // Sécurité anti-résidu numérique (si le titre est juste un chiffre parasite)
         if (!titleText || /^\d+$/.test(titleText)) {
           titleText = `Disque ${idx + 1}`;
         }
