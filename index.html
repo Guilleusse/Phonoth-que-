@@ -220,7 +220,7 @@
     .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
     .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 98vh; max-height: 98dvh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); }
     .modal-header { flex-shrink: 0; height: 58px; padding: 0 20px; background: #2c2c2e; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; }
-    .modal-title { font-size: 17px; font-weight: 700; color: white; }
+    .modal-title { font-size: 15px; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
     .modal-close { background: #3a3a3c; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
     .details-grid { background: #2c2c2e; border-radius: 14px; padding: 14px; margin: 15px 0; }
@@ -294,7 +294,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — MàJ : 18-09-2026 à 01:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 01:22</div>
 
     <header>
       <div class="top-bar">
@@ -488,11 +488,8 @@
   <!-- MODALE AJOUT / EDITION -->
   <div class="modal-overlay" id="formModal">
     <div class="modal-content">
-      <div class="modal-header" style="height: auto; min-height: 58px; padding-top: 8px; padding-bottom: 8px;">
-        <div id="formModalTitle" style="font-size: 14px; font-weight: 700; color: white; line-height: 1.2; display: flex; flex-direction: column;">
-          <span>Ajouter une</span>
-          <span style="color: var(--text-sub); font-size: 12px; font-weight: 600;">référence</span>
-        </div>
+      <div class="modal-header">
+        <span class="modal-title" id="formModalTitle">Ajouter une référence</span>
         <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
           <button type="button" class="btn-secondary" style="padding: 6px 12px; width: auto; font-size: 13px; background: #3a3a3c; color: white; border: none; border-radius: 8px;" onclick="closeModal('formModal')">Annuler</button>
           <button type="button" class="btn-submit" style="padding: 6px 12px; width: auto; font-size: 13px; border-radius: 8px;" onclick="saveAlbumForm()">Enregistrer</button>
@@ -1769,7 +1766,7 @@
       pendingCoverUrl = "";
       
       const titleEl = document.getElementById("formModalTitle");
-      titleEl.innerHTML = '<span>Ajouter une</span><span style="color: var(--text-sub); font-size: 12px; font-weight: 600;">référence</span>';
+      titleEl.textContent = "Ajouter une référence";
   
       document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
       document.getElementById("isAudiophile").checked = false;
@@ -1806,7 +1803,7 @@
       const album = collection[index];
       
       const titleEl = document.getElementById("formModalTitle");
-      titleEl.innerHTML = '<span>Modifier la</span><span style="color: var(--text-sub); font-size: 12px; font-weight: 600;">référence</span>';
+      titleEl.textContent = "Modifier la référence";
   
       document.getElementById("isWantlist").checked = !!album.isWantlist;
       document.getElementById("isAudiophile").checked = !!album.isAudiophile;
