@@ -272,6 +272,17 @@
       --text-main: #111827;
       --text-sub: #4b5563;
     }
+    body.light-mode h1 { 
+      background: linear-gradient(135deg, #111827 30%, #4b5563 100%); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      text-shadow: none; 
+    }
+    body.light-mode .filter-chip.active { 
+      background: var(--text-main); 
+      color: #ffffff; 
+      border-color: var(--text-main); 
+    }
     body.light-mode .modal-content, body.light-mode .login-box { background: var(--card-bg); }
     body.light-mode .modal-header, body.light-mode .details-grid, body.light-mode .volumes-box, body.light-mode .checkbox-group { background: var(--bg-color) !important; border-color: var(--card-border); }
     body.light-mode .form-group[style*="background:#2c2c2e"] { background: var(--bg-color) !important; border: 1px solid var(--card-border); }
@@ -283,7 +294,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026—Light/Dark Mode Toggle 17-09-2026 02:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - Light/Dark Mode Toggle 17-09-2026 02:56</div>
 
     <header>
       <div class="top-bar">
