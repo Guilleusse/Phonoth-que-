@@ -263,12 +263,27 @@
     /* Modal Connexion */
     #loginModal { z-index: 3000; }
     .login-box { background: #1c1c1e; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid var(--card-border); }
+
+    /* --- MODE JOUR (LIGHT MODE) --- */
+    body.light-mode {
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --card-border: #e5e7eb;
+      --text-main: #111827;
+      --text-sub: #4b5563;
+    }
+    body.light-mode .modal-content, body.light-mode .login-box { background: var(--card-bg); }
+    body.light-mode .modal-header, body.light-mode .details-grid, body.light-mode .volumes-box, body.light-mode .checkbox-group { background: var(--bg-color) !important; border-color: var(--card-border); }
+    body.light-mode .form-group[style*="background:#2c2c2e"] { background: var(--bg-color) !important; border: 1px solid var(--card-border); }
+    body.light-mode .modal-title, body.light-mode h2, body.light-mode h3, body.light-mode span[style*="color:white"], body.light-mode label[style*="color:white"], body.light-mode span[style*="color: white"] { color: var(--text-main) !important; }
+    body.light-mode .search-clear-btn { background: #d1d5db; color: #111827; }
+    body.light-mode .az-index { background: rgba(255, 255, 255, 0.85); border: 1px solid var(--card-border); }
   </style>
 </head>
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Volume Track Sync Fix 16-09-2026 23:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026—Light/Dark Mode Toggle 17-09-2026 02:30</div>
 
     <header>
       <div class="top-bar">
@@ -639,6 +654,11 @@
     let pendingCoverUrl = "";
     let pendingEditVolCoverUrl = "";
 
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-mode');
+      localStorage.setItem('phonotheque_theme', isLight ? 'light' : 'dark');
+    }
+
     window.addEventListener('scroll', () => {
       const btn = document.getElementById('backToTopBtn');
       if (!btn) return;
@@ -719,6 +739,10 @@
 
     async function initApp() {
       loadLocal();
+
+      if (localStorage.getItem('phonotheque_theme') === 'light') {
+        document.body.classList.add('light-mode');
+      }
 
       // Vérification de la session Supabase
       const { data: { session } } = await supabase.auth.getSession();
@@ -1053,7 +1077,13 @@
         <div class="details-row"><span class="details-label">Coffrets :</span><span class="details-val">${countCoffret}</span></div>
         <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedTotal} €</span></div>
         <div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
-        <div class="details-row"><span class="details-label">Total Cloud (Réf.) :</span><span class="details-val">${collection.length}</span></div>
+        <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (Réf.) :</span><span class="details-val">${collection.length}</span></div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+          <button class="btn-secondary" style="width: 100%; justify-content: center; background: var(--bg-color);" onclick="toggleTheme()">
+            🌓 Activer / Désactiver le mode Clair
+          </button>
+        </div>
       `;
 
       document.getElementById("statsModal").classList.add("active");
@@ -1693,7 +1723,6 @@
       album.volumes[volIdx] = updatedVol;
       pendingEditVolCoverUrl = "";
       
-      // SYNCHRONISATION SUPABASE CORRIGÉE ICI :
       syncAlbumToFirestore(album);
 
       closeModal("editVolumeModal");
