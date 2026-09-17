@@ -268,7 +268,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Supabase Migration : 16-09-2026 à 17:15</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 — Volume Track Sync Fix 16-09-2026 23:30</div>
 
     <header>
       <div class="top-bar">
@@ -437,7 +437,7 @@
         <div class="form-group">
           <label>URL de la vignette (facultatif)</label>
           <input type="url" id="editVolCover" placeholder="https://..." autocomplete="off">
-          <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('editVolCoverFileInput').click()">Choisir une image (Photos / Fichiers)</button>
+          <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('editVolCoverFileInput').click()">📷 Envoyer une photo sur Supabase Storage</button>
           <input type="file" id="editVolCoverFileInput" accept="image/*" style="display:none;" onchange="handleEditVolCoverFileSelect(event)">
         </div>
 
@@ -579,7 +579,7 @@
           <div class="form-group">
             <label>URL de la pochette</label>
             <input type="url" id="formCover" placeholder="https://..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('coverFileInput').click()">Choisir une image (Photos / Fichiers)</button>
+            <button type="button" class="btn-secondary" style="margin-top:8px; background:#2c2c2e; width:100%;" onclick="document.getElementById('coverFileInput').click()">📷 Envoyer une photo sur Supabase Storage</button>
             <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(event)">
           </div>
 
@@ -634,9 +634,10 @@
     let html5QrCode = null;
     let savedScrollPosition = 0;
     let currentFetchedTracks = [];
+    let realtimeChannel = null;
 
-    let pendingCoverBase64 = "";
-    let pendingEditVolCoverBase64 = "";
+    let pendingCoverUrl = "";
+    let pendingEditVolCoverUrl = "";
 
     window.addEventListener('scroll', () => {
       const btn = document.getElementById('backToTopBtn');
@@ -652,83 +653,67 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function handleCoverFileSelect(event) {
+    async function handleCoverFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement("canvas");
-          const maxDim = 600;
-          let width = img.width;
-          let height = img.height;
+      showSpinner();
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
 
-          if (width > height) {
-            if (width > maxDim) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            }
-          } else {
-            if (height > maxDim) {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
+        const { data, error } = await supabase.storage
+          .from('Pochettes')
+          .upload(fileName, file);
 
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
+        if (error) {
+          throw error;
+        }
 
-          pendingCoverBase64 = canvas.toDataURL("image/jpeg", 0.75);
-          document.getElementById("formCover").value = "✓ Image chargée en mémoire";
-          alert("Image chargée et optimisée avec succès !");
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+        const { data: publicUrlData } = supabase.storage
+          .from('Pochettes')
+          .getPublicUrl(fileName);
+
+        pendingCoverUrl = publicUrlData.publicUrl;
+        document.getElementById("formCover").value = pendingCoverUrl;
+        alert("Image envoyée sur Supabase Storage avec succès !");
+      } catch (err) {
+        console.error("Erreur upload:", err);
+        alert("Erreur lors de l'envoi de l'image sur le Cloud.");
+      }
+      hideSpinner();
       event.target.value = '';
     }
 
-    function handleEditVolCoverFileSelect(event) {
+    async function handleEditVolCoverFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement("canvas");
-          const maxDim = 600;
-          let width = img.width;
-          let height = img.height;
+      showSpinner();
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
 
-          if (width > height) {
-            if (width > maxDim) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            }
-          } else {
-            if (height > maxDim) {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
+        const { data, error } = await supabase.storage
+          .from('Pochettes')
+          .upload(fileName, file);
 
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
+        if (error) {
+          throw error;
+        }
 
-          pendingEditVolCoverBase64 = canvas.toDataURL("image/jpeg", 0.75);
-          document.getElementById("editVolCover").value = "✓ Image du disque chargée en mémoire";
-          alert("Image du disque chargée et optimisée avec succès !");
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+        const { data: publicUrlData } = supabase.storage
+          .from('Pochettes')
+          .getPublicUrl(fileName);
+
+        pendingEditVolCoverUrl = publicUrlData.publicUrl;
+        document.getElementById("editVolCover").value = pendingEditVolCoverUrl;
+        alert("Image du disque envoyée sur Supabase Storage avec succès !");
+      } catch (err) {
+        console.error("Erreur upload:", err);
+        alert("Erreur lors de l'envoi de l'image du disque.");
+      }
+      hideSpinner();
       event.target.value = '';
     }
 
@@ -741,6 +726,7 @@
         authUser = session.user;
         document.getElementById("loginModal").classList.remove("active");
         fetchCollectionFromSupabase();
+        setupRealtimeSubscription();
       } else {
         document.getElementById("loginModal").classList.add("active");
       }
@@ -751,11 +737,38 @@
           authUser = session.user;
           document.getElementById("loginModal").classList.remove("active");
           fetchCollectionFromSupabase();
+          setupRealtimeSubscription();
         } else {
           authUser = null;
+          if (realtimeChannel) {
+            supabase.removeChannel(realtimeChannel);
+            realtimeChannel = null;
+          }
           document.getElementById("loginModal").classList.add("active");
         }
       });
+    }
+
+    function setupRealtimeSubscription() {
+      if (realtimeChannel) {
+        supabase.removeChannel(realtimeChannel);
+      }
+
+      realtimeChannel = supabase
+        .channel('public:albums')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'albums'
+          },
+          (payload) => {
+            console.log('🔄 Mise à jour en temps réel reçue :', payload);
+            fetchCollectionFromSupabase();
+          }
+        )
+        .subscribe();
     }
 
     async function loginUser() {
@@ -1465,7 +1478,11 @@
       }
 
       vols.forEach((v, idx) => {
-        const titleText = v.title || '';
+        let titleText = v.title || '';
+        if (!titleText || /^\d+$/.test(titleText)) {
+          titleText = `Disque ${idx + 1}`;
+        }
+
         let coverUrl = v.cover || '';
         const vTracks = v.tracks || [];
         
@@ -1573,16 +1590,19 @@
       if (!album.volumes || !album.volumes[volIdx]) return;
 
       const current = album.volumes[volIdx];
-      const title = current.title || '';
+      let title = current.title || '';
+      if (!title || /^\d+$/.test(title)) {
+        title = `Disque ${volIdx + 1}`;
+      }
       const cover = current.cover || '';
       const tracks = current.tracks || [];
 
-      pendingEditVolCoverBase64 = cover;
+      pendingEditVolCoverUrl = cover;
 
       document.getElementById("editVolIndex").value = volIdx;
       document.getElementById("editVolSubId").value = current.subId || '';
       document.getElementById("editVolTitle").value = title;
-      document.getElementById("editVolCover").value = cover ? (cover.startsWith("data:image") ? "✓ Image chargée en mémoire" : cover) : "";
+      document.getElementById("editVolCover").value = cover;
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
 
       document.getElementById("editVolTracks").value = tracks.map(t => {
@@ -1625,9 +1645,9 @@
           }).join('\n');
 
           document.getElementById("editVolTracks").value = fetched;
-          if (data.images && data.images.length && !pendingEditVolCoverBase64) {
-            pendingEditVolCoverBase64 = data.images[0].resource_url || data.images[0].uri;
-            document.getElementById("editVolCover").value = pendingEditVolCoverBase64;
+          if (data.images && data.images.length && !pendingEditVolCoverUrl) {
+            pendingEditVolCoverUrl = data.images[0].resource_url || data.images[0].uri;
+            document.getElementById("editVolCover").value = pendingEditVolCoverUrl;
           }
           alert(`Disque ${targetDiscNum} isolé et chargé avec succès (${tracks.length} pistes) !`);
         } else {
@@ -1646,10 +1666,7 @@
       if (isNaN(volIdx) || !album.volumes || !album.volumes[volIdx]) return;
 
       const newTitle = document.getElementById("editVolTitle").value.trim();
-      let newCover = pendingEditVolCoverBase64 || document.getElementById("editVolCover").value.trim();
-      if (newCover.startsWith("✓")) {
-        newCover = album.volumes[volIdx].cover || '';
-      }
+      const newCover = pendingEditVolCoverUrl || document.getElementById("editVolCover").value.trim();
 
       const tracksText = document.getElementById("editVolTracks").value.trim();
       let parsedTracks = [];
@@ -1674,7 +1691,11 @@
       updatedVol.subId = newSubId;
 
       album.volumes[volIdx] = updatedVol;
-      pendingEditVolCoverBase64 = "";
+      pendingEditVolCoverUrl = "";
+      
+      // SYNCHRONISATION SUPABASE CORRIGÉE ICI :
+      syncAlbumToFirestore(album);
+
       closeModal("editVolumeModal");
       showDetails(selectedAlbumIndex);
     }
@@ -1704,7 +1725,7 @@
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = -1;
       currentFetchedTracks = [];
-      pendingCoverBase64 = "";
+      pendingCoverUrl = "";
       document.getElementById("formModalTitle").textContent = "Ajouter une référence";
   
       document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
@@ -1775,10 +1796,10 @@
       document.getElementById("formNotes").value = album.notes || '';
       document.getElementById("formDiscogsId").value = album.discogsId || '';
       
-      pendingCoverBase64 = album.cover || '';
-      document.getElementById("formCover").value = album.cover ? (album.cover.startsWith("data:image") ? "✓ Image chargée en mémoire" : album.cover) : '';
+      pendingCoverUrl = album.cover || '';
+      document.getElementById("formCover").value = album.cover || '';
       
-      document.getElementById("formDiscsCount").value = album.discsCount || '';
+      document.getElementById("formDiscsCount").value = album.discsCount || (album.volumes ? album.volumes.length : '') || '';
 
       closeModal("detailsModal");
       document.getElementById("formModal").classList.add("active");
@@ -1823,7 +1844,27 @@
       const is45RPM = (support === 'Vinyle') ? document.getElementById("is45RPM").checked : false;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
   
-      const existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? collection[selectedAlbumIndex].volumes : [];
+      let existingVols = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes) ? [...collection[selectedAlbumIndex].volumes] : [];
+
+      if (isBoxSet) {
+        const targetCount = discsCount > 0 ? discsCount : (existingVols.length > 0 ? existingVols.length : 2);
+        
+        while (existingVols.length < targetCount) {
+          const i = existingVols.length + 1;
+          const newVol = { title: `Disque ${i}`, cover: '', tracks: [] };
+          const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
+          if (firestoreId) {
+            const subId = await saveVolumeToFirestore(firestoreId, newVol);
+            newVol.subId = subId;
+          }
+          existingVols.push(newVol);
+        }
+        if (existingVols.length > targetCount) {
+          existingVols = existingVols.slice(0, targetCount);
+        }
+      } else {
+        existingVols = [];
+      }
 
       const tracksText = document.getElementById("formTracks").value.trim();
       let manualTracks = [];
@@ -1843,10 +1884,7 @@
 
       const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
 
-      let finalCover = pendingCoverBase64 || document.getElementById("formCover").value.trim();
-      if (finalCover.startsWith("✓")) {
-        finalCover = (selectedAlbumIndex >= 0 ? collection[selectedAlbumIndex].cover : '') || '';
-      }
+      const finalCover = pendingCoverUrl || document.getElementById("formCover").value.trim();
 
       const albumData = {
         firestoreId: firestoreId,
@@ -1870,12 +1908,12 @@
         isWantlist: isWantlist,
         isAudiophile: isAudiophile,
         is45RPM: is45RPM,
-        discsCount: discsCount,
+        discsCount: isBoxSet ? existingVols.length : 0,
         volumes: existingVols,
         tracks: tracks
       };
 
-      pendingCoverBase64 = "";
+      pendingCoverUrl = "";
 
       if (selectedAlbumIndex >= 0) {
         collection[selectedAlbumIndex] = albumData;
@@ -1884,16 +1922,6 @@
       }
 
       syncAlbumToFirestore(albumData);
-
-      if (isBoxSet && discsCount > existingVols.length && albumData.firestoreId) {
-        for (let i = existingVols.length + 1; i <= discsCount; i++) {
-          const newVol = { title: `Disque ${i}`, cover: '', tracks: [] };
-          const subId = await saveVolumeToFirestore(albumData.firestoreId, newVol);
-          newVol.subId = subId;
-          albumData.volumes.push(newVol);
-        }
-      }
-
       closeModal("formModal");
     }
 
@@ -2082,8 +2110,8 @@
           }
         }
         if (data.images && data.images.length) {
-          pendingCoverBase64 = data.images[0].resource_url || data.images[0].uri;
-          document.getElementById("formCover").value = pendingCoverBase64;
+          pendingCoverUrl = data.images[0].resource_url || data.images[0].uri;
+          document.getElementById("formCover").value = pendingCoverUrl;
         }
 
         if (data.tracklist && data.tracklist.length) {
@@ -2272,65 +2300,6 @@
       link.click();
       document.body.removeChild(link);
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const urlInputs = document.querySelectorAll('input[type="url"]');
-      urlInputs.forEach(input => {
-        input.addEventListener('paste', function(e) {
-          const items = (e.clipboardData || window.clipboardData).items;
-          if (!items) return;
-
-          for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-              e.preventDefault();
-              const file = items[i].getAsFile();
-              if (!file) return;
-
-              const reader = new FileReader();
-              reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                  const canvas = document.createElement("canvas");
-                  const maxDim = 600;
-                  let width = img.width;
-                  let height = img.height;
-
-                  if (width > height) {
-                    if (width > maxDim) {
-                      height = Math.round((height * maxDim) / width);
-                      width = maxDim;
-                    }
-                  } else {
-                    if (height > maxDim) {
-                      width = Math.round((width * maxDim) / height);
-                      height = maxDim;
-                    }
-                  }
-
-                  canvas.width = width;
-                  canvas.height = height;
-                  const ctx = canvas.getContext("2d");
-                  ctx.drawImage(img, 0, 0, width, height);
-
-                  const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
-                  
-                  if (input.id === 'formCover') {
-                    pendingCoverBase64 = dataUrl;
-                  } else if (input.id === 'editVolCover') {
-                    pendingEditVolCoverBase64 = dataUrl;
-                  }
-
-                  input.value = "✓ Image chargée en mémoire";
-                };
-                img.src = event.target.result;
-              };
-              reader.readAsDataURL(file);
-              break;
-            }
-          }
-        });
-      });
-    });
 
     window.onload = initApp;
   </script>
