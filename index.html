@@ -317,7 +317,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 03:31</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 15:58</div>
 
     <header>
       <div class="top-bar">
@@ -679,23 +679,49 @@
     let activeExactFilter = null;
     let selectedAlbumIndex = -1;
     let html5QrCode = null;
+    
+    // NOUVEAU : Variables pour gérer le défilement proprement
     let savedScrollPosition = 0;
+    let isBodyLocked = false; 
+    
     let currentFetchedTracks = [];
     let realtimeChannel = null;
 
     let pendingCoverUrl = "";
     let pendingEditVolCoverUrl = "";
 
+    // NOUVEAU : Fonctions de blocage ultra-sécurisées
     function lockBodyScroll() {
+      if (isBodyLocked) return; // Ne rien faire si déjà bloqué
+      
+      // On sauvegarde la position AVANT de figer l'écran
+      savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
+      
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
+      // On compense visuellement la remontée à 0
+      document.body.style.top = `-${savedScrollPosition}px`;
       document.body.style.width = '100%';
+      
+      isBodyLocked = true;
     }
 
     function unlockBodyScroll() {
+      // Si une autre modale est encore ouverte (ex: modale par dessus une autre), on ne débloque pas
+      const activeModals = document.querySelectorAll('.modal-overlay.active');
+      if (activeModals.length > 0) return; 
+
+      if (!isBodyLocked) return;
+
       document.body.style.overflow = '';
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
+      
+      // On restaure la position au pixel près
+      window.scrollTo(0, savedScrollPosition);
+      
+      isBodyLocked = false;
     }
 
     function toggleTheme() {
@@ -788,7 +814,6 @@
         document.body.classList.add('light-mode');
       }
 
-      // Vérification de la session Supabase
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         authUser = session.user;
@@ -800,7 +825,6 @@
         document.getElementById("loginModal").classList.add("active");
       }
 
-      // Écouteur des changements d'état
       supabase.auth.onAuthStateChange((event, session) => {
         if (session) {
           authUser = session.user;
@@ -1069,7 +1093,6 @@
 
     function openStatsModal() {
       lockBodyScroll();
-      savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, countWantlist = 0, totalPrice = 0;
       let totalDiscsPhysical = 0;
 
@@ -1402,7 +1425,6 @@
 
     async function showDetails(index) {
       lockBodyScroll();
-      savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
 
@@ -1803,7 +1825,6 @@
 
     function openAddModal() {
       lockBodyScroll();
-      savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = -1;
       currentFetchedTracks = [];
       pendingCoverUrl = "";
@@ -1840,8 +1861,10 @@
     }
 
     async function openEditModal(index) {
+      // On ferme la modale des détails (si elle est ouverte) pour réinitialiser le scroll proprement
+      closeModal("detailsModal");
+      
       lockBodyScroll();
-      savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       currentFetchedTracks = [];
       const album = collection[index];
@@ -1887,7 +1910,6 @@
       
       document.getElementById("formDiscsCount").value = album.discsCount || (album.volumes ? album.volumes.length : '') || '';
 
-      closeModal("detailsModal");
       document.getElementById("formModal").classList.add("active");
     }
 
@@ -2235,12 +2257,6 @@
       } else {
         document.getElementById(id).classList.remove("active");
         unlockBodyScroll();
-
-        if (id === 'detailsModal' || id === 'formModal' || id === 'bulkModal' || id === 'editVolumeModal' || id === 'statsModal') {
-          setTimeout(() => {
-            window.scrollTo(0, savedScrollPosition);
-          }, 10);
-        }
       }
     }
 
