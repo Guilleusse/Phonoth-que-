@@ -294,7 +294,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 01:22</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 02:06</div>
 
     <header>
       <div class="top-bar">
@@ -524,7 +524,7 @@
 
           <div class="form-group">
             <label>Nom de tri (facultatif)</label>
-            <input type="text" id="formSortName" placeholder="ex: Bach, Johann Sebastian  •  ou  Beatles" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formSortName" placeholder="ex: Bach, Johann Sebastian   •   ou   Beatles" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <div style="font-size:11px; color:var(--text-sub); margin-top:6px;">Utilisé uniquement pour le tri et l'index A-Z. L'affichage garde toujours le nom complet ci-dessus. Laisser vide pour un classement par nom complet (par défaut).</div>
           </div>
 
@@ -1760,6 +1760,11 @@
     }
 
     function openAddModal() {
+      // Bloque le défilement de l'arrière-plan sur iPhone
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = -1;
       currentFetchedTracks = [];
@@ -1797,6 +1802,11 @@
     }
 
     async function openEditModal(index) {
+      // Bloque le défilement de l'arrière-plan sur iPhone
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       currentFetchedTracks = [];
@@ -2188,6 +2198,12 @@
         stopLiveScanner();
       } else {
         document.getElementById(id).classList.remove("active");
+        
+        // Restaure le défilement normal de la page principale
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+
         if (id === 'detailsModal' || id === 'formModal' || id === 'bulkModal' || id === 'editVolumeModal' || id === 'statsModal') {
           setTimeout(() => {
             window.scrollTo(0, savedScrollPosition);
