@@ -40,29 +40,21 @@
     }
 
     * { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-  -webkit-tap-highlight-color: transparent;
-  /* Masquer la barre sur Firefox et Edge */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
 
-/* Masquer la barre sur iOS, Safari et Chrome */
-::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-  background: transparent;
-}
-
-/* Désactivation sur les autres navigateurs */
-* {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
+    ::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+      background: transparent;
+    }
     
     body { 
       background-color: var(--bg-color); 
@@ -317,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 15:58</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 17:58</div>
 
     <header>
       <div class="top-bar">
@@ -680,7 +672,6 @@
     let selectedAlbumIndex = -1;
     let html5QrCode = null;
     
-    // NOUVEAU : Variables pour gérer le défilement proprement
     let savedScrollPosition = 0;
     let isBodyLocked = false; 
     
@@ -690,16 +681,12 @@
     let pendingCoverUrl = "";
     let pendingEditVolCoverUrl = "";
 
-    // NOUVEAU : Fonctions de blocage ultra-sécurisées
     function lockBodyScroll() {
-      if (isBodyLocked) return; // Ne rien faire si déjà bloqué
-      
-      // On sauvegarde la position AVANT de figer l'écran
+      if (isBodyLocked) return;
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
-      // On compense visuellement la remontée à 0
       document.body.style.top = `-${savedScrollPosition}px`;
       document.body.style.width = '100%';
       
@@ -707,7 +694,6 @@
     }
 
     function unlockBodyScroll() {
-      // Si une autre modale est encore ouverte (ex: modale par dessus une autre), on ne débloque pas
       const activeModals = document.querySelectorAll('.modal-overlay.active');
       if (activeModals.length > 0) return; 
 
@@ -718,9 +704,7 @@
       document.body.style.top = '';
       document.body.style.width = '';
       
-      // On restaure la position au pixel près
       window.scrollTo(0, savedScrollPosition);
-      
       isBodyLocked = false;
     }
 
@@ -1861,7 +1845,6 @@
     }
 
     async function openEditModal(index) {
-      // On ferme la modale des détails (si elle est ouverte) pour réinitialiser le scroll proprement
       closeModal("detailsModal");
       
       lockBodyScroll();
@@ -2181,6 +2164,22 @@
 
         if (title) document.getElementById("formTitle").value = title;
         if (artist) document.getElementById("formArtist").value = artist;
+
+        // --- EXTRACTION AUTOMATIQUE DU CHEF D'ORCHESTRE (CONDUCTOR) ---
+        let conductorName = '';
+        if (data.extraartists && data.extraartists.length) {
+          const cond = data.extraartists.find(a => a.role && (a.role.toLowerCase().includes('conductor') || a.role.toLowerCase().includes('direction')));
+          if (cond) conductorName = cond.name.replace(/\s*\(\d+\)$/, '').trim();
+        }
+        if (!conductorName && data.artists && data.artists.length) {
+          const cond = data.artists.find(a => a.role && (a.role.toLowerCase().includes('conductor') || a.role.toLowerCase().includes('direction')));
+          if (cond) conductorName = cond.name.replace(/\s*\(\d+\)$/, '').trim();
+        }
+        if (conductorName) {
+          document.getElementById("formConductor").value = conductorName;
+        }
+        // -------------------------------------------------------------
+
         if (data.labels && data.labels.length) {
           document.getElementById("formLabel").value = data.labels[0].name;
           if (data.labels[0].catno && !document.getElementById("formCatalogNumber").value) {
