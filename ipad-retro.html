@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Phonothèque - Borne Salon (iOS 9)</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>Phonothèque - Borne Salon</title>
   
   <style>
     body {
@@ -31,12 +33,17 @@
     }
 
     h1 {
-      font-size: 24px;
+      font-size: 22px;
       margin: 0;
       color: #ffffff;
     }
 
-    .btn-reload {
+    .actions-bar {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
       background: #2563eb;
       color: white;
       border: none;
@@ -45,6 +52,10 @@
       font-size: 13px;
       font-weight: bold;
       cursor: pointer;
+    }
+
+    .btn-dice {
+      background: #7c3aed;
     }
 
     .search-box {
@@ -168,7 +179,7 @@
     .badge-SACD { background: #0d9488; }
     .badge-Coffret { background: #8b5cf6; }
 
-    /* Modale Rétro */
+    /* Modale */
     .modal {
       display: none;
       position: fixed;
@@ -231,11 +242,14 @@
 
   <header>
     <div class="top-bar">
-      <h1>Phonothèque (Salon)</h1>
-      <button class="btn-reload" onclick="loadData()">🔄 Rafraîchir</button>
+      <h1>Phonothèque</h1>
+      <div class="actions-bar">
+        <button class="btn-action btn-dice" onclick="randomAlbum()">🎲 Dé</button>
+        <button class="btn-action" onclick="loadData()">🔄</button>
+      </div>
     </div>
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Rechercher artiste, album, label..." oninput="render()">
+      <input type="text" id="searchInput" placeholder="🔍 Rechercher artiste, album..." oninput="render()">
     </div>
     <div class="filters">
       <div class="chip active" onclick="setFilter('all', this)">Tous</div>
@@ -247,10 +261,10 @@
   </header>
 
   <div id="container">
-    <div class="loading">Connexion au serveur Supabase...</div>
+    <div class="loading">Connexion au serveur...</div>
   </div>
 
-  <!-- MODALE DETAILS -->
+  <!-- MODALE -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -262,7 +276,6 @@
   </div>
 
   <script>
-    // Configuration Supabase (Rest API directe pour compatibilité ES5 / iOS 9)
     var SUPABASE_URL = 'https://mchljfhtgingnqxcjizf.supabase.co';
     var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jaGxqZmh0Z2luZ25xeGNqaXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTY1NzYsImV4cCI6MjEwNTA3MjU3Nn0.aGv9w7XQB-FOVc7xScX-3HN-5ZcA3d3EM7JOBz0HCuQ';
 
@@ -283,38 +296,43 @@
           try {
             var rows = JSON.parse(xhr.responseText);
             collection = rows.map(function(row) {
+              // Récupération sécurisée depuis app_data s'il existe, ou directement sur la ligne
               var appData = row.app_data || {};
+              var coverUrl = appData.cover || '';
+              
+              // Si la pochette est dans volumes[0] (comme vu sur ta base)
+              if (!coverUrl && row.volumes && row.volumes.length > 0 && row.volumes[0].cover) {
+                coverUrl = row.volumes[0].cover;
+              }
+
               return {
-                artist: row.artist,
-                title: row.title,
+                artist: row.artist || appData.artist || 'Inconnu',
+                title: row.title || appData.title || 'Sans titre',
                 volumes: row.volumes || [],
                 tracks: row.tracks || [],
-                support: appData.support || 'CD',
-                label: appData.label || '',
-                year: appData.year || '',
-                country: appData.country || '',
-                style: appData.style || '',
-                conductor: appData.conductor || '',
-                purchaseDate: appData.purchaseDate || '',
-                purchasePrice: appData.purchasePrice || '',
-                notes: appData.notes || '',
-                cover: appData.cover || '',
-                isBoxSet: appData.isBoxSet || false,
-                isWantlist: appData.isWantlist || false,
-                is45RPM: appData.is45RPM || false
+                support: appData.support || row.support || 'CD',
+                label: appData.label || row.label || '',
+                year: appData.year || row.year || '',
+                country: appData.country || row.country || '',
+                style: appData.style || row.style || '',
+                conductor: appData.conductor || row.conductor || '',
+                notes: appData.notes || row.notes || '',
+                cover: coverUrl,
+                isBoxSet: appData.isBoxSet || (row.volumes && row.volumes.length > 0) || false,
+                isWantlist: appData.isWantlist || false
               };
             });
             render();
           } catch (e) {
-            container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur d\'analyse des données.</div>';
+            container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur de traitement des données.</div>';
           }
         } else {
-          container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur de connexion au serveur.</div>';
+          container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur serveur (' + xhr.status + ').</div>';
         }
       };
 
       xhr.onerror = function() {
-        container.innerHTML = '<div class="loading" style="color:#ef4444;">Impossible de joindre Supabase (réseau).</div>';
+        container.innerHTML = '<div class="loading" style="color:#ef4444;">Impossible de joindre Supabase.</div>';
       };
 
       xhr.send();
@@ -330,15 +348,12 @@
       render();
     }
 
-    function render() {
-      var container = document.getElementById('container');
+    function getFilteredList() {
       var searchInput = document.getElementById('searchInput');
       var search = searchInput ? searchInput.value.toLowerCase().trim() : '';
-      container.innerHTML = '';
 
-      var filtered = collection.filter(function(album) {
+      return collection.filter(function(album) {
         if (album.isWantlist) return false;
-
         if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
         if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
 
@@ -350,7 +365,13 @@
         }
         return true;
       });
+    }
 
+    function render() {
+      var container = document.getElementById('container');
+      container.innerHTML = '';
+
+      var filtered = getFilteredList();
       filtered.sort(function(a, b) {
         return (a.artist || '').localeCompare(b.artist || '', 'fr');
       });
@@ -361,7 +382,7 @@
       }
 
       var currentArtist = '';
-      filtered.forEach(function(album, index) {
+      filtered.forEach(function(album) {
         if (album.artist !== currentArtist) {
           currentArtist = album.artist;
           var groupHeader = document.createElement('div');
@@ -394,6 +415,13 @@
       });
     }
 
+    function randomAlbum() {
+      var filtered = getFilteredList();
+      if (filtered.length === 0) return;
+      var randomIndex = Math.floor(Math.random() * filtered.length);
+      showDetails(filtered[randomIndex]);
+    }
+
     function showDetails(album) {
       var modal = document.getElementById('modal');
       var body = document.getElementById('modalBody');
@@ -407,7 +435,7 @@
         '<div class="details-row"><span class="details-label">Artiste :</span><span class="details-val">' + (album.artist || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Support :</span><span class="details-val">' + (album.support || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Label :</span><span class="details-val">' + (album.label || '-') + '</span></div>' +
-        '<div class="details-row"><span class="details-label">Année :</span><span class="details-val">' + (album.year || '-') + '</span></div>' +
+        '<div class="details-row"><span class="details-label-label">Année :</span><span class="details-val">' + (album.year || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Pays :</span><span class="details-val">' + (album.country || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Genre :</span><span class="details-val">' + (album.style || '-') + '</span></div>';
 
@@ -418,7 +446,6 @@
         html += '<div class="details-row"><span class="details-label">Notes :</span><span class="details-val">' + album.notes + '</span></div>';
       }
 
-      // Gestion des pistes ou des disques de coffret
       if (album.isBoxSet && album.volumes && album.volumes.length > 0) {
         html += '<div style="margin-top:12px; font-weight:bold; font-size:13px; color:#2563eb;">Disques du coffret (' + album.volumes.length + ') :</div>';
         for (var i = 0; i < album.volumes.length; i++) {
@@ -441,7 +468,6 @@
       document.getElementById('modal').style.display = 'none';
     }
 
-    // Lancement au démarrage sur l'iPad
     window.onload = function() {
       loadData();
     };
