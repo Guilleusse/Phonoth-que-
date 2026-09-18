@@ -294,7 +294,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 02:06</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 02:30</div>
 
     <header>
       <div class="top-bar">
@@ -1362,6 +1362,11 @@
     }
 
     async function showDetails(index) {
+      // Bloque le défilement de l'arrière-plan sur iPhone pour la vue détails
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
