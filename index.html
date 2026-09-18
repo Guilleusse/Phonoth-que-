@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 17:58</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 19:21</div>
 
     <header>
       <div class="top-bar">
@@ -827,6 +827,19 @@
         }
       });
     }
+
+    // Gestion propre du retour d'un lien externe sous iOS (Safari / PWA)
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        // Restauration de l'état si iOS a mis la page en cache strict
+        renderCollection();
+        // Si un album était mémorisé en cours de consultation, on ré-ouvre sa modale
+        const lastAlbumId = localStorage.getItem('phonotheque_last_viewed');
+        if (lastAlbumId !== null && collection[parseInt(lastAlbumId)]) {
+          showDetails(parseInt(lastAlbumId));
+        }
+      }
+    });
 
     function setupRealtimeSubscription() {
       if (realtimeChannel) {
@@ -1410,6 +1423,10 @@
     async function showDetails(index) {
       lockBodyScroll();
       selectedAlbumIndex = index;
+      
+      // Mémorisation de l'album en cours pour le retour de lien externe
+      localStorage.setItem('phonotheque_last_viewed', index);
+
       const album = collection[index];
 
       document.getElementById("modalDetailTitle").textContent = album.isWantlist ? "💡 Élément recherché (Wantlist)" : (album.isBoxSet ? "Détails du Coffret" : "Détails de l'album");
@@ -2255,6 +2272,9 @@
         stopLiveScanner();
       } else {
         document.getElementById(id).classList.remove("active");
+        if (id === 'detailsModal') {
+          localStorage.removeItem('phonotheque_last_viewed');
+        }
         unlockBodyScroll();
       }
     }
