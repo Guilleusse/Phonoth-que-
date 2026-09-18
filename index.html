@@ -40,6 +40,20 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    /* Suppression totale des barres de défilement (iOS/Safari/Chrome) */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+/* Désactivation sur les autres navigateurs */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
     
     body { 
       background-color: var(--bg-color); 
@@ -294,7 +308,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 02:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 03:26</div>
 
     <header>
       <div class="top-bar">
