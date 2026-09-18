@@ -294,7 +294,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 02:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 18-09-2026 à 02:50</div>
 
     <header>
       <div class="top-bar">
@@ -663,6 +663,18 @@
     let pendingCoverUrl = "";
     let pendingEditVolCoverUrl = "";
 
+    function lockBodyScroll() {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    }
+
+    function unlockBodyScroll() {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+
     function toggleTheme() {
       const isLight = document.body.classList.toggle('light-mode');
       localStorage.setItem('phonotheque_theme', isLight ? 'light' : 'dark');
@@ -761,6 +773,7 @@
         fetchCollectionFromSupabase();
         setupRealtimeSubscription();
       } else {
+        lockBodyScroll();
         document.getElementById("loginModal").classList.add("active");
       }
 
@@ -769,6 +782,7 @@
         if (session) {
           authUser = session.user;
           document.getElementById("loginModal").classList.remove("active");
+          unlockBodyScroll();
           fetchCollectionFromSupabase();
           setupRealtimeSubscription();
         } else {
@@ -777,6 +791,7 @@
             supabase.removeChannel(realtimeChannel);
             realtimeChannel = null;
           }
+          lockBodyScroll();
           document.getElementById("loginModal").classList.add("active");
         }
       });
@@ -1030,6 +1045,7 @@
     }
 
     function openStatsModal() {
+      lockBodyScroll();
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, countWantlist = 0, totalPrice = 0;
       let totalDiscsPhysical = 0;
@@ -1362,11 +1378,7 @@
     }
 
     async function showDetails(index) {
-      // Bloque le défilement de l'arrière-plan sur iPhone pour la vue détails
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-
+      lockBodyScroll();
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       const album = collection[index];
@@ -1575,6 +1587,7 @@
 
     function addBulkVolumesToCurrentAlbum() {
       if (selectedAlbumIndex < 0) return;
+      lockBodyScroll();
       document.getElementById("bulkInput").value = "";
       document.getElementById("bulkModal").classList.add("active");
     }
@@ -1633,6 +1646,7 @@
       const album = collection[selectedAlbumIndex];
       if (!album.volumes || !album.volumes[volIdx]) return;
 
+      lockBodyScroll();
       const current = album.volumes[volIdx];
       let title = current.title || '';
       if (!title || /^\d+$/.test(title)) {
@@ -1765,11 +1779,7 @@
     }
 
     function openAddModal() {
-      // Bloque le défilement de l'arrière-plan sur iPhone
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-
+      lockBodyScroll();
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = -1;
       currentFetchedTracks = [];
@@ -1807,11 +1817,7 @@
     }
 
     async function openEditModal(index) {
-      // Bloque le défilement de l'arrière-plan sur iPhone
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-
+      lockBodyScroll();
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
       selectedAlbumIndex = index;
       currentFetchedTracks = [];
@@ -1983,6 +1989,7 @@
     }
 
     async function startLiveScanner() {
+      lockBodyScroll();
       document.getElementById("scannerModal").classList.add("active");
   
       if (html5QrCode) {
@@ -2051,6 +2058,7 @@
         } catch(e) {}
       }
       document.getElementById("scannerModal").classList.remove("active");
+      unlockBodyScroll();
     }
 
     async function fetchDiscogsByInput() {
@@ -2203,11 +2211,7 @@
         stopLiveScanner();
       } else {
         document.getElementById(id).classList.remove("active");
-        
-        // Restaure le défilement normal de la page principale
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
+        unlockBodyScroll();
 
         if (id === 'detailsModal' || id === 'formModal' || id === 'bulkModal' || id === 'editVolumeModal' || id === 'statsModal') {
           setTimeout(() => {
