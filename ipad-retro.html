@@ -295,12 +295,17 @@
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             var rows = JSON.parse(xhr.responseText);
+            
+            // DÉBOGAGE : Si le tableau est vide, affichons le texte brut pour comprendre
+            if (!rows || rows.length === 0) {
+              container.innerHTML = '<div class="loading" style="color:#eab308;">Attention : Supabase a renvoyé 0 ligne.<br><small style="color:#9ca3af;">Brut: ' + escapeHtml(xhr.responseText) + '</small></div>';
+              return;
+            }
+
             collection = rows.map(function(row) {
-              // Récupération sécurisée depuis app_data s'il existe, ou directement sur la ligne
               var appData = row.app_data || {};
               var coverUrl = appData.cover || '';
               
-              // Si la pochette est dans volumes[0] (comme vu sur ta base)
               if (!coverUrl && row.volumes && row.volumes.length > 0 && row.volumes[0].cover) {
                 coverUrl = row.volumes[0].cover;
               }
@@ -324,18 +329,22 @@
             });
             render();
           } catch (e) {
-            container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur de traitement des données.</div>';
+            container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur JS: ' + e.message + '<br><small>' + escapeHtml(xhr.responseText) + '</small></div>';
           }
         } else {
-          container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur serveur (' + xhr.status + ').</div>';
+          container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur HTTP ' + xhr.status + '<br><small>' + escapeHtml(xhr.responseText) + '</small></div>';
         }
       };
 
       xhr.onerror = function() {
-        container.innerHTML = '<div class="loading" style="color:#ef4444;">Impossible de joindre Supabase.</div>';
+        container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur réseau critique (Impossible de joindre Supabase).</div>';
       };
 
       xhr.send();
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").substring(0, 300);
     }
 
     function setFilter(filter, el) {
@@ -377,7 +386,7 @@
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="loading">Aucun disque trouvé.</div>';
+        container.innerHTML = '<div class="loading">Aucun disque trouvé (Total en mémoire : ' + collection.length + ').</div>';
         return;
       }
 
@@ -435,7 +444,7 @@
         '<div class="details-row"><span class="details-label">Artiste :</span><span class="details-val">' + (album.artist || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Support :</span><span class="details-val">' + (album.support || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Label :</span><span class="details-val">' + (album.label || '-') + '</span></div>' +
-        '<div class="details-row"><span class="details-label-label">Année :</span><span class="details-val">' + (album.year || '-') + '</span></div>' +
+        '<div class="details-row"><span class="details-label">Année :</span><span class="details-val">' + (album.year || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Pays :</span><span class="details-val">' + (album.country || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Genre :</span><span class="details-val">' + (album.style || '-') + '</span></div>';
 
