@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>Phonothèque - Borne Salon</title>
   
   <style>
@@ -13,21 +14,27 @@
       color: #f3f4f6;
       font-family: Helvetica, Arial, sans-serif;
       margin: 0;
-      padding: 10px 45px 60px 15px; /* Marge à droite pour laisser de la place à l'index alphabétique */
+      /* On laisse de la marge en haut pour le header fixe, et à droite pour l'index */
+      padding: 165px 45px 60px 15px;
     }
 
+    /* Bandeau du haut fixe */
     header {
       background-color: #121212;
-      margin-bottom: 15px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 10px 45px 10px 15px;
       border-bottom: 1px solid #2a2a2a;
-      padding-bottom: 12px;
     }
 
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     h1 {
@@ -45,7 +52,7 @@
       background: #2563eb;
       color: white;
       border: none;
-      padding: 8px 10px;
+      padding: 8px 12px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: bold;
@@ -53,10 +60,9 @@
     }
 
     .btn-dice { background: #7c3aed; }
-    .btn-edit { background: #d97706; }
 
     .search-box {
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     input[type="text"] {
@@ -118,7 +124,7 @@
       padding-bottom: 4px;
     }
 
-    /* Cartes XXL bien confortables */
+    /* Cartes XXL */
     .album-card {
       background: #1c1c1e;
       border: 1px solid #2c2c2e;
@@ -129,6 +135,7 @@
       align-items: center;
       gap: 15px;
       cursor: pointer;
+      position: relative;
     }
 
     .cover-box {
@@ -188,11 +195,23 @@
       color: #9ca3af;
     }
 
+    /* Bouton crayon intégré directement sur la carte */
+    .btn-card-edit {
+      background: #3a3a3c;
+      border: none;
+      color: white;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
     /* Index alphabétique vertical à droite */
     .alpha-index {
       position: fixed;
       right: 5px;
-      top: 90px;
+      top: 175px;
       bottom: 20px;
       display: flex;
       flex-direction: column;
@@ -229,7 +248,7 @@
       background: #1c1c1e;
       border-radius: 14px;
       max-width: 500px;
-      margin: 30px auto;
+      margin: 50px auto;
       padding: 18px;
       border: 1px solid #3a3a3c;
     }
@@ -279,7 +298,6 @@
     <div class="top-bar">
       <h1>Phonothèque</h1>
       <div class="actions-bar">
-        <button class="btn-action btn-edit" id="editBtn" onclick="toggleEditMode()" title="Mode Édition">✏️</button>
         <button class="btn-action btn-dice" onclick="randomAlbum()" title="Album aléatoire">🎲 Dé</button>
         <button class="btn-action" onclick="loadData()" title="Rafraîchir">🔄</button>
       </div>
@@ -323,19 +341,6 @@
 
     var collection = [];
     var currentFilter = 'all';
-    var isEditMode = false;
-
-    function toggleEditMode() {
-      isEditMode = !isEditMode;
-      var btn = document.getElementById('editBtn');
-      if (isEditMode) {
-        btn.style.background = '#10b981';
-        alert('Mode Édition actif : Touchez un album pour le modifier.');
-      } else {
-        btn.style.background = '#d97706';
-      }
-      render();
-    }
 
     function loadData() {
       var container = document.getElementById('container');
@@ -458,7 +463,6 @@
 
       document.getElementById('counter').textContent = filtered.length + ' disque' + (filtered.length > 1 ? 's' : '');
 
-      // Tri strict par Artiste alphabétique, puis Titre d'album
       filtered.sort(function(a, b) {
         var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr');
         if (artistComp !== 0) return artistComp;
@@ -484,13 +488,8 @@
 
         var card = document.createElement('div');
         card.className = 'album-card';
-        card.onclick = function() { 
-          if (isEditMode) {
-            editAlbum(album);
-          } else {
-            showDetails(album); 
-          }
-        };
+        // Clic sur la carte = affiche les détails
+        card.onclick = function() { showDetails(album); };
 
         var badgeText = album.support;
         if (album.isBoxSet) badgeText = 'Coffret ' + album.support;
@@ -503,37 +502,35 @@
           '<div class="cover-box">' + coverHtml + '</div>' +
           '<div class="album-info">' +
             '<div class="badge-container"><span class="badge badge-' + album.support + '">' + badgeText + '</span></div>' +
-            '<div class="album-title">' + (album.title || '') + (isEditMode ? ' <span style="color:#10b981;">✏️</span>' : '') + '</div>' +
+            '<div class="album-title">' + (album.title || '') + '</div>' +
             '<div class="album-sub">' + (album.label || '') + (album.year ? ' • ' + album.year : '') + '</div>' +
-          '</div>';
+          '</div>' +
+          '<button class="btn-card-edit" onclick="event.stopPropagation(); editArtist(event, album);" title="Modifier l’artiste">✏️</button>';
 
         container.appendChild(card);
       });
     }
 
-    function editAlbum(album) {
-      var newTitle = prompt("Modifier le titre de l'album :", album.title);
-      if (newTitle !== null) {
-        var newArtist = prompt("Modifier l'artiste :", album.artist);
-        if (newArtist !== null) {
-          album.title = newTitle;
-          album.artist = newArtist;
-          // Sauvegarde directe dans Supabase
-          var xhr = new XMLHttpRequest();
-          xhr.open('PATCH', SUPABASE_URL + '/rest/v1/albums?id=eq.' + album.id, true);
-          xhr.setRequestHeader('apikey', SUPABASE_KEY);
-          xhr.setRequestHeader('Authorization', 'Bearer ' + SUPABASE_KEY);
-          xhr.setRequestHeader('Content-Type', 'application/json');
-          xhr.onload = function() {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              alert('Modifications enregistrées !');
-              render();
-            } else {
-              alert('Erreur lors de la sauvegarde.');
-            }
-          };
-          xhr.send(JSON.stringify({ artist: newArtist, title: newTitle }));
-        }
+    function editArtist(e, album) {
+      // Invite permettant de saisir l'artiste (Nom Prénom) avec option d'annulation
+      var newArtist = prompt("Modifier l'artiste (ex: Nom Prénom) :", album.artist);
+      if (newArtist !== null && newArtist.trim() !== "") {
+        album.artist = newArtist.trim();
+        
+        // Sauvegarde directe dans Supabase
+        var xhr = new XMLHttpRequest();
+        xhr.open('PATCH', SUPABASE_URL + '/rest/v1/albums?id=eq.' + album.id, true);
+        xhr.setRequestHeader('apikey', SUPABASE_KEY);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + SUPABASE_KEY);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            render();
+          } else {
+            alert('Erreur lors de la sauvegarde.');
+          }
+        };
+        xhr.send(JSON.stringify({ artist: album.artist }));
       }
     }
 
