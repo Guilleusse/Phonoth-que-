@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>Phonothèque - Borne Salon</title>
   
   <style>
@@ -46,7 +45,7 @@
       background: #2563eb;
       color: white;
       border: none;
-      padding: 8px 14px;
+      padding: 8px 12px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: bold;
@@ -55,6 +54,10 @@
 
     .btn-dice {
       background: #7c3aed;
+    }
+
+    .btn-sort {
+      background: #0d9488;
     }
 
     .search-box {
@@ -72,18 +75,26 @@
       box-sizing: border-box;
     }
 
+    .filters-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
     .filters {
       display: flex;
       gap: 6px;
       overflow-x: auto;
       padding-bottom: 2px;
+      flex: 1;
     }
 
     .chip {
       background: #1c1c1e;
       border: 1px solid #3a3a3c;
       color: #9ca3af;
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 16px;
       font-size: 12px;
       font-weight: bold;
@@ -97,35 +108,45 @@
       border-color: #f3f4f6;
     }
 
-    .artist-group {
-      font-size: 15px;
-      font-weight: bold;
-      color: #3b82f6;
-      margin: 20px 0 10px 2px;
+    .counter {
+      font-size: 12px;
+      color: #8e8e93;
+      white-space: nowrap;
     }
 
+    .artist-group {
+      font-size: 16px;
+      font-weight: bold;
+      color: #3b82f6;
+      margin: 22px 0 10px 2px;
+      border-bottom: 1px solid #1f2937;
+      padding-bottom: 4px;
+    }
+
+    /* Cartes agrandies pour un meilleur confort visuel */
     .album-card {
       background: #1c1c1e;
       border: 1px solid #2c2c2e;
-      border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 10px;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 15px;
+      cursor: pointer;
     }
 
     .cover-box {
-      width: 65px;
-      height: 65px;
+      width: 85px;
+      height: 85px;
       background: #2c2c2e;
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 9px;
+      font-size: 10px;
       color: #8e8e93;
       text-align: center;
     }
@@ -142,14 +163,14 @@
     }
 
     .badge-container {
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
 
     .badge {
       display: inline-block;
-      padding: 2px 6px;
+      padding: 3px 8px;
       border-radius: 4px;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: bold;
       text-transform: uppercase;
       color: white;
@@ -160,15 +181,16 @@
     .badge-Coffret { background: #8b5cf6; }
 
     .album-title {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: bold;
       color: #ffffff;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
+      line-height: 1.2;
     }
 
     .album-sub {
-      font-size: 12px;
-      color: #8e8e93;
+      font-size: 13px;
+      color: #9ca3af;
     }
 
     /* Modale */
@@ -236,6 +258,7 @@
     <div class="top-bar">
       <h1>Phonothèque</h1>
       <div class="actions-bar">
+        <button class="btn-action btn-sort" id="sortBtn" onclick="toggleSort()">Tri: Chrono</button>
         <button class="btn-action btn-dice" onclick="randomAlbum()">🎲 Dé</button>
         <button class="btn-action" onclick="loadData()">🔄</button>
       </div>
@@ -243,12 +266,15 @@
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="🔍 Rechercher artiste, album, label..." oninput="render()">
     </div>
-    <div class="filters">
-      <div class="chip active" onclick="setFilter('all', this)">Tous</div>
-      <div class="chip" onclick="setFilter('Vinyle', this)">Vinyles</div>
-      <div class="chip" onclick="setFilter('CD', this)">CD</div>
-      <div class="chip" onclick="setFilter('SACD', this)">SACD</div>
-      <div class="chip" onclick="setFilter('Coffret', this)">Coffrets</div>
+    <div class="filters-bar">
+      <div class="filters">
+        <div class="chip active" onclick="setFilter('all', this)">Tous</div>
+        <div class="chip" onclick="setFilter('Vinyle', this)">Vinyles</div>
+        <div class="chip" onclick="setFilter('CD', this)">CD</div>
+        <div class="chip" onclick="setFilter('SACD', this)">SACD</div>
+        <div class="chip" onclick="setFilter('Coffret', this)">Coffrets</div>
+      </div>
+      <div class="counter" id="counter">-- disques</div>
     </div>
   </header>
 
@@ -273,6 +299,18 @@
 
     var collection = [];
     var currentFilter = 'all';
+    var sortMode = 'chrono'; // 'chrono' (Artiste puis Année) ou 'alpha' (Artiste puis Titre)
+
+    function toggleSort() {
+      if (sortMode === 'chrono') {
+        sortMode = 'alpha';
+        document.getElementById('sortBtn').textContent = 'Tri: A-Z';
+      } else {
+        sortMode = 'chrono';
+        document.getElementById('sortBtn').textContent = 'Tri: Chrono';
+      }
+      render();
+    }
 
     function loadData() {
       var container = document.getElementById('container');
@@ -369,13 +407,19 @@
 
       var filtered = getFilteredList();
 
+      // Mise à jour du compteur
+      document.getElementById('counter').textContent = filtered.length + ' disque' + (filtered.length > 1 ? 's' : '');
+
+      // Tri dynamique selon le mode choisi
       filtered.sort(function(a, b) {
         var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr');
         if (artistComp !== 0) return artistComp;
         
-        var yearA = parseInt(a.year) || 9999;
-        var yearB = parseInt(b.year) || 9999;
-        if (yearA !== yearB) return yearA - yearB;
+        if (sortMode === 'chrono') {
+          var yearA = parseInt(a.year) || 9999;
+          var yearB = parseInt(b.year) || 9999;
+          if (yearA !== yearB) return yearA - yearB;
+        }
 
         return (a.title || '').localeCompare(b.title || '', 'fr');
       });
