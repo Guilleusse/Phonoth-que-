@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>Phonothèque - Borne Salon</title>
   
   <style>
@@ -13,27 +14,25 @@
       color: #f3f4f6;
       font-family: Helvetica, Arial, sans-serif;
       margin: 0;
-      padding: 10px 15px 50px 15px;
+      padding: 10px 15px 60px 15px;
     }
 
     header {
       background-color: #121212;
-      position: relative;
-      padding-top: 10px;
       margin-bottom: 15px;
       border-bottom: 1px solid #2a2a2a;
-      padding-bottom: 10px;
+      padding-bottom: 12px;
     }
 
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     h1 {
-      font-size: 22px;
+      font-size: 20px;
       margin: 0;
       color: #ffffff;
     }
@@ -47,7 +46,7 @@
       background: #2563eb;
       color: white;
       border: none;
-      padding: 8px 12px;
+      padding: 8px 14px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: bold;
@@ -64,11 +63,11 @@
 
     input[type="text"] {
       width: 100%;
-      background: #1e1e1e;
-      border: 1px solid #2a2a2a;
+      background: #1c1c1e;
+      border: 1px solid #3a3a3c;
       color: #f3f4f6;
-      padding: 10px;
-      border-radius: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
       font-size: 15px;
       box-sizing: border-box;
     }
@@ -77,15 +76,15 @@
       display: flex;
       gap: 6px;
       overflow-x: auto;
-      padding-bottom: 5px;
+      padding-bottom: 2px;
     }
 
     .chip {
-      background: #1e1e1e;
-      border: 1px solid #2a2a2a;
+      background: #1c1c1e;
+      border: 1px solid #3a3a3c;
       color: #9ca3af;
-      padding: 6px 12px;
-      border-radius: 15px;
+      padding: 6px 14px;
+      border-radius: 16px;
       font-size: 12px;
       font-weight: bold;
       cursor: pointer;
@@ -99,27 +98,27 @@
     }
 
     .artist-group {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
-      color: #2563eb;
-      margin: 15px 0 8px 0;
+      color: #3b82f6;
+      margin: 20px 0 10px 2px;
     }
 
     .album-card {
-      background: #1e1e1e;
-      border: 1px solid #2a2a2a;
+      background: #1c1c1e;
+      border: 1px solid #2c2c2e;
       border-radius: 12px;
       padding: 10px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       display: flex;
-      gap: 10px;
-      cursor: pointer;
+      align-items: center;
+      gap: 12px;
     }
 
     .cover-box {
-      width: 60px;
-      height: 60px;
-      background: #2a2a2a;
+      width: 65px;
+      height: 65px;
+      background: #2c2c2e;
       border-radius: 8px;
       overflow: hidden;
       flex-shrink: 0;
@@ -127,7 +126,7 @@
       align-items: center;
       justify-content: center;
       font-size: 9px;
-      color: #9ca3af;
+      color: #8e8e93;
       text-align: center;
     }
 
@@ -139,45 +138,38 @@
 
     .album-info {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      min-width: 0;
     }
 
-    .album-artist {
-      font-size: 14px;
-      font-weight: bold;
-      color: #2563eb;
-      margin-bottom: 2px;
-    }
-
-    .album-title {
-      font-size: 12px;
-      font-weight: bold;
-      color: #f3f4f6;
-      margin-bottom: 2px;
-    }
-
-    .album-sub {
-      font-size: 11px;
-      color: #9ca3af;
+    .badge-container {
+      margin-bottom: 4px;
     }
 
     .badge {
       display: inline-block;
-      padding: 2px 5px;
+      padding: 2px 6px;
       border-radius: 4px;
       font-size: 9px;
       font-weight: bold;
       text-transform: uppercase;
       color: white;
-      margin-bottom: 3px;
-      width: fit-content;
       background: #2563eb;
     }
     .badge-Vinyle { background: #d97706; }
     .badge-SACD { background: #0d9488; }
     .badge-Coffret { background: #8b5cf6; }
+
+    .album-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+
+    .album-sub {
+      font-size: 12px;
+      color: #8e8e93;
+    }
 
     /* Modale */
     .modal {
@@ -194,9 +186,9 @@
       background: #1c1c1e;
       border-radius: 14px;
       max-width: 500px;
-      margin: 20px auto;
-      padding: 15px;
-      border: 1px solid #2a2a2a;
+      margin: 30px auto;
+      padding: 18px;
+      border: 1px solid #3a3a3c;
     }
 
     .modal-header {
@@ -205,35 +197,35 @@
       align-items: center;
       border-bottom: 1px solid #2a2a2a;
       padding-bottom: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .modal-close {
       background: #3a3a3c;
       color: white;
       border: none;
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
     }
 
     .details-row {
       display: flex;
       justify-content: space-between;
-      padding: 6px 0;
+      padding: 7px 0;
       border-bottom: 1px solid #2a2a2a;
       font-size: 13px;
     }
-    .details-label { color: #9ca3af; }
-    .details-val { font-weight: bold; text-align: right; }
+    .details-label { color: #8e8e93; }
+    .details-val { font-weight: bold; text-align: right; color: #f3f4f6; }
 
     .loading {
       text-align: center;
       padding: 40px;
-      color: #9ca3af;
+      color: #8e8e93;
       font-size: 14px;
     }
   </style>
@@ -249,7 +241,7 @@
       </div>
     </div>
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Rechercher artiste, album..." oninput="render()">
+      <input type="text" id="searchInput" placeholder="🔍 Rechercher artiste, album, label..." oninput="render()">
     </div>
     <div class="filters">
       <div class="chip active" onclick="setFilter('all', this)">Tous</div>
@@ -268,7 +260,7 @@
   <div id="modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <span id="modalTitle" style="font-weight: bold; font-size: 14px;">Détails</span>
+        <span id="modalTitle" style="font-weight: bold; font-size: 15px;">Détails</span>
         <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
       <div id="modalBody"></div>
@@ -296,9 +288,8 @@
           try {
             var rows = JSON.parse(xhr.responseText);
             
-            // DÉBOGAGE : Si le tableau est vide, affichons le texte brut pour comprendre
             if (!rows || rows.length === 0) {
-              container.innerHTML = '<div class="loading" style="color:#eab308;">Attention : Supabase a renvoyé 0 ligne.<br><small style="color:#9ca3af;">Brut: ' + escapeHtml(xhr.responseText) + '</small></div>';
+              container.innerHTML = '<div class="loading" style="color:#eab308;">Aucun disque trouvé.</div>';
               return;
             }
 
@@ -329,22 +320,18 @@
             });
             render();
           } catch (e) {
-            container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur JS: ' + e.message + '<br><small>' + escapeHtml(xhr.responseText) + '</small></div>';
+            container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur de traitement.</div>';
           }
         } else {
-          container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur HTTP ' + xhr.status + '<br><small>' + escapeHtml(xhr.responseText) + '</small></div>';
+          container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur serveur (' + xhr.status + ').</div>';
         }
       };
 
       xhr.onerror = function() {
-        container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur réseau critique (Impossible de joindre Supabase).</div>';
+        container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur réseau.</div>';
       };
 
       xhr.send();
-    }
-
-    function escapeHtml(text) {
-      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").substring(0, 300);
     }
 
     function setFilter(filter, el) {
@@ -381,12 +368,20 @@
       container.innerHTML = '';
 
       var filtered = getFilteredList();
+
       filtered.sort(function(a, b) {
-        return (a.artist || '').localeCompare(b.artist || '', 'fr');
+        var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr');
+        if (artistComp !== 0) return artistComp;
+        
+        var yearA = parseInt(a.year) || 9999;
+        var yearB = parseInt(b.year) || 9999;
+        if (yearA !== yearB) return yearA - yearB;
+
+        return (a.title || '').localeCompare(b.title || '', 'fr');
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="loading">Aucun disque trouvé (Total en mémoire : ' + collection.length + ').</div>';
+        container.innerHTML = '<div class="loading">Aucun disque trouvé.</div>';
         return;
       }
 
@@ -414,8 +409,7 @@
         card.innerHTML = 
           '<div class="cover-box">' + coverHtml + '</div>' +
           '<div class="album-info">' +
-            '<span class="badge badge-' + album.support + '">' + badgeText + '</span>' +
-            '<div class="album-artist">' + (album.artist || '') + '</div>' +
+            '<div class="badge-container"><span class="badge badge-' + album.support + '">' + badgeText + '</span></div>' +
             '<div class="album-title">' + (album.title || '') + '</div>' +
             '<div class="album-sub">' + (album.label || '') + (album.year ? ' • ' + album.year : '') + '</div>' +
           '</div>';
@@ -438,7 +432,7 @@
 
       title.textContent = album.title || 'Détails';
 
-      var coverImgHtml = album.cover ? '<img src="' + album.cover + '" style="width:100%; max-height:200px; object-fit:contain; border-radius:10px; margin-bottom:12px; background:#121212;">' : '';
+      var coverImgHtml = album.cover ? '<img src="' + album.cover + '" style="width:100%; max-height:220px; object-fit:contain; border-radius:10px; margin-bottom:12px; background:#121212;">' : '';
 
       var html = coverImgHtml +
         '<div class="details-row"><span class="details-label">Artiste :</span><span class="details-val">' + (album.artist || '-') + '</span></div>' +
@@ -456,16 +450,16 @@
       }
 
       if (album.isBoxSet && album.volumes && album.volumes.length > 0) {
-        html += '<div style="margin-top:12px; font-weight:bold; font-size:13px; color:#2563eb;">Disques du coffret (' + album.volumes.length + ') :</div>';
+        html += '<div style="margin-top:14px; font-weight:bold; font-size:13px; color:#3b82f6;">Disques du coffret (' + album.volumes.length + ') :</div>';
         for (var i = 0; i < album.volumes.length; i++) {
           var v = album.volumes[i];
-          html += '<div style="background:#121212; padding:6px 8px; border-radius:6px; margin-top:6px; font-size:12px;"><b>Disque ' + (i+1) + ':</b> ' + (v.title || '') + '</div>';
+          html += '<div style="background:#121212; padding:8px 10px; border-radius:6px; margin-top:6px; font-size:12px;"><b>Disque ' + (i+1) + ':</b> ' + (v.title || '') + '</div>';
         }
       } else if (album.tracks && album.tracks.length > 0) {
-        html += '<div style="margin-top:12px; font-weight:bold; font-size:13px; color:#2563eb;">Pistes :</div>';
+        html += '<div style="margin-top:14px; font-weight:bold; font-size:13px; color:#3b82f6;">Pistes :</div>';
         for (var j = 0; j < album.tracks.length; j++) {
           var t = album.tracks[j];
-          html += '<div style="font-size:12px; padding:3px 0; border-bottom:1px solid #2a2a2a; color:#9ca3af;"><b>' + (t.position || (j+1)) + '.</b> ' + (t.title || '') + '</div>';
+          html += '<div style="font-size:12px; padding:4px 0; border-bottom:1px solid #2a2a2a; color:#8e8e93;"><b>' + (t.position || (j+1)) + '.</b> ' + (t.title || '') + '</div>';
         }
       }
 
