@@ -129,7 +129,7 @@
       padding-bottom: 4px;
     }
 
-    /* Cartes XXL */
+    /* Cartes XXL avec espacement élargi */
     .album-card {
       background: #1c1c1e;
       border: 1px solid #2c2c2e;
@@ -164,7 +164,6 @@
       object-fit: cover;
     }
 
-    /* Espacement renforcé pour forcer le texte à s'écarter de la pochette */
     .album-info {
       flex: 1;
       min-width: 0;
@@ -219,7 +218,7 @@
       flex-shrink: 0;
     }
 
-    /* Index alphabétique vertical remonté pour laisser la place au bouton 🔝 en bas */
+    /* Index alphabétique vertical remonté pour laisser la place au bouton de retour */
     .alpha-index {
       position: fixed;
       right: 5px;
@@ -245,7 +244,7 @@
       color: #ffffff;
     }
 
-        /* Bouton 🔝 bien visible avec un fond assorti et une bordure propre */
+    /* Bouton de retour en haut (flèche blanche simple) */
     .btn-scroll-top {
       position: fixed;
       right: 5px;
@@ -256,7 +255,8 @@
       width: 28px;
       height: 36px;
       border-radius: 10px;
-      font-size: 14px;
+      font-size: 16px;
+      font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -358,8 +358,8 @@
   <!-- Index alphabétique vertical à droite -->
   <div class="alpha-index" id="alphaIndex"></div>
 
-  <!-- Bouton 🔝 positionné juste sous l'index -->
-  <button class="btn-scroll-top" onclick="scrollToTop()" title="Retour en haut">🔝</button>
+  <!-- Bouton de retour en haut (flèche simple blanche) -->
+  <button class="btn-scroll-top" onclick="scrollToTop()" title="Retour en haut">&#8593;</button>
 
   <!-- MODALE -->
   <div id="modal" class="modal">
