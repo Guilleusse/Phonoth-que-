@@ -15,7 +15,6 @@
       color: #f3f4f6;
       font-family: Helvetica, Arial, sans-serif;
       margin: 0;
-      /* On remet un padding léger, c'est le bloc tampon qui fera tout le boulot de descente */
       padding: 10px 45px 60px 15px;
     }
 
@@ -33,7 +32,7 @@
 
     /* Le bloc tampon invisible pour caler l'espace sous le header fixe */
     #spacer {
-      height: 165px; /* Tu pourras ajuster cette hauteur si tu veux monter ou descendre les cartes */
+      height: 165px;
     }
 
     .top-bar {
@@ -130,7 +129,7 @@
       padding-bottom: 4px;
     }
 
-    /* Cartes XXL */
+    /* Cartes XXL - gap augmenté à 18px pour décoller le texte de la vignette */
     .album-card {
       background: #1c1c1e;
       border: 1px solid #2c2c2e;
@@ -139,7 +138,7 @@
       margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 18px;
       position: relative;
     }
 
@@ -244,24 +243,23 @@
       color: #ffffff;
     }
 
-    /* Bouton retour en haut (flèche) */
+    /* Bouton retour en haut sans fond bleu (flèche simple épurée) */
     .btn-scroll-top {
       position: fixed;
       right: 38px;
-      bottom: 20px;
-      background: rgba(37, 99, 235, 0.9);
-      color: white;
-      border: 1px solid #3a3a3c;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      font-size: 16px;
+      bottom: 12px;
+      background: transparent;
+      border: none;
+      color: #60a5fa;
+      width: 32px;
+      height: 32px;
+      font-size: 20px;
+      font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 95;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.4);
     }
 
     /* Modale */
@@ -358,8 +356,8 @@
   <!-- Index alphabétique vertical à droite -->
   <div class="alpha-index" id="alphaIndex"></div>
 
-  <!-- Bouton de retour rapide en haut -->
-  <button class="btn-scroll-top" onclick="scrollToTop()" title="Retour en haut">⬆️</button>
+  <!-- Bouton de retour en haut (flèche simple sans fond) -->
+  <button class="btn-scroll-top" onclick="scrollToTop()" title="Retour en haut">▲</button>
 
   <!-- MODALE -->
   <div id="modal" class="modal">
@@ -469,7 +467,7 @@
       });
     }
 
-            function scrollToLetter(letter) {
+    function scrollToLetter(letter) {
       var groups = document.getElementsByClassName('artist-group');
       for (var i = 0; i < groups.length; i++) {
         if (groups[i].textContent.toUpperCase().indexOf(letter) === 0) {
@@ -477,16 +475,14 @@
           var elementPosition = groups[i].getBoundingClientRect().top;
           var offsetPosition = elementPosition + window.pageYOffset - headerHeight;
           
-          // Défilement direct sans option complexe pour l'iPad 2
           window.scrollTo(0, offsetPosition);
           break;
         }
       }
     }
 
-
     function scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo(0, 0);
     }
 
     function renderAlphaIndex() {
@@ -546,7 +542,7 @@
         var leftPart = document.createElement('div');
         leftPart.style.display = 'flex';
         leftPart.style.alignItems = 'center';
-        leftPart.style.gap = '15px';
+        leftPart.style.gap = '18px';
         leftPart.style.flex = '1';
         leftPart.style.cursor = 'pointer';
         leftPart.onclick = function() { showDetails(album); };
