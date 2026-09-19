@@ -13,7 +13,7 @@
       color: #f3f4f6;
       font-family: Helvetica, Arial, sans-serif;
       margin: 0;
-      padding: 10px 15px 60px 15px;
+      padding: 10px 45px 60px 15px; /* Marge à droite pour laisser de la place à l'index alphabétique */
     }
 
     header {
@@ -38,27 +38,22 @@
 
     .actions-bar {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
 
     .btn-action {
       background: #2563eb;
       color: white;
       border: none;
-      padding: 8px 12px;
+      padding: 8px 10px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    .btn-dice {
-      background: #7c3aed;
-    }
-
-    .btn-sort {
-      background: #0d9488;
-    }
+    .btn-dice { background: #7c3aed; }
+    .btn-edit { background: #d97706; }
 
     .search-box {
       margin-bottom: 10px;
@@ -123,12 +118,12 @@
       padding-bottom: 4px;
     }
 
-    /* Cartes agrandies pour un meilleur confort visuel */
+    /* Cartes XXL bien confortables */
     .album-card {
       background: #1c1c1e;
       border: 1px solid #2c2c2e;
       border-radius: 14px;
-      padding: 12px;
+      padding: 14px;
       margin-bottom: 12px;
       display: flex;
       align-items: center;
@@ -137,8 +132,8 @@
     }
 
     .cover-box {
-      width: 85px;
-      height: 85px;
+      width: 105px;
+      height: 105px;
       background: #2c2c2e;
       border-radius: 10px;
       overflow: hidden;
@@ -163,7 +158,7 @@
     }
 
     .badge-container {
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
 
     .badge {
@@ -181,16 +176,42 @@
     .badge-Coffret { background: #8b5cf6; }
 
     .album-title {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: bold;
       color: #ffffff;
-      margin-bottom: 4px;
-      line-height: 1.2;
+      margin-bottom: 5px;
+      line-height: 1.25;
     }
 
     .album-sub {
       font-size: 13px;
       color: #9ca3af;
+    }
+
+    /* Index alphabétique vertical à droite */
+    .alpha-index {
+      position: fixed;
+      right: 5px;
+      top: 90px;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      background: rgba(28, 28, 30, 0.85);
+      border: 1px solid #3a3a3c;
+      border-radius: 10px;
+      width: 28px;
+      padding: 4px 0;
+      z-index: 90;
+      font-size: 11px;
+      font-weight: bold;
+      color: #60a5fa;
+      cursor: pointer;
+    }
+
+    .alpha-index span:hover {
+      color: #ffffff;
     }
 
     /* Modale */
@@ -237,7 +258,7 @@
     .details-row {
       display: flex;
       justify-content: space-between;
-      padding: 7px 0;
+      padding: 8px 0;
       border-bottom: 1px solid #2a2a2a;
       font-size: 13px;
     }
@@ -258,9 +279,9 @@
     <div class="top-bar">
       <h1>Phonothèque</h1>
       <div class="actions-bar">
-        <button class="btn-action btn-sort" id="sortBtn" onclick="toggleSort()">Tri: Chrono</button>
-        <button class="btn-action btn-dice" onclick="randomAlbum()">🎲 Dé</button>
-        <button class="btn-action" onclick="loadData()">🔄</button>
+        <button class="btn-action btn-edit" id="editBtn" onclick="toggleEditMode()" title="Mode Édition">✏️</button>
+        <button class="btn-action btn-dice" onclick="randomAlbum()" title="Album aléatoire">🎲 Dé</button>
+        <button class="btn-action" onclick="loadData()" title="Rafraîchir">🔄</button>
       </div>
     </div>
     <div class="search-box">
@@ -282,6 +303,9 @@
     <div class="loading">Connexion au serveur...</div>
   </div>
 
+  <!-- Index alphabétique vertical à droite -->
+  <div class="alpha-index" id="alphaIndex"></div>
+
   <!-- MODALE -->
   <div id="modal" class="modal">
     <div class="modal-content">
@@ -299,15 +323,16 @@
 
     var collection = [];
     var currentFilter = 'all';
-    var sortMode = 'chrono'; // 'chrono' (Artiste puis Année) ou 'alpha' (Artiste puis Titre)
+    var isEditMode = false;
 
-    function toggleSort() {
-      if (sortMode === 'chrono') {
-        sortMode = 'alpha';
-        document.getElementById('sortBtn').textContent = 'Tri: A-Z';
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      var btn = document.getElementById('editBtn');
+      if (isEditMode) {
+        btn.style.background = '#10b981';
+        alert('Mode Édition actif : Touchez un album pour le modifier.');
       } else {
-        sortMode = 'chrono';
-        document.getElementById('sortBtn').textContent = 'Tri: Chrono';
+        btn.style.background = '#d97706';
       }
       render();
     }
@@ -340,6 +365,7 @@
               }
 
               return {
+                id: row.id,
                 artist: row.artist || appData.artist || 'Inconnu',
                 title: row.title || appData.title || 'Sans titre',
                 volumes: row.volumes || [],
@@ -401,26 +427,41 @@
       });
     }
 
+    function scrollToLetter(letter) {
+      var groups = document.getElementsByClassName('artist-group');
+      for (var i = 0; i < groups.length; i++) {
+        if (groups[i].textContent.toUpperCase().indexOf(letter) === 0) {
+          groups[i].scrollIntoView({ behavior: 'smooth' });
+          break;
+        }
+      }
+    }
+
+    function renderAlphaIndex() {
+      var indexContainer = document.getElementById('alphaIndex');
+      indexContainer.innerHTML = '';
+      var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+      
+      alphabet.forEach(function(letter) {
+        var span = document.createElement('span');
+        span.textContent = letter;
+        span.onclick = function() { scrollToLetter(letter); };
+        indexContainer.appendChild(span);
+      });
+    }
+
     function render() {
       var container = document.getElementById('container');
       container.innerHTML = '';
 
       var filtered = getFilteredList();
 
-      // Mise à jour du compteur
       document.getElementById('counter').textContent = filtered.length + ' disque' + (filtered.length > 1 ? 's' : '');
 
-      // Tri dynamique selon le mode choisi
+      // Tri strict par Artiste alphabétique, puis Titre d'album
       filtered.sort(function(a, b) {
         var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr');
         if (artistComp !== 0) return artistComp;
-        
-        if (sortMode === 'chrono') {
-          var yearA = parseInt(a.year) || 9999;
-          var yearB = parseInt(b.year) || 9999;
-          if (yearA !== yearB) return yearA - yearB;
-        }
-
         return (a.title || '').localeCompare(b.title || '', 'fr');
       });
 
@@ -428,6 +469,8 @@
         container.innerHTML = '<div class="loading">Aucun disque trouvé.</div>';
         return;
       }
+
+      renderAlphaIndex();
 
       var currentArtist = '';
       filtered.forEach(function(album) {
@@ -441,7 +484,13 @@
 
         var card = document.createElement('div');
         card.className = 'album-card';
-        card.onclick = function() { showDetails(album); };
+        card.onclick = function() { 
+          if (isEditMode) {
+            editAlbum(album);
+          } else {
+            showDetails(album); 
+          }
+        };
 
         var badgeText = album.support;
         if (album.isBoxSet) badgeText = 'Coffret ' + album.support;
@@ -454,12 +503,38 @@
           '<div class="cover-box">' + coverHtml + '</div>' +
           '<div class="album-info">' +
             '<div class="badge-container"><span class="badge badge-' + album.support + '">' + badgeText + '</span></div>' +
-            '<div class="album-title">' + (album.title || '') + '</div>' +
+            '<div class="album-title">' + (album.title || '') + (isEditMode ? ' <span style="color:#10b981;">✏️</span>' : '') + '</div>' +
             '<div class="album-sub">' + (album.label || '') + (album.year ? ' • ' + album.year : '') + '</div>' +
           '</div>';
 
         container.appendChild(card);
       });
+    }
+
+    function editAlbum(album) {
+      var newTitle = prompt("Modifier le titre de l'album :", album.title);
+      if (newTitle !== null) {
+        var newArtist = prompt("Modifier l'artiste :", album.artist);
+        if (newArtist !== null) {
+          album.title = newTitle;
+          album.artist = newArtist;
+          // Sauvegarde directe dans Supabase
+          var xhr = new XMLHttpRequest();
+          xhr.open('PATCH', SUPABASE_URL + '/rest/v1/albums?id=eq.' + album.id, true);
+          xhr.setRequestHeader('apikey', SUPABASE_KEY);
+          xhr.setRequestHeader('Authorization', 'Bearer ' + SUPABASE_KEY);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              alert('Modifications enregistrées !');
+              render();
+            } else {
+              alert('Erreur lors de la sauvegarde.');
+            }
+          };
+          xhr.send(JSON.stringify({ artist: newArtist, title: newTitle }));
+        }
+      }
     }
 
     function randomAlbum() {
