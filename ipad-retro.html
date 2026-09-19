@@ -15,8 +15,8 @@
       color: #f3f4f6;
       font-family: Helvetica, Arial, sans-serif;
       margin: 0;
-      /* Marge haute fixée à 70px pour laisser 3-4mm pile sous le header fixe */
-      padding: -100px 45px 60px 15px;
+      /* On remet un padding léger, c'est le bloc tampon qui fera tout le boulot de descente */
+      padding: 10px 45px 60px 15px;
     }
 
     /* Bandeau du haut fixe */
@@ -29,6 +29,11 @@
       z-index: 100;
       padding: 12px 45px 10px 15px;
       border-bottom: 1px solid #2a2a2a;
+    }
+
+    /* Le bloc tampon invisible pour caler l'espace sous le header fixe */
+    #spacer {
+      height: 165px; /* Tu pourras ajuster cette hauteur si tu veux monter ou descendre les cartes */
     }
 
     .top-bar {
@@ -239,6 +244,26 @@
       color: #ffffff;
     }
 
+    /* Bouton retour en haut (flèche) */
+    .btn-scroll-top {
+      position: fixed;
+      right: 38px;
+      bottom: 20px;
+      background: rgba(37, 99, 235, 0.9);
+      color: white;
+      border: 1px solid #3a3a3c;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 95;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+    }
+
     /* Modale */
     .modal {
       display: none;
@@ -323,12 +348,18 @@
     </div>
   </header>
 
+  <!-- Bloc tampon invisible pour forcer l'espacement sous le header fixe -->
+  <div id="spacer"></div>
+
   <div id="container">
     <div class="loading">Connexion au serveur...</div>
   </div>
 
   <!-- Index alphabétique vertical à droite -->
   <div class="alpha-index" id="alphaIndex"></div>
+
+  <!-- Bouton de retour rapide en haut -->
+  <button class="btn-scroll-top" onclick="scrollToTop()" title="Retour en haut">⬆️</button>
 
   <!-- MODALE -->
   <div id="modal" class="modal">
@@ -448,6 +479,10 @@
       }
     }
 
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function renderAlphaIndex() {
       var indexContainer = document.getElementById('alphaIndex');
       indexContainer.innerHTML = '';
@@ -469,7 +504,6 @@
 
       document.getElementById('counter').textContent = filtered.length + ' disque' + (filtered.length > 1 ? 's' : '');
 
-      // Tri strict et permanent par Artiste alphabétique, puis Titre
       filtered.sort(function(a, b) {
         var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
         if (artistComp !== 0) return artistComp;
@@ -546,7 +580,6 @@
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
           if (xhr.status >= 200 && xhr.status < 300) {
-            // Re-render immédiat pour appliquer le tri en direct dans la page
             render();
           } else {
             alert('Erreur lors de la sauvegarde.');
