@@ -469,7 +469,7 @@
       });
     }
 
-        function scrollToLetter(letter) {
+            function scrollToLetter(letter) {
       var groups = document.getElementsByClassName('artist-group');
       for (var i = 0; i < groups.length; i++) {
         if (groups[i].textContent.toUpperCase().indexOf(letter) === 0) {
@@ -477,14 +477,13 @@
           var elementPosition = groups[i].getBoundingClientRect().top;
           var offsetPosition = elementPosition + window.pageYOffset - headerHeight;
           
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
+          // Défilement direct sans option complexe pour l'iPad 2
+          window.scrollTo(0, offsetPosition);
           break;
         }
       }
     }
+
 
     function scrollToTop() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
