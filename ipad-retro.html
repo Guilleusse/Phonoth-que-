@@ -469,11 +469,18 @@
       });
     }
 
-    function scrollToLetter(letter) {
+        function scrollToLetter(letter) {
       var groups = document.getElementsByClassName('artist-group');
       for (var i = 0; i < groups.length; i++) {
         if (groups[i].textContent.toUpperCase().indexOf(letter) === 0) {
-          groups[i].scrollIntoView({ behavior: 'smooth' });
+          var headerHeight = 175; 
+          var elementPosition = groups[i].getBoundingClientRect().top;
+          var offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
           break;
         }
       }
