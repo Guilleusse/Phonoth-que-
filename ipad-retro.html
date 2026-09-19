@@ -6,6 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png">
   <title>Phonothèque - Borne Salon</title>
   
   <style>
@@ -14,8 +15,8 @@
       color: #f3f4f6;
       font-family: Helvetica, Arial, sans-serif;
       margin: 0;
-      /* On laisse de la marge en haut pour le header fixe, et à droite pour l'index */
-      padding: 165px 45px 60px 15px;
+      /* On augmente la marge du haut pour que le premier album ne soit plus coupé sous le header */
+      padding: 175px 45px 60px 15px;
     }
 
     /* Bandeau du haut fixe */
@@ -26,7 +27,7 @@
       left: 0;
       right: 0;
       z-index: 100;
-      padding: 10px 45px 10px 15px;
+      padding: 12px 45px 10px 15px;
       border-bottom: 1px solid #2a2a2a;
     }
 
@@ -134,7 +135,6 @@
       display: flex;
       align-items: center;
       gap: 15px;
-      cursor: pointer;
       position: relative;
     }
 
@@ -151,6 +151,7 @@
       font-size: 10px;
       color: #8e8e93;
       text-align: center;
+      cursor: pointer;
     }
 
     .cover-box img {
@@ -162,6 +163,7 @@
     .album-info {
       flex: 1;
       min-width: 0;
+      cursor: pointer;
     }
 
     .badge-container {
@@ -195,14 +197,18 @@
       color: #9ca3af;
     }
 
-    /* Bouton crayon intégré directement sur la carte */
+    /* Bouton crayon optimisé pour iOS 9 */
     .btn-card-edit {
       background: #3a3a3c;
-      border: none;
+      border: 1px solid #555;
       color: white;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 14px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
     }
@@ -211,7 +217,7 @@
     .alpha-index {
       position: fixed;
       right: 5px;
-      top: 175px;
+      top: 185px;
       bottom: 20px;
       display: flex;
       flex-direction: column;
@@ -488,8 +494,6 @@
 
         var card = document.createElement('div');
         card.className = 'album-card';
-        // Clic sur la carte = affiche les détails
-        card.onclick = function() { showDetails(album); };
 
         var badgeText = album.support;
         if (album.isBoxSet) badgeText = 'Coffret ' + album.support;
@@ -498,26 +502,43 @@
           ? '<img src="' + album.cover + '" onerror="this.style.display=\'none\'">' 
           : 'Pochette';
 
-        card.innerHTML = 
+        // Structure propre : clic sur la carte (hors bouton) ouvre les détails, clic sur le bouton ouvre l'édition
+        var leftPart = document.createElement('div');
+        leftPart.style.display = 'flex';
+        leftPart.style.alignItems = 'center';
+        leftPart.style.gap = '15px';
+        leftPart.style.flex = '1';
+        leftPart.style.cursor = 'pointer';
+        leftPart.onclick = function() { showDetails(album); };
+
+        leftPart.innerHTML = 
           '<div class="cover-box">' + coverHtml + '</div>' +
           '<div class="album-info">' +
             '<div class="badge-container"><span class="badge badge-' + album.support + '">' + badgeText + '</span></div>' +
             '<div class="album-title">' + (album.title || '') + '</div>' +
             '<div class="album-sub">' + (album.label || '') + (album.year ? ' • ' + album.year : '') + '</div>' +
-          '</div>' +
-          '<button class="btn-card-edit" onclick="event.stopPropagation(); editArtist(event, album);" title="Modifier l’artiste">✏️</button>';
+          '</div>';
 
+        var editBtn = document.createElement('button');
+        editBtn.className = 'btn-card-edit';
+        editBtn.innerHTML = '✏️';
+        editBtn.title = "Modifier l'artiste";
+        editBtn.onclick = function(e) {
+          e.preventDefault();
+          editArtist(album);
+        };
+
+        card.appendChild(leftPart);
+        card.appendChild(editBtn);
         container.appendChild(card);
       });
     }
 
-    function editArtist(e, album) {
-      // Invite permettant de saisir l'artiste (Nom Prénom) avec option d'annulation
-      var newArtist = prompt("Modifier l'artiste (ex: Nom Prénom) :", album.artist);
+    function editArtist(album) {
+      var newArtist = prompt("Modifier l'artiste (Nom Prénom) :", album.artist);
       if (newArtist !== null && newArtist.trim() !== "") {
         album.artist = newArtist.trim();
         
-        // Sauvegarde directe dans Supabase
         var xhr = new XMLHttpRequest();
         xhr.open('PATCH', SUPABASE_URL + '/rest/v1/albums?id=eq.' + album.id, true);
         xhr.setRequestHeader('apikey', SUPABASE_KEY);
@@ -553,7 +574,7 @@
       var html = coverImgHtml +
         '<div class="details-row"><span class="details-label">Artiste :</span><span class="details-val">' + (album.artist || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Support :</span><span class="details-val">' + (album.support || '-') + '</span></div>' +
-        '<div class="details-row"><span class="details-label">Label :</span><span class="details-val">' + (album.label || '-') + '</span></div>' +
+        '<div class="details-row"><span class="details-label">Label :</span><span class="details-val">' + (album.label || '-') + ' сил</span></div>' +
         '<div class="details-row"><span class="details-label">Année :</span><span class="details-val">' + (album.year || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Pays :</span><span class="details-val">' + (album.country || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Genre :</span><span class="details-val">' + (album.style || '-') + '</span></div>';
