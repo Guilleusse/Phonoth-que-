@@ -15,8 +15,8 @@
       color: #f3f4f6;
       font-family: Helvetica, Arial, sans-serif;
       margin: 0;
-      /* On augmente la marge du haut pour que le premier album ne soit plus coupé sous le header */
-      padding: 175px 45px 60px 15px;
+      /* Marge haute augmentée à 190px pour laisser 3-4mm pile sous le header fixe */
+      padding: 190px 45px 60px 15px;
     }
 
     /* Bandeau du haut fixe */
@@ -217,7 +217,7 @@
     .alpha-index {
       position: fixed;
       right: 5px;
-      top: 185px;
+      top: 195px;
       bottom: 20px;
       display: flex;
       flex-direction: column;
@@ -469,10 +469,11 @@
 
       document.getElementById('counter').textContent = filtered.length + ' disque' + (filtered.length > 1 ? 's' : '');
 
+      // Tri strict et permanent par Artiste alphabétique, puis Titre
       filtered.sort(function(a, b) {
-        var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr');
+        var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
         if (artistComp !== 0) return artistComp;
-        return (a.title || '').localeCompare(b.title || '', 'fr');
+        return (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' });
       });
 
       if (filtered.length === 0) {
@@ -502,7 +503,6 @@
           ? '<img src="' + album.cover + '" onerror="this.style.display=\'none\'">' 
           : 'Pochette';
 
-        // Structure propre : clic sur la carte (hors bouton) ouvre les détails, clic sur le bouton ouvre l'édition
         var leftPart = document.createElement('div');
         leftPart.style.display = 'flex';
         leftPart.style.alignItems = 'center';
@@ -546,6 +546,7 @@
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
           if (xhr.status >= 200 && xhr.status < 300) {
+            // Re-render immédiat pour appliquer le tri en direct dans la page
             render();
           } else {
             alert('Erreur lors de la sauvegarde.');
@@ -574,7 +575,7 @@
       var html = coverImgHtml +
         '<div class="details-row"><span class="details-label">Artiste :</span><span class="details-val">' + (album.artist || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Support :</span><span class="details-val">' + (album.support || '-') + '</span></div>' +
-        '<div class="details-row"><span class="details-label">Label :</span><span class="details-val">' + (album.label || '-') + ' сил</span></div>' +
+        '<div class="details-row"><span class="details-label">Label :</span><span class="details-val">' + (album.label || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Année :</span><span class="details-val">' + (album.year || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Pays :</span><span class="details-val">' + (album.country || '-') + '</span></div>' +
         '<div class="details-row"><span class="details-label">Genre :</span><span class="details-val">' + (album.style || '-') + '</span></div>';
