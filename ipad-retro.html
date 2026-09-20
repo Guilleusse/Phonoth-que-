@@ -406,15 +406,19 @@
                 coverUrl = row.volumes[0].cover;
               }
 
+              // On vérifie si l'iPad a une modification locale enregistrée pour ce disque
+              var localArtist = localStorage.getItem('local_artist_' + row.id);
+              var finalArtist = localArtist || row.artist || appData.artist || 'Inconnu';
+
               return {
                 id: row.id,
-                artist: row.artist || appData.artist || 'Inconnu',
+                artist: finalArtist,
                 title: row.title || appData.title || 'Sans titre',
                 volumes: row.volumes || [],
                 tracks: row.tracks || [],
                 support: appData.support || row.support || 'CD',
                 label: appData.label || row.label || '',
-                year: albumYear = albumYear = row.year || appData.year || '',
+                year: row.year || appData.year || '',
                 country: row.country || appData.country || '',
                 style: row.style || appData.style || '',
                 conductor: row.conductor || appData.conductor || '',
@@ -574,13 +578,16 @@
       });
     }
 
-    // Modification 100% locale, sans toucher à Supabase (l'iPhone reste maître)
+    // Modification locale persistante sur l'iPad via localStorage (Supabase et l'iPhone ne sont pas touchés)
     function editArtist(album) {
       var newArtist = prompt("Modifier l'artiste en local (Nom Prénom) :", album.artist);
       if (newArtist !== null && newArtist.trim() !== "") {
         album.artist = newArtist.trim();
         
-        // Tri immédiat et réaffichage sans appel réseau
+        // On sauvegarde le changement dans la mémoire du navigateur de l'iPad
+        localStorage.setItem('local_artist_' + album.id, album.artist);
+        
+        // Tri immédiat et réaffichage
         collection.sort(function(a, b) {
           var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
           if (artistComp !== 0) return artistComp;
