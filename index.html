@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 00:51</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 01:12</div>
 
     <header>
       <div class="top-bar">
@@ -1674,11 +1674,11 @@
       if (confirm("Voulez-vous vraiment vider toute la liste des disques de ce coffret ?")) {
         album.volumes = [];
         album.discsCount = 0;
-        album.isBoxSet = false; // <-- Décoche automatiquement le mode coffret
+        album.isBoxSet = false; // Décoche automatiquement le mode coffret
         syncAlbumToFirestore(album);
         
-        // Ferme la modale de détails et rafraîchit l'affichage
-        closeModal("detailsModal");
+        // Rafraîchit l'affichage de la modale sans la fermer
+        showDetails(selectedAlbumIndex);
       }
     }
 
