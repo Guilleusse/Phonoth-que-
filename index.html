@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 20-09-2026 18:20</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 20-09-2026 22:10</div>
 
     <header>
       <div class="top-bar">
@@ -593,9 +593,9 @@
             </select>
           </div>
 
-          <!-- NOUVEAU CHAMP : DOUBLE ALBUM -->
+          <!-- DOUBLE ALBUM -->
           <div class="checkbox-group" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
-            <input type="checkbox" id="isDoubleAlbum">
+            <input type="checkbox" id="isDoubleAlbum" onchange="onDoubleAlbumChange()">
             <label for="isDoubleAlbum" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Double Album (2 disques)</label>
           </div>
 
@@ -1099,7 +1099,7 @@
           let realDiscsCount = 1;
           if (explicitDiscs > 0) realDiscsCount = explicitDiscs;
           else if (a.isBoxSet) realDiscsCount = subBoxes * 2;
-          else if (a.isDoubleAlbum) realDiscsCount = 2; // Statistiques précises pour le double album
+          else if (a.isDoubleAlbum) realDiscsCount = 2;
 
           totalDiscsPhysical += realDiscsCount;
 
@@ -1294,7 +1294,6 @@
       let baseText = album.support || 'CD';
       const supp = baseText.toUpperCase();
 
-      // Gestion spécifique du texte pour le Double Album
       if (album.isDoubleAlbum) {
         if (album.support === 'Vinyle') baseText = '2 DISQUES VINYLE';
         else if (album.support === 'CD') baseText = '2 DISQUES CD';
@@ -1425,6 +1424,23 @@
         speedGroup.style.display = 'none';
         document.getElementById("is45RPM").checked = false;
       }
+    }
+
+    // Gestion exclusive : Double Album vs Coffret
+    function onDoubleAlbumChange() {
+      if (document.getElementById("isDoubleAlbum").checked) {
+        document.getElementById("isBoxSet").checked = false;
+        toggleBoxSetFields();
+      }
+    }
+
+    function toggleBoxSetFields() {
+      const isChecked = document.getElementById("isBoxSet").checked;
+      if (isChecked) {
+        document.getElementById("isDoubleAlbum").checked = false;
+      }
+      document.getElementById("boxSetFieldsGroup").style.display = isChecked ? 'block' : 'none';
+      document.getElementById("formTracksGroup").style.display = isChecked ? 'none' : 'block';
     }
 
     async function showDetails(index) {
@@ -1823,12 +1839,6 @@
         syncAlbumToFirestore(album);
         showDetails(selectedAlbumIndex);
       }
-    }
-
-    function toggleBoxSetFields() {
-      const isChecked = document.getElementById("isBoxSet").checked;
-      document.getElementById("boxSetFieldsGroup").style.display = isChecked ? 'block' : 'none';
-      document.getElementById("formTracksGroup").style.display = isChecked ? 'none' : 'block';
     }
 
     function openAddModal() {
