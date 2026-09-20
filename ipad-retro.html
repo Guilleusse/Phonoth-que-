@@ -574,7 +574,7 @@
       });
     }
 
-        function editArtist(album) {
+    function editArtist(album) {
       var newArtist = prompt("Modifier l'artiste (Nom Prénom) :", album.artist);
       if (newArtist !== null && newArtist.trim() !== "") {
         var updatedArtist = newArtist.trim();
@@ -584,13 +584,13 @@
         xhr.setRequestHeader('apikey', SUPABASE_KEY);
         xhr.setRequestHeader('Authorization', 'Bearer ' + SUPABASE_KEY);
         xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Prefer', 'return=minimal');
         
         xhr.onload = function() {
           if (xhr.status >= 200 && xhr.status < 300) {
-            // On met à jour localement
             album.artist = updatedArtist;
             
-            // On retrie toute la collection
+            // Tri immédiat et actualisation de l'affichage
             collection.sort(function(a, b) {
               var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
               if (artistComp !== 0) return artistComp;
@@ -598,11 +598,14 @@
             });
             render();
           } else {
-            alert('Erreur lors de la sauvegarde Supabase (' + xhr.status + ').');
+            alert('Refus de Supabase (' + xhr.status + ') : ' + xhr.responseText);
           }
         };
 
-        // On met à jour la colonne artiste et on force l'enregistrement
+        xhr.onerror = function() {
+          alert('Erreur réseau lors de la modification.');
+        };
+
         xhr.send(JSON.stringify({ artist: updatedArtist }));
       }
     }
