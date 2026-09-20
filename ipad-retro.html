@@ -218,7 +218,7 @@
       flex-shrink: 0;
     }
 
-        /* Index alphabétique vertical */
+    /* Index alphabétique vertical remonté pour laisser la place au bouton de retour */
     .alpha-index {
       position: fixed;
       right: 5px;
@@ -244,7 +244,7 @@
       color: #ffffff;
     }
 
-    /* Bouton de retour aligné au millimètre sur la largeur de l'index */
+    /* Bouton de retour en haut aligné au millimètre sur la largeur de l'index */
     .btn-scroll-top {
       position: fixed;
       right: 5px;
@@ -424,6 +424,14 @@
                 isWantlist: appData.isWantlist || false
               };
             });
+
+            // Tri permanent dès le chargement des données
+            collection.sort(function(a, b) {
+              var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
+              if (artistComp !== 0) return artistComp;
+              return (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' });
+            });
+
             render();
           } catch (e) {
             container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur de traitement.</div>';
@@ -507,12 +515,6 @@
       var filtered = getFilteredList();
 
       document.getElementById('counter').textContent = filtered.length + ' disque' + (filtered.length > 1 ? 's' : '');
-
-      filtered.sort(function(a, b) {
-        var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
-        if (artistComp !== 0) return artistComp;
-        return (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' });
-      });
 
       if (filtered.length === 0) {
         container.innerHTML = '<div class="loading">Aucun disque trouvé.</div>';
