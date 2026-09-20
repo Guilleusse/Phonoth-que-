@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 20-09-2026 22:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 20-09-2026 23:28</div>
 
     <header>
       <div class="top-bar">
@@ -1850,7 +1850,9 @@
         album.volumes.splice(volIdx, 1);
         album.discsCount = album.volumes.length;
         syncAlbumToFirestore(album);
-        showDetails(selectedAlbumIndex);
+        
+        // Rafraîchissement direct et propre de la liste des disques sans recharger toute la modale
+        renderVolumesList(album.volumes, album.cover);
       }
     }
 
@@ -2000,6 +2002,7 @@
           }
           existingVols.push(newVol);
         }
+        // MODIFICATION ICI : Si l'utilisateur a réduit le nombre de disques dans le formulaire, on coupe proprement le tableau !
         if (existingVols.length > targetCount) {
           existingVols = existingVols.slice(0, targetCount);
         }
