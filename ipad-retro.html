@@ -30,7 +30,6 @@
       border-bottom: 1px solid #2a2a2a;
     }
 
-    /* Le bloc tampon invisible pour caler l'espace sous le header fixe */
     #spacer {
       height: 165px;
     }
@@ -129,7 +128,6 @@
       padding-bottom: 4px;
     }
 
-    /* Cartes XXL avec espacement élargi */
     .album-card {
       background: #1c1c1e;
       border: 1px solid #2c2c2e;
@@ -202,7 +200,6 @@
       color: #9ca3af;
     }
 
-    /* Bouton crayon optimisé pour iOS 9 */
     .btn-card-edit {
       background: #3a3a3c;
       border: 1px solid #555;
@@ -218,7 +215,6 @@
       flex-shrink: 0;
     }
 
-    /* Index alphabétique vertical remonté pour laisser la place au bouton de retour */
     .alpha-index {
       position: fixed;
       right: 5px;
@@ -244,7 +240,6 @@
       color: #ffffff;
     }
 
-    /* Bouton de retour en haut aligné au millimètre sur la largeur de l'index */
     .btn-scroll-top {
       position: fixed;
       right: 5px;
@@ -264,7 +259,6 @@
       z-index: 95;
     }
 
-    /* Modale */
     .modal {
       display: none;
       position: fixed;
@@ -321,6 +315,18 @@
       color: #8e8e93;
       font-size: 14px;
     }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: bold;
+      color: #8e8e93;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
@@ -348,20 +354,16 @@
     </div>
   </header>
 
-  <!-- Bloc tampon invisible pour forcer l'espacement sous le header fixe -->
   <div id="spacer"></div>
 
   <div id="container">
     <div class="loading">Connexion au serveur...</div>
   </div>
 
-  <!-- Index alphabétique vertical à droite -->
   <div class="alpha-index" id="alphaIndex"></div>
-
-  <!-- Bouton de retour en haut (flèche simple blanche) -->
   <button class="btn-scroll-top" onclick="scrollToTop()" title="Retour en haut">&#8593;</button>
 
-  <!-- MODALE -->
+  <!-- MODALE DETAILS / EDITION LOCALE -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -406,13 +408,17 @@
                 coverUrl = row.volumes[0].cover;
               }
 
-              // On vérifie si l'iPad a une modification locale enregistrée pour ce disque
+              // Récupération des données modifiées localement sur l'iPad si elles existent
               var localArtist = localStorage.getItem('local_artist_' + row.id);
+              var localSortName = localStorage.getItem('local_sortname_' + row.id);
+
               var finalArtist = localArtist || row.artist || appData.artist || 'Inconnu';
+              var finalSortName = localSortName !== null ? localSortName : (appData.sortName || '');
 
               return {
                 id: row.id,
                 artist: finalArtist,
+                sortName: finalSortName,
                 title: row.title || appData.title || 'Sans titre',
                 volumes: row.volumes || [],
                 tracks: row.tracks || [],
@@ -429,13 +435,7 @@
               };
             });
 
-            // Tri permanent dès le chargement des données
-            collection.sort(function(a, b) {
-              var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
-              if (artistComp !== 0) return artistComp;
-              return (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' });
-            });
-
+            sortCollection();
             render();
           } catch (e) {
             container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur de traitement.</div>';
@@ -450,6 +450,18 @@
       };
 
       xhr.send();
+    }
+
+    // Fonction de tri inspirée directement de l'iPhone (gère le sortName en priorité)
+    function sortCollection() {
+      collection.sort(function(a, b) {
+        var keyA = (a.sortName && a.sortName.trim()) ? a.sortName.trim() : (a.artist || '');
+        var keyB = (b.sortName && b.sortName.trim()) ? b.sortName.trim() : (b.artist || '');
+
+        var artistComp = keyA.localeCompare(keyB, 'fr', { sensitivity: 'base' });
+        if (artistComp !== 0) return artistComp;
+        return (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' });
+      });
     }
 
     function setFilter(filter, el) {
@@ -484,7 +496,8 @@
     function scrollToLetter(letter) {
       var groups = document.getElementsByClassName('artist-group');
       for (var i = 0; i < groups.length; i++) {
-        if (groups[i].textContent.toUpperCase().indexOf(letter) === 0) {
+        var groupKey = groups[i].getAttribute('data-sortkey') || '';
+        if (groupKey.toUpperCase().indexOf(letter) === 0) {
           var headerHeight = 175; 
           var elementPosition = groups[i].getBoundingClientRect().top;
           var offsetPosition = elementPosition + window.pageYOffset - headerHeight;
@@ -527,13 +540,17 @@
 
       renderAlphaIndex();
 
-      var currentArtist = '';
+      var currentGroupKey = '';
       filtered.forEach(function(album) {
-        if (album.artist !== currentArtist) {
-          currentArtist = album.artist;
+        var sortKey = (album.sortName && album.sortName.trim()) ? album.sortName.trim() : (album.artist || '');
+        
+        if (sortKey !== currentGroupKey) {
+          currentGroupKey = sortKey;
           var groupHeader = document.createElement('div');
           groupHeader.className = 'artist-group';
-          groupHeader.textContent = currentArtist;
+          groupHeader.setAttribute('data-sortkey', currentGroupKey);
+          // On affiche l'artiste normalement (ex: Alain Bashung), même si le tri se fait sur le sortKey
+          groupHeader.textContent = album.artist;
           container.appendChild(groupHeader);
         }
 
@@ -569,7 +586,7 @@
         editBtn.title = "Modifier l'artiste en local";
         editBtn.onclick = function(e) {
           e.preventDefault();
-          editArtist(album);
+          showEditModal(album);
         };
 
         card.appendChild(leftPart);
@@ -578,22 +595,48 @@
       });
     }
 
-    // Modification locale persistante sur l'iPad via localStorage (Supabase et l'iPhone ne sont pas touchés)
-    function editArtist(album) {
-      var newArtist = prompt("Modifier l'artiste en local (Nom Prénom) :", album.artist);
-      if (newArtist !== null && newArtist.trim() !== "") {
-        album.artist = newArtist.trim();
-        
-        // On sauvegarde le changement dans la mémoire du navigateur de l'iPad
-        localStorage.setItem('local_artist_' + album.id, album.artist);
-        
-        // Tri immédiat et réaffichage
-        collection.sort(function(a, b) {
-          var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
-          if (artistComp !== 0) return artistComp;
-          return (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' });
-        });
-        render();
+    // Ouvre une modale de saisie propre pour l'artiste et le nom de tri local
+    function showEditModal(album) {
+      var modal = document.getElementById('modal');
+      var body = document.getElementById('modalBody');
+      var title = document.getElementById('modalTitle');
+
+      title.textContent = "Modifier l'artiste (Local iPad)";
+
+      body.innerHTML = `
+        <div class="form-group">
+          <label>Artiste affiché (ex: Alain Bashung)</label>
+          <input type="text" id="editArtistInput" value="${album.artist || ''}">
+        </div>
+        <div class="form-group">
+          <label>Nom de tri (ex: Bashung, Alain)</label>
+          <input type="text" id="editSortNameInput" value="${album.sortName || ''}">
+          <div style="font-size: 11px; color: #8e8e93; margin-top: 4px;">Permet de ranger l'album dans les B tout en affichant le prénom en premier.</div>
+        </div>
+        <button class="btn-action" style="width: 100%; margin-top: 15px; padding: 12px; font-size: 14px;" onclick="saveLocalEdit('${album.id}')">Enregistrer en local</button>
+      `;
+
+      modal.style.display = 'block';
+    }
+
+    function saveLocalEdit(albumId) {
+      var newArtist = document.getElementById('editArtistInput').value.trim();
+      var newSortName = document.getElementById('editSortNameInput').value.trim();
+
+      if (newArtist) {
+        var album = collection.find(function(a) { return a.id === albumId; });
+        if (album) {
+          album.artist = newArtist;
+          album.sortName = newSortName;
+
+          // Sauvegarde dans le localStorage de l'iPad
+          localStorage.setItem('local_artist_' + albumId, newArtist);
+          localStorage.setItem('local_sortname_' + albumId, newSortName);
+
+          sortCollection();
+          render();
+          closeModal();
+        }
       }
     }
 
