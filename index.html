@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 20-09-2026 22:10</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 20-09-2026 22:30</div>
 
     <header>
       <div class="top-bar">
@@ -594,7 +594,7 @@
           </div>
 
           <!-- DOUBLE ALBUM -->
-          <div class="checkbox-group" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
+          <div class="checkbox-group" id="doubleAlbumGroup" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
             <input type="checkbox" id="isDoubleAlbum" onchange="onDoubleAlbumChange()">
             <label for="isDoubleAlbum" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Double Album (2 disques)</label>
           </div>
@@ -633,7 +633,8 @@
             <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(event)">
           </div>
 
-          <div class="checkbox-group">
+          <!-- COFFRET / SÉRIE -->
+          <div class="checkbox-group" id="boxSetGroup" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
             <input type="checkbox" id="isBoxSet" onchange="toggleBoxSetFields()">
             <label for="isBoxSet" style="text-transform:none; font-size:14px; color:white; cursor:pointer;">Il s'agit d'un coffret / série (multi-disques)</label>
           </div>
@@ -1426,21 +1427,33 @@
       }
     }
 
-    // Gestion exclusive : Double Album vs Coffret
+    // Gestion exclusive et visuelle (masquage dynamique) : Double Album vs Coffret
     function onDoubleAlbumChange() {
-      if (document.getElementById("isDoubleAlbum").checked) {
+      const isDouble = document.getElementById("isDoubleAlbum").checked;
+      const boxSetGroup = document.getElementById("boxSetGroup");
+      
+      if (isDouble) {
         document.getElementById("isBoxSet").checked = false;
+        boxSetGroup.style.display = 'none';
         toggleBoxSetFields();
+      } else {
+        boxSetGroup.style.display = 'flex';
       }
     }
 
     function toggleBoxSetFields() {
-      const isChecked = document.getElementById("isBoxSet").checked;
-      if (isChecked) {
+      const isBox = document.getElementById("isBoxSet").checked;
+      const doubleGroup = document.getElementById("doubleAlbumGroup");
+
+      if (isBox) {
         document.getElementById("isDoubleAlbum").checked = false;
+        doubleGroup.style.display = 'none';
+      } else {
+        doubleGroup.style.display = 'flex';
       }
-      document.getElementById("boxSetFieldsGroup").style.display = isChecked ? 'block' : 'none';
-      document.getElementById("formTracksGroup").style.display = isChecked ? 'none' : 'block';
+
+      document.getElementById("boxSetFieldsGroup").style.display = isBox ? 'block' : 'none';
+      document.getElementById("formTracksGroup").style.display = isBox ? 'none' : 'block';
     }
 
     async function showDetails(index) {
