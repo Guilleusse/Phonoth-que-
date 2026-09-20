@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 20-09-2026 23:28</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 00:40</div>
 
     <header>
       <div class="top-bar">
@@ -1600,9 +1600,10 @@
       headerDiv.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:6px;";
       headerDiv.innerHTML = `
         <span style="font-size:11px; color:var(--text-sub); font-weight:bold;">${vols.length} DISQUE(S)</span>
-        <div style="display:flex; gap:6px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
           <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:#374151; color:white; border:none;" onclick="addBulkVolumesToCurrentAlbum()">📋 Coller une liste</button>
           <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:var(--accent-blue); color:white; border:none;" onclick="addNewVolumeToCurrentAlbum()">+ 1 disque</button>
+          <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:rgba(239, 68, 68, 0.2); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.4);" onclick="clearAllVolumesOfCurrentAlbum()">🗑️ Vider la liste</button>
         </div>
       `;
       box.appendChild(headerDiv);
@@ -1665,6 +1666,17 @@
         `;
         box.appendChild(item);
       });
+    }
+
+    function clearAllVolumesOfCurrentAlbum() {
+      if (selectedAlbumIndex < 0) return;
+      const album = collection[selectedAlbumIndex];
+      if (confirm("Voulez-vous vraiment vider toute la liste des disques de ce coffret ?")) {
+        album.volumes = [];
+        album.discsCount = 0;
+        syncAlbumToFirestore(album);
+        renderVolumesList(album.volumes, album.cover);
+      }
     }
 
     function addBulkVolumesToCurrentAlbum() {
@@ -1851,7 +1863,6 @@
         album.discsCount = album.volumes.length;
         syncAlbumToFirestore(album);
         
-        // Rafraîchissement direct et propre de la liste des disques sans recharger toute la modale
         renderVolumesList(album.volumes, album.cover);
       }
     }
@@ -2002,7 +2013,6 @@
           }
           existingVols.push(newVol);
         }
-        // MODIFICATION ICI : Si l'utilisateur a réduit le nombre de disques dans le formulaire, on coupe proprement le tableau !
         if (existingVols.length > targetCount) {
           existingVols = existingVols.slice(0, targetCount);
         }
