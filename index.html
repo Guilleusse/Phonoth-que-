@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 3:17</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 3:31</div>
 
     <header>
       <div class="top-bar">
@@ -1657,9 +1657,9 @@
               <div style="font-size:13px; font-weight:600; color:white; margin-top:2px; word-break:break-word;">${titleText}</div>
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0;">
-              <!-- Correction robuste du clic avec stopImmediatePropagation et gestionnaire explicite -->
-              <button type="button" class="card-action-btn" onclick="event.stopImmediatePropagation(); openEditVolumeModal(${idx});" title="Modifier">✏️</button>
-              <button type="button" class="card-action-btn" onclick="event.stopImmediatePropagation(); deleteVolumeItem(${idx});" title="Supprimer">🗑️</button>
+              <!-- CORRECTION DIRECTE : Utilisation de data-action et d'un écouteur propre évitant les conflits globaux -->
+              <button type="button" class="card-action-btn edit-vol-btn" data-vol-index="${idx}" title="Modifier">✏️</button>
+              <button type="button" class="card-action-btn delete-vol-btn" data-vol-index="${idx}" title="Supprimer">🗑️</button>
             </div>
           </div>
           ${tracksAccordionHtml}
@@ -1667,6 +1667,31 @@
         box.appendChild(item);
       });
     }
+
+    // Gestionnaire global unique rattaché au conteneur des volumes pour intercepter proprement les clics (évite tout bug de liaison inline)
+    document.addEventListener('click', function(e) {
+      const editBtn = e.target.closest('.edit-vol-btn');
+      if (editBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const volIdx = parseInt(editBtn.getAttribute('data-vol-index'), 10);
+        if (!isNaN(volIdx)) {
+          openEditVolumeModal(volIdx);
+        }
+        return;
+      }
+
+      const deleteBtn = e.target.closest('.delete-vol-btn');
+      if (deleteBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const volIdx = parseInt(deleteBtn.getAttribute('data-vol-index'), 10);
+        if (!isNaN(volIdx)) {
+          deleteVolumeItem(volIdx);
+        }
+        return;
+      }
+    });
 
     function clearAllVolumesOfCurrentAlbum() {
       if (selectedAlbumIndex < 0) return;
