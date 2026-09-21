@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 17:15</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 19:05</div>
 
     <header>
       <div class="top-bar">
@@ -592,10 +592,20 @@
             </select>
           </div>
 
-          <!-- DOUBLE ALBUM -->
-          <div class="checkbox-group" id="doubleAlbumGroup" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
-            <input type="checkbox" id="isDoubleAlbum" onchange="onDoubleAlbumChange()">
+          <!-- SELECTION MULTI-DISQUES (2, 3 ou 4 disques) -->
+          <div class="checkbox-group" id="multiDiscGroup1" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
+            <input type="checkbox" id="isDoubleAlbum" onchange="onMultiDiscChange(2)">
             <label for="isDoubleAlbum" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Double Album (2 disques)</label>
+          </div>
+
+          <div class="checkbox-group" id="multiDiscGroup2" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
+            <input type="checkbox" id="isTripleAlbum" onchange="onMultiDiscChange(3)">
+            <label for="isTripleAlbum" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Triple Album (3 disques)</label>
+          </div>
+
+          <div class="checkbox-group" id="multiDiscGroup3" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
+            <input type="checkbox" id="isQuadrupleAlbum" onchange="onMultiDiscChange(4)">
+            <label for="isQuadrupleAlbum" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Quadruple Album (4 disques)</label>
           </div>
 
           <!-- Champ Vitesse Vinyle -->
@@ -1091,6 +1101,8 @@
           if (explicitDiscs > 0) realDiscsCount = explicitDiscs;
           else if (a.isBoxSet) realDiscsCount = subBoxes * 2;
           else if (a.isDoubleAlbum) realDiscsCount = 2;
+          else if (a.isTripleAlbum) realDiscsCount = 3;
+          else if (a.isQuadrupleAlbum) realDiscsCount = 4;
 
           totalDiscsPhysical += realDiscsCount;
 
@@ -1290,6 +1302,16 @@
         else if (album.support === 'CD') baseText = '2 DISQUES CD';
         else if (album.support === 'SACD') baseText = '2 DISQUES SACD';
         else baseText = '2 DISQUES';
+      } else if (album.isTripleAlbum) {
+        if (album.support === 'Vinyle') baseText = '3 DISQUES VINYLE';
+        else if (album.support === 'CD') baseText = '3 DISQUES CD';
+        else if (album.support === 'SACD') baseText = '3 DISQUES SACD';
+        else baseText = '3 DISQUES';
+      } else if (album.isQuadrupleAlbum) {
+        if (album.support === 'Vinyle') baseText = '4 DISQUES VINYLE';
+        else if (album.support === 'CD') baseText = '4 DISQUES CD';
+        else if (album.support === 'SACD') baseText = '4 DISQUES SACD';
+        else baseText = '4 DISQUES';
       }
 
       let badgeText = baseText.toUpperCase();
@@ -1417,11 +1439,31 @@
       }
     }
 
-    function onDoubleAlbumChange() {
-      const isDouble = document.getElementById("isDoubleAlbum").checked;
+    function onMultiDiscChange(count) {
+      const isDouble = document.getElementById("isDoubleAlbum");
+      const isTriple = document.getElementById("isTripleAlbum");
+      const isQuadruple = document.getElementById("isQuadrupleAlbum");
       const boxSetGroup = document.getElementById("boxSetGroup");
-      
-      if (isDouble) {
+
+      if (count === 2) {
+        if (isDouble.checked) {
+          isTriple.checked = false;
+          isQuadruple.checked = false;
+        }
+      } else if (count === 3) {
+        if (isTriple.checked) {
+          isDouble.checked = false;
+          isQuadruple.checked = false;
+        }
+      } else if (count === 4) {
+        if (isQuadruple.checked) {
+          isDouble.checked = false;
+          isTriple.checked = false;
+        }
+      }
+
+      const anyMulti = isDouble.checked || isTriple.checked || isQuadruple.checked;
+      if (anyMulti) {
         document.getElementById("isBoxSet").checked = false;
         boxSetGroup.style.display = 'none';
         toggleBoxSetFields();
@@ -1432,13 +1474,21 @@
 
     function toggleBoxSetFields() {
       const isBox = document.getElementById("isBoxSet").checked;
-      const doubleGroup = document.getElementById("doubleAlbumGroup");
+      const multiGroup1 = document.getElementById("multiDiscGroup1");
+      const multiGroup2 = document.getElementById("multiDiscGroup2");
+      const multiGroup3 = document.getElementById("multiDiscGroup3");
 
       if (isBox) {
         document.getElementById("isDoubleAlbum").checked = false;
-        doubleGroup.style.display = 'none';
+        document.getElementById("isTripleAlbum").checked = false;
+        document.getElementById("isQuadrupleAlbum").checked = false;
+        multiGroup1.style.display = 'none';
+        multiGroup2.style.display = 'none';
+        multiGroup3.style.display = 'none';
       } else {
-        doubleGroup.style.display = 'flex';
+        multiGroup1.style.display = 'flex';
+        multiGroup2.style.display = 'flex';
+        multiGroup3.style.display = 'flex';
       }
 
       document.getElementById("boxSetFieldsGroup").style.display = isBox ? 'block' : 'none';
@@ -1457,6 +1507,8 @@
       let detailSupport = album.support;
       if (album.isBoxSet) detailSupport = `Coffret (${album.support})`;
       else if (album.isDoubleAlbum) detailSupport = `Double Album (${album.support})`;
+      else if (album.isTripleAlbum) detailSupport = `Triple Album (${album.support})`;
+      else if (album.isQuadrupleAlbum) detailSupport = `Quadruple Album (${album.support})`;
       document.getElementById("modalDetailSupport").textContent = detailSupport;
       
       const speedRow = document.getElementById("rowSpeed");
@@ -1842,6 +1894,8 @@
       document.getElementById("isAudiophile").checked = false;
       document.getElementById("is45RPM").checked = false;
       document.getElementById("isDoubleAlbum").checked = false;
+      document.getElementById("isTripleAlbum").checked = false;
+      document.getElementById("isQuadrupleAlbum").checked = false;
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
       document.getElementById("formSortName").value = '';
@@ -1882,6 +1936,8 @@
       document.getElementById("isAudiophile").checked = !!album.isAudiophile;
       document.getElementById("is45RPM").checked = !!album.is45RPM;
       document.getElementById("isDoubleAlbum").checked = !!album.isDoubleAlbum;
+      document.getElementById("isTripleAlbum").checked = !!album.isTripleAlbum;
+      document.getElementById("isQuadrupleAlbum").checked = !!album.isQuadrupleAlbum;
       document.getElementById("isBoxSet").checked = !!album.isBoxSet;
       
       document.getElementById("formSupport").value = album.support || 'Vinyle';
@@ -1956,6 +2012,8 @@
       const isWantlist = document.getElementById("isWantlist").checked;
       const isAudiophile = document.getElementById("isAudiophile").checked;
       const isDoubleAlbum = document.getElementById("isDoubleAlbum").checked;
+      const isTripleAlbum = document.getElementById("isTripleAlbum").checked;
+      const isQuadrupleAlbum = document.getElementById("isQuadrupleAlbum").checked;
       const support = document.getElementById("formSupport").value;
       const is45RPM = (support === 'Vinyle') ? document.getElementById("is45RPM").checked : false;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
@@ -2020,6 +2078,8 @@
         isAudiophile: isAudiophile,
         is45RPM: is45RPM,
         isDoubleAlbum: isDoubleAlbum,
+        isTripleAlbum: isTripleAlbum,
+        isQuadrupleAlbum: isQuadrupleAlbum,
         discsCount: isBoxSet ? existingVols.length : 0,
         volumes: existingVols,
         tracks: tracks
@@ -2345,7 +2405,9 @@
                   volumes: parseVolumesCSV(cols[20]),
                   tracks: parseTracksCSV(cols[21]),
                   sortName: cols[22] || '',
-                  isDoubleAlbum: cols[23] === 'true'
+                  isDoubleAlbum: cols[23] === 'true',
+                  isTripleAlbum: cols[24] === 'true',
+                  isQuadrupleAlbum: cols[25] === 'true'
                 });
               }
             }
@@ -2399,7 +2461,7 @@
     }
 
     function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
           if (typeof v === 'object' && v !== null) {
@@ -2411,7 +2473,7 @@
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
 
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.notes||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}"\n`;
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.notes||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
