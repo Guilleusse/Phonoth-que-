@@ -236,7 +236,10 @@
     .modal-content { background: #1c1c1e; border-radius: 20px 20px 0 0; width: 100%; max-width: 650px; height: 98vh; max-height: 98dvh; display: flex; flex-direction: column; border-top: 1px solid var(--card-border); overflow: hidden; padding-top: env(safe-area-inset-top); }
     .modal-header { flex-shrink: 0; height: 58px; padding: 0 20px; background: #2c2c2e; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; }
     .modal-title { font-size: 15px; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
-    .modal-close { background: #3a3a3c; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    
+    /* MODIFICATION BOUTON FERMER AU LIEU DE LA CROIX */
+    .modal-close { background: #3a3a3c; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    
     .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
     .details-grid { background: #2c2c2e; border-radius: 14px; padding: 14px; margin: 15px 0; }
     .details-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid #3a3a3c; font-size: 14px; }
@@ -309,7 +312,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 19:05</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 22:30</div>
 
     <header>
       <div class="top-bar">
@@ -390,7 +393,7 @@
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
       <div class="modal-header" style="border-radius: 20px 20px 0 0;">
         <span class="modal-title">📊 Statistiques de la phonothèque</span>
-        <button class="modal-close" onclick="closeModal('statsModal')">✕</button>
+        <button class="modal-close" onclick="closeModal('statsModal')">Fermer</button>
       </div>
       <div class="modal-body" style="padding: 15px;">
         <div class="details-grid" style="margin: 0;" id="statsModalContent"></div>
@@ -403,7 +406,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <span class="modal-title" id="modalDetailTitle">Détails de l'album</span>
-        <button class="modal-close" onclick="closeModal('detailsModal')">✕</button>
+        <button class="modal-close" onclick="closeModal('detailsModal')">Fermer</button>
       </div>
       <div class="modal-body">
         <img id="modalDetailCover" class="modal-cover" src="" alt="Pochette">
@@ -451,7 +454,7 @@
     <div class="modal-content" style="height: auto; max-height: 85vh;">
       <div class="modal-header">
         <span class="modal-title">Coller une liste de disques (Noms des albums)</span>
-        <button class="modal-close" onclick="closeModal('bulkModal')">✕</button>
+        <button class="modal-close" onclick="closeModal('bulkModal')">Fermer</button>
       </div>
       <div class="modal-body" style="padding:15px;">
         <label style="display:block; font-size:12px; color:var(--text-sub); margin-bottom:8px; font-weight:bold;">COLLEZ VOS NOMS DE DISQUES CI-DESSOUS (UN PAR LIGNE) :</label>
@@ -466,7 +469,7 @@
     <div class="modal-content" style="height: auto; max-height: 90vh;">
       <div class="modal-header">
         <span class="modal-title" id="editVolumeModalTitle">Modifier le disque</span>
-        <button class="modal-close" onclick="closeModal('editVolumeModal')">✕</button>
+        <button class="modal-close" onclick="closeModal('editVolumeModal')">Fermer</button>
       </div>
       <div class="modal-body" style="padding:15px;">
         <input type="hidden" id="editVolIndex">
@@ -505,7 +508,7 @@
       <div class="modal-header">
         <span class="modal-title" id="formModalTitle">Ajouter une référence</span>
         <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
-          <button type="button" class="btn-secondary" style="padding: 6px 12px; width: auto; font-size: 13px; background: #3a3a3c; color: white; border: none; border-radius: 8px;" onclick="closeModal('formModal')">Annuler</button>
+          <button type="button" class="btn-secondary" style="padding: 6px 12px; width: auto; font-size: 13px; background: #3a3a3c; color: white; border: none; border-radius: 8px;" onclick="closeModal('formModal')">Fermer</button>
           <button type="button" class="btn-submit" style="padding: 6px 12px; width: auto; font-size: 13px; border-radius: 8px;" onclick="saveAlbumForm()">Enregistrer</button>
         </div>
       </div>
@@ -664,7 +667,7 @@
     <div class="modal-content" style="height: 75vh; max-height:75dvh; background: #000;">
       <div class="modal-header">
         <span class="modal-title">Scanner un code-barres</span>
-        <button class="modal-close" onclick="stopLiveScanner()">✕</button>
+        <button class="modal-close" onclick="stopLiveScanner()">Fermer</button>
       </div>
       <div class="modal-body" style="padding:15px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <div id="reader" style="width:100%; max-width:360px;"></div>
