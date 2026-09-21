@@ -237,7 +237,6 @@
     .modal-header { flex-shrink: 0; height: 58px; padding: 0 20px; background: #2c2c2e; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; }
     .modal-title { font-size: 15px; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
     
-    /* MODIFICATION BOUTON FERMER AU LIEU DE LA CROIX */
     .modal-close { background: #3a3a3c; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     
     .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
@@ -256,7 +255,6 @@
     .btn-danger { background: var(--danger); }
     .volumes-box { background: #2c2c2e; border-radius: 14px; padding: 12px; margin-top: 10px; }
     
-    /* Styles stricts et verrouillés pour éviter tout décalage du flux vidéo sur iOS Safari */
     #reader { 
       position: relative !important;
       width: 100% !important; 
@@ -278,11 +276,9 @@
     #reader__dashboard_section_csr button { background: var(--card-bg) !important; color: white !important; border: 1px solid var(--card-border) !important; padding: 6px 12px !important; border-radius: 8px !important; font-size: 13px !important; }
     #reader__scan_region { background: transparent !important; }
 
-    /* Modal Connexion */
     #loginModal { z-index: 3000; }
     .login-box { background: #1c1c1e; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid var(--card-border); }
 
-    /* --- MODE JOUR (LIGHT MODE) --- */
     body.light-mode {
       --bg-color: #f3f4f6;
       --card-bg: #ffffff;
@@ -312,7 +308,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 21-09-2026 22:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 22-09-2026 01:27</div>
 
     <header>
       <div class="top-bar">
@@ -363,10 +359,8 @@
   <main id="collectionContainer"></main>
   <div class="az-index" id="azIndex"></div>
 
-  <!-- Bouton Retour en haut -->
   <button id="backToTopBtn" class="back-to-top-btn" onclick="scrollToTop()" title="Revenir en haut">↑</button>
 
-  <!-- MODALE CONNEXION -->
   <div class="modal-overlay" id="loginModal" style="align-items: center;">
     <div class="login-box">
       <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px; text-align: center;">🔐 Phonothèque</h2>
@@ -388,7 +382,6 @@
     </div>
   </div>
 
-  <!-- MODALE STATISTIQUES -->
   <div class="modal-overlay" id="statsModal" style="align-items: center;">
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
       <div class="modal-header" style="border-radius: 20px 20px 0 0;">
@@ -401,7 +394,6 @@
     </div>
   </div>
 
-  <!-- MODALE DETAILS -->
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -449,7 +441,6 @@
     </div>
   </div>
 
-  <!-- MODALE IMPORTATION EN MASSE DISQUES -->
   <div class="modal-overlay" id="bulkModal" style="z-index: 1500;">
     <div class="modal-content" style="height: auto; max-height: 85vh;">
       <div class="modal-header">
@@ -464,7 +455,6 @@
     </div>
   </div>
 
-  <!-- MODALE MODIFICATION D'UN DISQUE INDIVIDUEL DU COFFRET -->
   <div class="modal-overlay" id="editVolumeModal" style="z-index: 2500;">
     <div class="modal-content" style="height: auto; max-height: 90vh;">
       <div class="modal-header">
@@ -502,7 +492,6 @@
     </div>
   </div>
 
-  <!-- MODALE AJOUT / EDITION -->
   <div class="modal-overlay" id="formModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -541,7 +530,7 @@
 
           <div class="form-group">
             <label>Nom de tri (facultatif)</label>
-            <input type="text" id="formSortName" placeholder="ex: Bach, Johann Sebastian    •   ou   Beatles" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formSortName" placeholder="ex: Bach, Johann Sebastian    •    ou    Beatles" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <div style="font-size:11px; color:var(--text-sub); margin-top:6px;">Utilisé uniquement pour le tri et l'index A-Z. L'affichage garde toujours le nom complet ci-dessus. Laisser vide pour un classement par nom complet (par défaut).</div>
           </div>
 
@@ -595,7 +584,6 @@
             </select>
           </div>
 
-          <!-- SELECTION MULTI-DISQUES (2, 3 ou 4 disques) -->
           <div class="checkbox-group" id="multiDiscGroup1" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
             <input type="checkbox" id="isDoubleAlbum" onchange="onMultiDiscChange(2)">
             <label for="isDoubleAlbum" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Double Album (2 disques)</label>
@@ -611,7 +599,6 @@
             <label for="isQuadrupleAlbum" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Quadruple Album (4 disques)</label>
           </div>
 
-          <!-- Champ Vitesse Vinyle -->
           <div class="checkbox-group" id="vinylSpeedGroup" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
             <input type="checkbox" id="is45RPM">
             <label for="is45RPM" style="text-transform:none; font-size:14px; color:white; font-weight:bold; cursor:pointer;">Vinyle 45 Tours (RPM)</label>
@@ -645,7 +632,6 @@
             <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(event)">
           </div>
 
-          <!-- COFFRET / SÉRIE -->
           <div class="checkbox-group" id="boxSetGroup" style="background:#2c2c2e; border:1px solid var(--card-border); padding:12px; border-radius:12px; margin-bottom:15px; display:flex;">
             <input type="checkbox" id="isBoxSet" onchange="toggleBoxSetFields()">
             <label for="isBoxSet" style="text-transform:none; font-size:14px; color:white; cursor:pointer;">Il s'agit d'un coffret / série (multi-disques)</label>
@@ -662,7 +648,6 @@
     </div>
   </div>
 
-  <!-- MODALE SCANNER CAMERA HTML5 EN DIRECT -->
   <div class="modal-overlay" id="scannerModal" style="z-index: 2000;">
     <div class="modal-content" style="height: 75vh; max-height:75dvh; background: #000;">
       <div class="modal-header">
@@ -676,11 +661,9 @@
   </div>
 
   <script>
-    // ----- Configuration Supabase unique -----
     const SUPABASE_URL = 'https://mchljfhtgingnqxcjizf.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jaGxqZmh0Z2luZ25xeGNqaXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTY1NzYsImV4cCI6MjEwNTA3MjU3Nn0.aGv9w7XQB-FOVc7xScX-3HN-5ZcA3d3EM7JOBz0HCuQ';
     window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    // -----------------------------------------
 
     document.addEventListener('touchstart', function() {}, { passive: true });
 
@@ -1866,7 +1849,7 @@
       
       syncAlbumToSupabase(album);
 
-      closeModal("editVolumeModal");
+      document.getElementById("editVolumeModal").classList.remove("active");
       showDetails(selectedAlbumIndex);
     }
 
@@ -1925,7 +1908,7 @@
     }
 
     async function openEditModal(index) {
-      closeModal("detailsModal");
+      document.getElementById("detailsModal").classList.remove("active");
       
       lockBodyScroll();
       selectedAlbumIndex = index;
@@ -2097,7 +2080,8 @@
       }
 
       syncAlbumToSupabase(albumData);
-      closeModal("formModal");
+      document.getElementById("formModal").classList.remove("active");
+      unlockBodyScroll();
     }
 
     async function startLiveScanner() {
@@ -2251,11 +2235,11 @@
 
         let conductorName = '';
         if (data.extraartists && data.extraartists.length) {
-          const cond = data.extraartists.find(a => a.role && (a.role.toLowerCase().includes('conductor') || a.role.toLowerCase().includes('direction')));
+          const cond = data.extraartists.find(a => a.role && (a.role.toLowerCase().includes('conductor') || a.role.toLowerCase().includes('direction') || a.role.toLowerCase().includes('direct')));
           if (cond) conductorName = cond.name.replace(/\s*\(\d+\)$/, '').trim();
         }
         if (!conductorName && data.artists && data.artists.length) {
-          const cond = data.artists.find(a => a.role && (a.role.toLowerCase().includes('conductor') || a.role.toLowerCase().includes('direction')));
+          const cond = data.artists.find(a => a.role && (a.role.toLowerCase().includes('conductor') || a.role.toLowerCase().includes('direction') || a.role.toLowerCase().includes('direct')));
           if (cond) conductorName = cond.name.replace(/\s*\(\d+\)$/, '').trim();
         }
         if (conductorName) {
