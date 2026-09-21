@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 13:40</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 14:07</div>
 
     <header>
       <div class="top-bar">
@@ -688,6 +688,7 @@
     let pendingCoverUrl = "";
     let pendingEditVolCoverUrl = "";
 
+    // --- CORRECTION DU VERROUILLAGE CORPS DE PAGE (PLUS DE BLOCAGE SAISIE) ---
     function lockBodyScroll() {
       if (isBodyLocked) return;
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
@@ -701,6 +702,7 @@
     }
 
     function unlockBodyScroll() {
+      // On s'assure qu'aucune autre modale n'est active avant de libérer le body
       const activeModals = document.querySelectorAll('.modal-overlay.active');
       if (activeModals.length > 0) return; 
 
@@ -747,7 +749,9 @@
           .from('Pochettes')
           .upload(fileName, file);
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
         const { data: publicUrlData } = supabase.storage
           .from('Pochettes')
@@ -777,7 +781,9 @@
           .from('Pochettes')
           .upload(fileName, file);
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
         const { data: publicUrlData } = supabase.storage
           .from('Pochettes')
@@ -880,7 +886,7 @@
       if (!error && data) {
         collection = data.map(row => {
           return {
-            supabaseId: row.id,
+            firestoreId: row.id,
             artist: row.artist,
             title: row.title,
             volumes: row.volumes || [],
@@ -916,6 +922,7 @@
       if (s) s.style.display = "none";
     }
 
+    // --- SYNCHRONISATION SUPABASE PROPRE ET SÉCURISÉE ---
     async function syncAlbumToSupabase(album) {
       try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
 
@@ -923,28 +930,28 @@
         showSpinner();
         
         const appData = { ...album };
-        delete appData.supabaseId;
+        delete appData.firestoreId;
         delete appData.artist;
         delete appData.title;
         delete appData.volumes;
         delete appData.tracks;
 
         const dbRecord = {
-          artist: album.artist,
-          title: album.title,
+          artist: album.artist || 'Artiste inconnu',
+          title: album.title || 'Sans titre',
           volumes: album.volumes || [],
           tracks: album.tracks || [],
           app_data: appData
         };
 
-        if (album.supabaseId) {
-          dbRecord.id = album.supabaseId;
+        if (album.firestoreId && typeof album.firestoreId === 'string' && album.firestoreId.trim() !== '') {
+          dbRecord.id = album.firestoreId;
         }
 
         const { data, error } = await supabase.from('albums').upsert([dbRecord]).select();
         
         if (!error && data && data.length > 0) {
-          album.supabaseId = data[0].id;
+          album.firestoreId = data[0].id;
           try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
         } else {
           console.error("Erreur MAJ album Supabase", error);
@@ -966,13 +973,13 @@
       return true;
     }
 
-    async function deleteAlbumFromSupabase(supabaseId) {
+    async function deleteAlbumFromSupabase(firestoreId) {
       try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
 
-      if (authUser && supabaseId) {
+      if (authUser && firestoreId) {
         showSpinner();
-        const { error } = await supabase.from('albums').delete().eq('id', supabaseId);
-        if (error) console.error("Erreur suppression album Supabase", error);
+        const { error } = await supabase.from('albums').delete().eq('id', firestoreId);
+        if (error) console.error("Erreur suppression album", error);
         setTimeout(hideSpinner, 300);
       }
       renderCollection();
@@ -1007,9 +1014,9 @@
       if (e) e.stopPropagation();
       const album = collection[index];
       if (confirm(`Voulez-vous vraiment supprimer "${album.title || 'cet album'}" ?`)) {
-        const supabaseId = album.supabaseId;
+        const firestoreId = album.firestoreId;
         collection.splice(index, 1);
-        deleteAlbumFromSupabase(supabaseId);
+        deleteAlbumFromSupabase(firestoreId);
       }
     }
 
@@ -1092,11 +1099,7 @@
           const subBoxes = (a.volumes && a.volumes.length > 0) ? a.volumes.length : 1;
 
           const realBoxCount = a.isBoxSet ? (a.title && a.title.includes("Kantatenwerk") ? subBoxes : 1) : 0;
-          
-          let realDiscsCount = 1;
-          if (explicitDiscs > 0) realDiscsCount = explicitDiscs;
-          else if (a.isBoxSet) realDiscsCount = subBoxes * 2;
-          else if (a.isDoubleAlbum) realDiscsCount = 2;
+          const realDiscsCount = explicitDiscs > 0 ? explicitDiscs : (a.isBoxSet ? subBoxes * 2 : 1);
 
           totalDiscsPhysical += realDiscsCount;
 
@@ -1288,29 +1291,20 @@
       };
 
       let badgeClass = 'badge-cd';
-      let baseText = album.support || 'CD';
-      const supp = baseText.toUpperCase();
-
-      if (album.isDoubleAlbum) {
-        if (album.support === 'Vinyle') baseText = '2 DISQUES VINYLE';
-        else if (album.support === 'CD') baseText = '2 DISQUES CD';
-        else if (album.support === 'SACD') baseText = '2 DISQUES SACD';
-        else baseText = '2 DISQUES';
-      }
-
-      let badgeText = baseText.toUpperCase();
+      let badgeText = album.support || 'CD';
+      const supp = (album.support || 'Vinyle').toUpperCase();
       const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
   
       if (album.isWantlist) {
         badgeClass = 'badge-wantlist';
-        badgeText = `SOUHAITS ${badgeText}`;
+        badgeText = `SOUHAITS ${supp}`;
       } else if (album.isBoxSet) {
         badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
-        let boxText = nbDisques > 0 ? `${nbDisques} DISQUES ${supp}` : `COFFRET ${supp}`;
-        badgeText = album.isAudiophile ? `${boxText} AUDIOPHILE` : boxText;
+        let baseText = nbDisques > 0 ? `${nbDisques} DISQUES ${supp}` : `COFFRET ${supp}`;
+        badgeText = album.isAudiophile ? `${baseText} AUDIOPHILE` : baseText;
       } else if (album.isAudiophile) {
         badgeClass = 'badge-audiophile';
-        badgeText = `${badgeText} AUDIOPHILE`;
+        badgeText = `${supp} AUDIOPHILE`;
       } else if (album.support === 'Vinyle') {
         badgeClass = 'badge-vinyle';
       } else if (album.support === 'SACD') {
@@ -1423,34 +1417,6 @@
       }
     }
 
-    function onDoubleAlbumChange() {
-      const isDouble = document.getElementById("isDoubleAlbum").checked;
-      const boxSetGroup = document.getElementById("boxSetGroup");
-      
-      if (isDouble) {
-        document.getElementById("isBoxSet").checked = false;
-        boxSetGroup.style.display = 'none';
-        toggleBoxSetFields();
-      } else {
-        boxSetGroup.style.display = 'flex';
-      }
-    }
-
-    function toggleBoxSetFields() {
-      const isBox = document.getElementById("isBoxSet").checked;
-      const doubleGroup = document.getElementById("doubleAlbumGroup");
-
-      if (isBox) {
-        document.getElementById("isDoubleAlbum").checked = false;
-        doubleGroup.style.display = 'none';
-      } else {
-        doubleGroup.style.display = 'flex';
-      }
-
-      document.getElementById("boxSetFieldsGroup").style.display = isBox ? 'block' : 'none';
-      document.getElementById("formTracksGroup").style.display = isBox ? 'none' : 'block';
-    }
-
     async function showDetails(index) {
       lockBodyScroll();
       selectedAlbumIndex = index;
@@ -1459,11 +1425,7 @@
       document.getElementById("modalDetailTitle").textContent = album.isWantlist ? "💡 Élément recherché (Wantlist)" : (album.isBoxSet ? "Détails du Coffret" : "Détails de l'album");
       document.getElementById("modalDetailArtist").textContent = album.artist || '';
       document.getElementById("modalDetailAlbumName").textContent = album.title || '';
-      
-      let detailSupport = album.support;
-      if (album.isBoxSet) detailSupport = `Coffret (${album.support})`;
-      else if (album.isDoubleAlbum) detailSupport = `Double Album (${album.support})`;
-      document.getElementById("modalDetailSupport").textContent = detailSupport;
+      document.getElementById("modalDetailSupport").textContent = album.isBoxSet ? `Coffret (${album.support})` : album.support;
       
       const speedRow = document.getElementById("rowSpeed");
       if (album.support === 'Vinyle') {
@@ -1595,10 +1557,9 @@
       headerDiv.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:6px;";
       headerDiv.innerHTML = `
         <span style="font-size:11px; color:var(--text-sub); font-weight:bold;">${vols.length} DISQUE(S)</span>
-        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+        <div style="display:flex; gap:6px;">
           <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:#374151; color:white; border:none;" onclick="addBulkVolumesToCurrentAlbum()">📋 Coller une liste</button>
           <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:var(--accent-blue); color:white; border:none;" onclick="addNewVolumeToCurrentAlbum()">+ 1 disque</button>
-          <button class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:rgba(239, 68, 68, 0.2); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.4);" onclick="clearAllVolumesOfCurrentAlbum()">🗑️ Vider la liste</button>
         </div>
       `;
       box.appendChild(headerDiv);
@@ -1653,51 +1614,14 @@
               <div style="font-size:13px; font-weight:600; color:white; margin-top:2px; word-break:break-word;">${titleText}</div>
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0;">
-              <button type="button" class="card-action-btn edit-vol-btn" data-vol-index="${idx}" title="Modifier">✏️</button>
-              <button type="button" class="card-action-btn delete-vol-btn" data-vol-index="${idx}" title="Supprimer">🗑️</button>
+              <button class="card-action-btn" onclick="openEditVolumeModal(${idx})" title="Modifier">✏️</button>
+              <button class="card-action-btn" onclick="deleteVolumeItem(${idx})" title="Supprimer">🗑️</button>
             </div>
           </div>
           ${tracksAccordionHtml}
         `;
         box.appendChild(item);
       });
-    }
-
-    // Gestionnaire global unique pour les boutons de sous-disques (délégation d'événements)
-    document.addEventListener('click', function(e) {
-      const editBtn = e.target.closest('.edit-vol-btn');
-      if (editBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        const volIdx = parseInt(editBtn.getAttribute('data-vol-index'), 10);
-        if (!isNaN(volIdx)) {
-          openEditVolumeModal(volIdx);
-        }
-        return;
-      }
-
-      const deleteBtn = e.target.closest('.delete-vol-btn');
-      if (deleteBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        const volIdx = parseInt(deleteBtn.getAttribute('data-vol-index'), 10);
-        if (!isNaN(volIdx)) {
-          deleteVolumeItem(volIdx);
-        }
-        return;
-      }
-    });
-
-    function clearAllVolumesOfCurrentAlbum() {
-      if (selectedAlbumIndex < 0) return;
-      const album = collection[selectedAlbumIndex];
-      if (confirm("Voulez-vous vraiment vider toute la liste des disques de ce coffret ?")) {
-        album.volumes = [];
-        album.discsCount = 0;
-        album.isBoxSet = false;
-        syncAlbumToSupabase(album);
-        showDetails(selectedAlbumIndex);
-      }
     }
 
     function addBulkVolumesToCurrentAlbum() {
@@ -1721,7 +1645,7 @@
           let volData = album.volumes[idx] || { title: line, cover: album.cover || '', tracks: [] };
           volData.title = line;
           
-          const subId = await saveVolumeToSupabase(album.supabaseId, volData, volData.subId);
+          const subId = await saveVolumeToSupabase(album.firestoreId, volData, volData.subId);
           volData.subId = subId;
           album.volumes[idx] = volData;
         }
@@ -1747,7 +1671,7 @@
           tracks: []
         };
 
-        const subId = await saveVolumeToSupabase(album.supabaseId, newVol);
+        const subId = await saveVolumeToSupabase(album.firestoreId, newVol);
         newVol.subId = subId;
         album.volumes.push(newVol);
         album.discsCount = album.volumes.length;
@@ -1857,21 +1781,19 @@
       const updatedVol = {
         title: newTitle,
         cover: newCover,
-        tracks: parsedTracks,
-        subId: subId || ('vol_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5))
+        tracks: parsedTracks
       };
+
+      const newSubId = await saveVolumeToSupabase(album.firestoreId, updatedVol, subId);
+      updatedVol.subId = newSubId;
 
       album.volumes[volIdx] = updatedVol;
       pendingEditVolCoverUrl = "";
       
-      // 1. Fermeture immédiate de la modale de modification du disque
-      document.getElementById("editVolumeModal").classList.remove("active");
+      syncAlbumToSupabase(album);
 
-      // 2. Rafraîchissement synchrone local de la liste des volumes
-      renderVolumesList(album.volumes, album.cover);
-
-      // 3. Synchronisation en arrière-plan avec Supabase
-      await syncAlbumToSupabase(album);
+      closeModal("editVolumeModal");
+      showDetails(selectedAlbumIndex);
     }
 
     async function deleteVolumeItem(volIdx) {
@@ -1881,13 +1803,18 @@
       const vol = album.volumes[volIdx];
       
       if (confirm(`Supprimer "${vol.title || 'ce disque'}" ?`)) {
-        await deleteVolumeFromSupabase(album.supabaseId, vol.subId);
+        await deleteVolumeFromSupabase(album.firestoreId, vol.subId);
         album.volumes.splice(volIdx, 1);
         album.discsCount = album.volumes.length;
         syncAlbumToSupabase(album);
-        
-        renderVolumesList(album.volumes, album.cover);
+        showDetails(selectedAlbumIndex);
       }
+    }
+
+    function toggleBoxSetFields() {
+      const isChecked = document.getElementById("isBoxSet").checked;
+      document.getElementById("boxSetFieldsGroup").style.display = isChecked ? 'block' : 'none';
+      document.getElementById("formTracksGroup").style.display = isChecked ? 'none' : 'block';
     }
 
     function openAddModal() {
@@ -1902,7 +1829,6 @@
       document.getElementById("isWantlist").checked = (currentFilter === 'Wantlist');
       document.getElementById("isAudiophile").checked = false;
       document.getElementById("is45RPM").checked = false;
-      document.getElementById("isDoubleAlbum").checked = false;
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
       document.getElementById("formSortName").value = '';
@@ -1942,7 +1868,6 @@
       document.getElementById("isWantlist").checked = !!album.isWantlist;
       document.getElementById("isAudiophile").checked = !!album.isAudiophile;
       document.getElementById("is45RPM").checked = !!album.is45RPM;
-      document.getElementById("isDoubleAlbum").checked = !!album.isDoubleAlbum;
       document.getElementById("isBoxSet").checked = !!album.isBoxSet;
       
       document.getElementById("formSupport").value = album.support || 'Vinyle';
@@ -2016,7 +1941,6 @@
       const isBoxSet = document.getElementById("isBoxSet").checked;
       const isWantlist = document.getElementById("isWantlist").checked;
       const isAudiophile = document.getElementById("isAudiophile").checked;
-      const isDoubleAlbum = document.getElementById("isDoubleAlbum").checked;
       const support = document.getElementById("formSupport").value;
       const is45RPM = (support === 'Vinyle') ? document.getElementById("is45RPM").checked : false;
       const discsCount = parseInt(document.getElementById("formDiscsCount").value) || 0;
@@ -2029,9 +1953,9 @@
         while (existingVols.length < targetCount) {
           const i = existingVols.length + 1;
           const newVol = { title: `Disque ${i}`, cover: '', tracks: [] };
-          const supabaseId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].supabaseId : null;
-          if (supabaseId) {
-            const subId = await saveVolumeToSupabase(supabaseId, newVol);
+          const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
+          if (firestoreId) {
+            const subId = await saveVolumeToSupabase(firestoreId, newVol);
             newVol.subId = subId;
           }
           existingVols.push(newVol);
@@ -2059,12 +1983,12 @@
       const existingTracks = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].tracks) ? collection[selectedAlbumIndex].tracks : [];
       const tracks = isBoxSet ? [] : ((manualTracks.length > 0) ? manualTracks : ((currentFetchedTracks.length > 0) ? currentFetchedTracks : existingTracks));
 
-      const supabaseId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].supabaseId : null;
+      const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
 
       const finalCover = pendingCoverUrl || document.getElementById("formCover").value.trim();
 
       const albumData = {
-        supabaseId: supabaseId,
+        firestoreId: firestoreId,
         title: title,
         artist: artist,
         sortName: sortName,
@@ -2085,7 +2009,6 @@
         isWantlist: isWantlist,
         isAudiophile: isAudiophile,
         is45RPM: is45RPM,
-        isDoubleAlbum: isDoubleAlbum,
         discsCount: isBoxSet ? existingVols.length : 0,
         volumes: existingVols,
         tracks: tracks
@@ -2410,8 +2333,7 @@
                   discsCount: parseInt(cols[19]) || 0,
                   volumes: parseVolumesCSV(cols[20]),
                   tracks: parseTracksCSV(cols[21]),
-                  sortName: cols[22] || '',
-                  isDoubleAlbum: cols[23] === 'true'
+                  sortName: cols[22] || ''
                 });
               }
             }
@@ -2429,7 +2351,7 @@
 
               const recordsToInsert = newAlbums.map(album => {
                 const appData = { ...album };
-                delete appData.supabaseId;
+                delete appData.firestoreId;
                 delete appData.artist;
                 delete appData.title;
                 delete appData.volumes;
@@ -2465,7 +2387,7 @@
     }
 
     function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName\n";
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
           if (typeof v === 'object' && v !== null) {
@@ -2477,7 +2399,7 @@
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
 
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.notes||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}"\n`;
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.notes||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}"\n`;
       });
 
       const today = new Date().toISOString().split('T')[0];
