@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 01:12</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 2:54</div>
 
     <header>
       <div class="top-bar">
@@ -406,7 +406,7 @@
         <button class="modal-close" onclick="closeModal('detailsModal')">✕</button>
       </div>
       <div class="modal-body">
-        <img id="modalDetailCover" class="modal-cover" src="" alt="Pochette">
+        <img id="modalDetailCover" class="modal-cover" src="" alt="Pochette" crossorigin="anonymous">
         <h2 id="modalDetailArtist" style="font-size: 20px; font-weight: 700; color: var(--accent-blue); margin-bottom: 2px;"></h2>
         <h3 id="modalDetailAlbumName" style="font-size: 15px; font-weight: 600; color: var(--text-sub); margin-bottom: 15px;"></h3>
 
@@ -1350,7 +1350,7 @@
           <button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)" title="Supprimer">🗑️</button>
         </div>
         <div class="cover-box">
-          ${coverSrc ? `<img src="${coverSrc}" alt="cover" onerror="this.style.display='none'">` : 'Pochette'}
+          ${coverSrc ? `<img src="${coverSrc}" alt="cover" crossorigin="anonymous" onerror="this.style.display='none'">` : 'Pochette'}
         </div>
         <div class="album-info">
           <span class="badge ${badgeClass}">${badgeText}</span>
@@ -1427,7 +1427,6 @@
       }
     }
 
-    // Gestion exclusive et visuelle (masquage dynamique) : Double Album vs Coffret
     function onDoubleAlbumChange() {
       const isDouble = document.getElementById("isDoubleAlbum").checked;
       const boxSetGroup = document.getElementById("boxSetGroup");
@@ -1633,7 +1632,7 @@
         item.style.cssText = "background:#1c1c1e; padding:10px; border-radius:12px; margin-bottom:8px; border:1px solid #3a3a3c;";
         
         const coverHtml = coverUrl 
-          ? `<img src="${coverUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">`
+          ? `<img src="${coverUrl}" crossorigin="anonymous" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">`
           : `<div style="width:50px; height:50px; border-radius:8px; background:#2a2a2a; color:var(--text-sub); font-size:9px; display:flex; align-items:center; justify-content:center; text-align:center; flex-shrink:0;">Disque ${idx+1}</div>`;
 
         let tracksAccordionHtml = '';
@@ -1658,8 +1657,9 @@
               <div style="font-size:13px; font-weight:600; color:white; margin-top:2px; word-break:break-word;">${titleText}</div>
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0;">
-              <button class="card-action-btn" onclick="openEditVolumeModal(${idx})" title="Modifier">✏️</button>
-              <button class="card-action-btn" onclick="deleteVolumeItem(${idx})" title="Supprimer">🗑️</button>
+              <!-- Ajout de event.stopPropagation() pour bloquer la propagation du clic -->
+              <button class="card-action-btn" onclick="event.stopPropagation(); openEditVolumeModal(${idx})" title="Modifier">✏️</button>
+              <button class="card-action-btn" onclick="event.stopPropagation(); deleteVolumeItem(${idx})" title="Supprimer">🗑️</button>
             </div>
           </div>
           ${tracksAccordionHtml}
@@ -1674,10 +1674,8 @@
       if (confirm("Voulez-vous vraiment vider toute la liste des disques de ce coffret ?")) {
         album.volumes = [];
         album.discsCount = 0;
-        album.isBoxSet = false; // Décoche automatiquement le mode coffret
+        album.isBoxSet = false;
         syncAlbumToFirestore(album);
-        
-        // Rafraîchit l'affichage de la modale sans la fermer
         showDetails(selectedAlbumIndex);
       }
     }
@@ -2232,7 +2230,6 @@
         if (title) document.getElementById("formTitle").value = title;
         if (artist) document.getElementById("formArtist").value = artist;
 
-        // --- EXTRACTION AUTOMATIQUE DU CHEF D'ORCHESTRE (CONDUCTOR) ---
         let conductorName = '';
         if (data.extraartists && data.extraartists.length) {
           const cond = data.extraartists.find(a => a.role && (a.role.toLowerCase().includes('conductor') || a.role.toLowerCase().includes('direction')));
@@ -2245,7 +2242,6 @@
         if (conductorName) {
           document.getElementById("formConductor").value = conductorName;
         }
-        // -------------------------------------------------------------
 
         if (data.labels && data.labels.length) {
           document.getElementById("formLabel").value = data.labels[0].name;
