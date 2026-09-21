@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 3:31</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 13:40</div>
 
     <header>
       <div class="top-bar">
@@ -747,9 +747,7 @@
           .from('Pochettes')
           .upload(fileName, file);
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         const { data: publicUrlData } = supabase.storage
           .from('Pochettes')
@@ -779,9 +777,7 @@
           .from('Pochettes')
           .upload(fileName, file);
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         const { data: publicUrlData } = supabase.storage
           .from('Pochettes')
@@ -884,7 +880,7 @@
       if (!error && data) {
         collection = data.map(row => {
           return {
-            firestoreId: row.id,
+            supabaseId: row.id,
             artist: row.artist,
             title: row.title,
             volumes: row.volumes || [],
@@ -920,14 +916,14 @@
       if (s) s.style.display = "none";
     }
 
-    async function syncAlbumToFirestore(album) {
+    async function syncAlbumToSupabase(album) {
       try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
 
       if (authUser) {
         showSpinner();
         
         const appData = { ...album };
-        delete appData.firestoreId;
+        delete appData.supabaseId;
         delete appData.artist;
         delete appData.title;
         delete appData.volumes;
@@ -941,17 +937,17 @@
           app_data: appData
         };
 
-        if (album.firestoreId) {
-          dbRecord.id = album.firestoreId;
+        if (album.supabaseId) {
+          dbRecord.id = album.supabaseId;
         }
 
         const { data, error } = await supabase.from('albums').upsert([dbRecord]).select();
         
         if (!error && data && data.length > 0) {
-          album.firestoreId = data[0].id;
+          album.supabaseId = data[0].id;
           try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
         } else {
-          console.error("Erreur MAJ album", error);
+          console.error("Erreur MAJ album Supabase", error);
         }
         setTimeout(hideSpinner, 300);
       }
@@ -962,21 +958,21 @@
       return album.volumes || [];
     }
 
-    async function saveVolumeToFirestore(albumId, volumeData, subId) {
+    async function saveVolumeToSupabase(albumId, volumeData, subId) {
       return subId || 'vol_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     }
 
-    async function deleteVolumeFromFirestore(albumId, subId) {
+    async function deleteVolumeFromSupabase(albumId, subId) {
       return true;
     }
 
-    async function deleteAlbumFromFirestore(firestoreId) {
+    async function deleteAlbumFromSupabase(supabaseId) {
       try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
 
-      if (authUser && firestoreId) {
+      if (authUser && supabaseId) {
         showSpinner();
-        const { error } = await supabase.from('albums').delete().eq('id', firestoreId);
-        if (error) console.error("Erreur suppression album", error);
+        const { error } = await supabase.from('albums').delete().eq('id', supabaseId);
+        if (error) console.error("Erreur suppression album Supabase", error);
         setTimeout(hideSpinner, 300);
       }
       renderCollection();
@@ -1011,9 +1007,9 @@
       if (e) e.stopPropagation();
       const album = collection[index];
       if (confirm(`Voulez-vous vraiment supprimer "${album.title || 'cet album'}" ?`)) {
-        const firestoreId = album.firestoreId;
+        const supabaseId = album.supabaseId;
         collection.splice(index, 1);
-        deleteAlbumFromFirestore(firestoreId);
+        deleteAlbumFromSupabase(supabaseId);
       }
     }
 
@@ -1585,7 +1581,7 @@
         if (!collection[selectedAlbumIndex].purchaseDate) {
           collection[selectedAlbumIndex].purchaseDate = today;
         }
-        syncAlbumToFirestore(collection[selectedAlbumIndex]);
+        syncAlbumToSupabase(collection[selectedAlbumIndex]);
         closeModal("detailsModal");
         openEditModal(selectedAlbumIndex);
       }
@@ -1657,7 +1653,6 @@
               <div style="font-size:13px; font-weight:600; color:white; margin-top:2px; word-break:break-word;">${titleText}</div>
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0;">
-              <!-- CORRECTION DIRECTE : Utilisation de data-action et d'un écouteur propre évitant les conflits globaux -->
               <button type="button" class="card-action-btn edit-vol-btn" data-vol-index="${idx}" title="Modifier">✏️</button>
               <button type="button" class="card-action-btn delete-vol-btn" data-vol-index="${idx}" title="Supprimer">🗑️</button>
             </div>
@@ -1668,7 +1663,7 @@
       });
     }
 
-    // Gestionnaire global unique rattaché au conteneur des volumes pour intercepter proprement les clics (évite tout bug de liaison inline)
+    // Gestionnaire global unique pour les boutons de sous-disques (délégation d'événements)
     document.addEventListener('click', function(e) {
       const editBtn = e.target.closest('.edit-vol-btn');
       if (editBtn) {
@@ -1700,7 +1695,7 @@
         album.volumes = [];
         album.discsCount = 0;
         album.isBoxSet = false;
-        syncAlbumToFirestore(album);
+        syncAlbumToSupabase(album);
         showDetails(selectedAlbumIndex);
       }
     }
@@ -1726,13 +1721,13 @@
           let volData = album.volumes[idx] || { title: line, cover: album.cover || '', tracks: [] };
           volData.title = line;
           
-          const subId = await saveVolumeToFirestore(album.firestoreId, volData, volData.subId);
+          const subId = await saveVolumeToSupabase(album.supabaseId, volData, volData.subId);
           volData.subId = subId;
           album.volumes[idx] = volData;
         }
 
         album.discsCount = album.volumes.length;
-        syncAlbumToFirestore(album);
+        syncAlbumToSupabase(album);
         closeModal("bulkModal");
         showDetails(selectedAlbumIndex);
       }
@@ -1752,11 +1747,11 @@
           tracks: []
         };
 
-        const subId = await saveVolumeToFirestore(album.firestoreId, newVol);
+        const subId = await saveVolumeToSupabase(album.supabaseId, newVol);
         newVol.subId = subId;
         album.volumes.push(newVol);
         album.discsCount = album.volumes.length;
-        syncAlbumToFirestore(album);
+        syncAlbumToSupabase(album);
         showDetails(selectedAlbumIndex);
       }
     }
@@ -1862,19 +1857,21 @@
       const updatedVol = {
         title: newTitle,
         cover: newCover,
-        tracks: parsedTracks
+        tracks: parsedTracks,
+        subId: subId || ('vol_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5))
       };
-
-      const newSubId = await saveVolumeToFirestore(album.firestoreId, updatedVol, subId);
-      updatedVol.subId = newSubId;
 
       album.volumes[volIdx] = updatedVol;
       pendingEditVolCoverUrl = "";
       
-      syncAlbumToFirestore(album);
+      // 1. Fermeture immédiate de la modale de modification du disque
+      document.getElementById("editVolumeModal").classList.remove("active");
 
-      closeModal("editVolumeModal");
-      showDetails(selectedAlbumIndex);
+      // 2. Rafraîchissement synchrone local de la liste des volumes
+      renderVolumesList(album.volumes, album.cover);
+
+      // 3. Synchronisation en arrière-plan avec Supabase
+      await syncAlbumToSupabase(album);
     }
 
     async function deleteVolumeItem(volIdx) {
@@ -1884,10 +1881,10 @@
       const vol = album.volumes[volIdx];
       
       if (confirm(`Supprimer "${vol.title || 'ce disque'}" ?`)) {
-        await deleteVolumeFromFirestore(album.firestoreId, vol.subId);
+        await deleteVolumeFromSupabase(album.supabaseId, vol.subId);
         album.volumes.splice(volIdx, 1);
         album.discsCount = album.volumes.length;
-        syncAlbumToFirestore(album);
+        syncAlbumToSupabase(album);
         
         renderVolumesList(album.volumes, album.cover);
       }
@@ -2032,9 +2029,9 @@
         while (existingVols.length < targetCount) {
           const i = existingVols.length + 1;
           const newVol = { title: `Disque ${i}`, cover: '', tracks: [] };
-          const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
-          if (firestoreId) {
-            const subId = await saveVolumeToFirestore(firestoreId, newVol);
+          const supabaseId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].supabaseId : null;
+          if (supabaseId) {
+            const subId = await saveVolumeToSupabase(supabaseId, newVol);
             newVol.subId = subId;
           }
           existingVols.push(newVol);
@@ -2062,12 +2059,12 @@
       const existingTracks = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].tracks) ? collection[selectedAlbumIndex].tracks : [];
       const tracks = isBoxSet ? [] : ((manualTracks.length > 0) ? manualTracks : ((currentFetchedTracks.length > 0) ? currentFetchedTracks : existingTracks));
 
-      const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
+      const supabaseId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].supabaseId : null;
 
       const finalCover = pendingCoverUrl || document.getElementById("formCover").value.trim();
 
       const albumData = {
-        firestoreId: firestoreId,
+        supabaseId: supabaseId,
         title: title,
         artist: artist,
         sortName: sortName,
@@ -2102,7 +2099,7 @@
         collection.unshift(albumData);
       }
 
-      syncAlbumToFirestore(albumData);
+      syncAlbumToSupabase(albumData);
       closeModal("formModal");
     }
 
@@ -2432,7 +2429,7 @@
 
               const recordsToInsert = newAlbums.map(album => {
                 const appData = { ...album };
-                delete appData.firestoreId;
+                delete appData.supabaseId;
                 delete appData.artist;
                 delete appData.title;
                 delete appData.volumes;
