@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 15:55</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 17:15</div>
 
     <header>
       <div class="top-bar">
@@ -470,7 +470,6 @@
       </div>
       <div class="modal-body" style="padding:15px;">
         <input type="hidden" id="editVolIndex">
-        <input type="hidden" id="editVolSubId">
         <div class="form-group">
           <label>Nom / Titre du disque</label>
           <input type="text" id="editVolTitle" placeholder="ex: Disque 1 - Lyla" autocomplete="off">
@@ -747,9 +746,7 @@
           .from('Pochettes')
           .upload(fileName, file);
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         const { data: publicUrlData } = supabase.storage
           .from('Pochettes')
@@ -779,9 +776,7 @@
           .from('Pochettes')
           .upload(fileName, file);
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         const { data: publicUrlData } = supabase.storage
           .from('Pochettes')
@@ -844,11 +839,7 @@
         .channel('public:albums')
         .on(
           'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'albums'
-          },
+          { event: '*', schema: 'public', table: 'albums' },
           (payload) => {
             console.log('🔄 Mise à jour en temps réel reçue :', payload);
             fetchCollectionFromSupabase();
@@ -882,9 +873,12 @@
       showSpinner();
       const { data, error } = await supabase.from('albums').select('*');
       if (!error && data) {
+        const currentAlbum = selectedAlbumIndex >= 0 ? collection[selectedAlbumIndex] : null;
+        const currentSupabaseId = currentAlbum ? currentAlbum.supabaseId : null;
+
         collection = data.map(row => {
           return {
-            firestoreId: row.id,
+            supabaseId: row.id,
             artist: row.artist,
             title: row.title,
             volumes: row.volumes || [],
@@ -892,6 +886,11 @@
             ...(row.app_data || {})
           };
         });
+
+        if (currentSupabaseId) {
+          selectedAlbumIndex = collection.findIndex(a => a.supabaseId === currentSupabaseId);
+        }
+
         try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
       } else {
         console.error("Erreur de synchronisation Supabase", error);
@@ -927,7 +926,7 @@
         showSpinner();
         
         const appData = { ...album };
-        delete appData.firestoreId;
+        delete appData.supabaseId;
         delete appData.artist;
         delete appData.title;
         delete appData.volumes;
@@ -941,14 +940,17 @@
           app_data: appData
         };
 
-        if (album.firestoreId) {
-          dbRecord.id = album.firestoreId;
+        if (album.supabaseId) {
+          dbRecord.id = album.supabaseId;
         }
 
         const { data, error } = await supabase.from('albums').upsert([dbRecord]).select();
         
         if (!error && data && data.length > 0) {
-          album.firestoreId = data[0].id;
+          album.supabaseId = data[0].id;
+          if (selectedAlbumIndex >= 0) {
+            selectedAlbumIndex = collection.findIndex(a => a.supabaseId === album.supabaseId);
+          }
           try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
         } else {
           console.error("Erreur MAJ album", error);
@@ -958,12 +960,12 @@
       renderCollection();
     }
 
-    async function deleteAlbumFromSupabase(firestoreId) {
+    async function deleteAlbumFromSupabase(supabaseId) {
       try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
 
-      if (authUser && firestoreId) {
+      if (authUser && supabaseId) {
         showSpinner();
-        const { error } = await supabase.from('albums').delete().eq('id', firestoreId);
+        const { error } = await supabase.from('albums').delete().eq('id', supabaseId);
         if (error) console.error("Erreur suppression album", error);
         setTimeout(hideSpinner, 300);
       }
@@ -999,9 +1001,9 @@
       if (e) e.stopPropagation();
       const album = collection[index];
       if (confirm(`Voulez-vous vraiment supprimer "${album.title || 'cet album'}" ?`)) {
-        const firestoreId = album.firestoreId;
+        const supabaseId = album.supabaseId;
         collection.splice(index, 1);
-        deleteAlbumFromSupabase(firestoreId);
+        deleteAlbumFromSupabase(supabaseId);
       }
     }
 
@@ -1415,7 +1417,6 @@
       }
     }
 
-    // Gestion exclusive et visuelle (masquage dynamique) : Double Album vs Coffret
     function onDoubleAlbumChange() {
       const isDouble = document.getElementById("isDoubleAlbum").checked;
       const boxSetGroup = document.getElementById("boxSetGroup");
@@ -1992,12 +1993,12 @@
       const existingTracks = (selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].tracks) ? collection[selectedAlbumIndex].tracks : [];
       const tracks = isBoxSet ? [] : ((manualTracks.length > 0) ? manualTracks : ((currentFetchedTracks.length > 0) ? currentFetchedTracks : existingTracks));
 
-      const firestoreId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].firestoreId : null;
+      const supabaseId = (selectedAlbumIndex >= 0) ? collection[selectedAlbumIndex].supabaseId : null;
 
       const finalCover = pendingCoverUrl || document.getElementById("formCover").value.trim();
 
       const albumData = {
-        firestoreId: firestoreId,
+        supabaseId: supabaseId,
         title: title,
         artist: artist,
         sortName: sortName,
@@ -2362,7 +2363,7 @@
 
               const recordsToInsert = newAlbums.map(album => {
                 const appData = { ...album };
-                delete appData.firestoreId;
+                delete appData.supabaseId;
                 delete appData.artist;
                 delete appData.title;
                 delete appData.volumes;
