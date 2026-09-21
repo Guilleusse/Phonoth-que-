@@ -237,7 +237,6 @@
     .modal-header { flex-shrink: 0; height: 58px; padding: 0 20px; background: #2c2c2e; border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; border-radius: 20px 20px 0 0; }
     .modal-title { font-size: 15px; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
     
-    /* MODIFICATION BOUTON FERMER AU LIEU DE LA CROIX */
     .modal-close { background: #3a3a3c; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     
     .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
@@ -312,7 +311,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 22:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 Essai Automatisation 21-09-2026 23:55</div>
 
     <header>
       <div class="top-bar">
@@ -2285,7 +2284,7 @@
           let detectedSupport = null;
           if (fmtDescriptions.includes('sacd') || fmtName.includes('sacd')) {
             detectedSupport = 'SACD';
-          } else if (fmtName.includes('vinyl')) {
+          } else if (fmtName.includes('vinyl') || fmtName.includes('lp')) {
             detectedSupport = 'Vinyle';
           } else if (fmtName.includes('cd')) {
             detectedSupport = 'CD';
@@ -2297,6 +2296,35 @@
 
             if (detectedSupport === 'Vinyle' && fmtDescriptions.includes('45 rpm')) {
               document.getElementById("is45RPM").checked = true;
+            }
+          }
+
+          // Détection automatique Coffret ou Multi-disques
+          if (fmtDescriptions.includes('box set')) {
+            document.getElementById("isBoxSet").checked = true;
+            toggleBoxSetFields();
+          } else if (fmtDescriptions.includes('double lp') || fmtDescriptions.includes('2x') || fmtDescriptions.includes('double album')) {
+            document.getElementById("isDoubleAlbum").checked = true;
+            onMultiDiscChange(2);
+          } else if (fmtDescriptions.includes('3x')) {
+            document.getElementById("isTripleAlbum").checked = true;
+            onMultiDiscChange(3);
+          } else if (fmtDescriptions.includes('4x')) {
+            document.getElementById("isQuadrupleAlbum").checked = true;
+            onMultiDiscChange(4);
+          }
+
+          // Gestion Mono / Stéréo dans les Notes
+          let audioType = '';
+          if (fmtDescriptions.includes('mono')) audioType = 'Mono';
+          else if (fmtDescriptions.includes('stereo')) audioType = 'Stéréo';
+
+          if (audioType) {
+            const notesField = document.getElementById("formNotes");
+            if (notesField.value) {
+              if (!notesField.value.includes(audioType)) notesField.value += ` • ${audioType}`;
+            } else {
+              notesField.value = audioType;
             }
           }
         }
