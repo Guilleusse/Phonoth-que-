@@ -245,8 +245,11 @@
     .details-row:last-child { border-bottom: none; }
     .details-label { color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
     .details-val { font-weight: 600; text-align: right; word-break: break-word; }
+    
+    /* Alignement à gauche pour le champ Notes */
     .details-row:has(#modalDetailNotes) { flex-direction: column; align-items: flex-start; gap: 4px; }
     .details-row:has(#modalDetailNotes) .details-val { text-align: left; width: 100%; font-weight: normal; color: var(--text-sub); }
+
     .modal-cover { width: 100%; max-height: 250px; object-fit: contain; border-radius: 16px; background: #121212; margin-bottom: 15px; }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-bottom: 6px; }
@@ -310,7 +313,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 22-09-2026 01:27</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 22-09-2026 19:45</div>
 
     <header>
       <div class="top-bar">
@@ -2101,7 +2104,8 @@
 
       html5QrCode = new Html5Qrcode("reader");
 
-      const cameraConfig = { facingMode: "environment" };
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      const cameraConfig = isMobile ? { facingMode: "environment" } : true;
 
       const config = { 
         fps: 60, 
@@ -2121,11 +2125,14 @@
           Html5QrcodeSupportedFormats.UPC_E,
           Html5QrcodeSupportedFormats.CODE_128 
         ],
-        videoConstraints: {
+        videoConstraints: isMobile ? {
           width: { ideal: 1920 },
           height: { ideal: 1080 },
           facingMode: "environment",
           advanced: [{ focusMode: "continuous" }]
+        } : {
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         }
       };
 
