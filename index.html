@@ -329,7 +329,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 02:06</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 17:31</div>
 
     <header>
       <div class="top-bar">
@@ -2165,14 +2165,16 @@
           Html5QrcodeSupportedFormats.UPC_E,
           Html5QrcodeSupportedFormats.CODE_128 
         ],
+        // Optimisation ciblée PC / Logitech : Résolution HD et requêtes de netteté/focus étendues
         videoConstraints: isMobile ? {
           width: { ideal: 1920 },
           height: { ideal: 1080 },
           facingMode: "environment",
           advanced: [{ focusMode: "continuous" }]
         } : {
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 1920, min: 1280 },
+          height: { ideal: 1080, min: 720 },
+          advanced: [{ focusMode: "continuous" }]
         }
       };
 
