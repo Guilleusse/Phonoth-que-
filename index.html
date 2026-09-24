@@ -329,7 +329,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 19:28</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 22:11</div>
 
     <header>
       <div class="top-bar">
@@ -1193,12 +1193,17 @@
       let filtered = collection.filter((album) => {
         if (!album) return false;
 
-        if (currentFilter === 'Wantlist') {
-          if (!album.isWantlist) return false;
-        } else {
-          if (album.isWantlist) return false;
-          if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
-          if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
+        // Si une recherche texte ou un filtre exact est actif, on cherche partout (y compris dans la wantlist)
+        const isSearching = (search.length > 0 || activeExactFilter !== null);
+
+        if (!isSearching) {
+          if (currentFilter === 'Wantlist') {
+            if (!album.isWantlist) return false;
+          } else {
+            if (album.isWantlist) return false;
+            if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
+            if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
+          }
         }
 
         if (activeExactFilter) {
@@ -2292,12 +2297,10 @@
         const isStrictConductorRole = (roleStr) => {
           if (!roleStr) return false;
           const r = roleStr.toLowerCase();
-          // On bloque de force tout ce qui touche à l'art direction ou l'artwork
           if (r.includes('art direction') || r.includes('artwork') || r.includes('design') || r.includes('photography')) {
             return false;
           }
-          // On cherche les rôles valides de direction musicale
-          return r.includes('conductor') || r.includes('directed by') || r.includes('direction') || r.includes('conductor');
+          return r.includes('conductor') || r.includes('directed by') || r.includes('direction');
         };
 
         if (data.extraartists && data.extraartists.length) {
