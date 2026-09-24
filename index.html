@@ -329,7 +329,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 17:31</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 19:18</div>
 
     <header>
       <div class="top-bar">
@@ -435,7 +435,7 @@
           <div class="details-row"><span class="details-label">Genre / Style :</span><span class="details-val" id="modalDetailStyle"></span></div>
           <div class="details-row"><span class="details-label">Année de sortie :</span><span class="details-val" id="modalDetailYear"></span></div>
           <div class="details-row"><span class="details-label">Pays d'édition :</span><span class="details-val" id="modalDetailCountry"></span></div>
-          <div class="details-row" id="rowConductor"><span class="details-label">Chef d'orchestre :</span><span class="details-val" id="modalDetailConductor"></span></div>
+          <div class="details-row" id="rowConductor"><span class="details-label">Chef d'orchestre / Directed By :</span><span class="details-val" id="modalDetailConductor"></span></div>
           <div class="details-row"><span class="details-label">Date d'achat :</span><span class="details-val" id="modalDetailDate"></span></div>
           <div class="details-row"><span class="details-label">Prix d'achat :</span><span class="details-val" id="modalDetailPrice"></span></div>
           <div class="details-row" id="rowLocation"><span class="details-label">Lieu d'achat :</span><span class="details-val" id="modalDetailLocation"></span></div>
@@ -577,7 +577,7 @@
           </div>
 
           <div class="form-group">
-            <label>Chef d'orchestre / Interprète</label>
+            <label>Chef d'orchestre / Directed By</label>
             <input type="text" id="formConductor" placeholder="ex: Nikolaus Harnoncourt" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
 
@@ -2165,7 +2165,6 @@
           Html5QrcodeSupportedFormats.UPC_E,
           Html5QrcodeSupportedFormats.CODE_128 
         ],
-        // Optimisation ciblée PC / Logitech : Résolution HD et requêtes de netteté/focus étendues
         videoConstraints: isMobile ? {
           width: { ideal: 1920 },
           height: { ideal: 1080 },
@@ -2290,12 +2289,19 @@
         if (artist) document.getElementById("formArtist").value = artist;
 
         let conductorName = '';
+        const isMusicDirectionRole = (roleStr) => {
+          if (!roleStr) return false;
+          const r = roleStr.toLowerCase();
+          return (r.includes('conductor') || r.includes('directed by') || r.includes('direction') || r.includes('direct') || r.includes('conductor')) && 
+                 !r.includes('art direction') && !r.includes('artwork');
+        };
+
         if (data.extraartists && data.extraartists.length) {
-          const cond = data.extraartists.find(a => a.role && (a.role.toLowerCase().includes('conductor') || a.role.toLowerCase().includes('direction') || a.role.toLowerCase().includes('direct')));
+          const cond = data.extraartists.find(a => isMusicDirectionRole(a.role));
           if (cond) conductorName = cond.name.replace(/\s*\(\d+\)$/, '').trim();
         }
         if (!conductorName && data.artists && data.artists.length) {
-          const cond = data.artists.find(a => a.role && (a.role.toLowerCase().includes('conductor') || a.role.toLowerCase().includes('direction') || a.role.toLowerCase().includes('direct')));
+          const cond = data.artists.find(a => isMusicDirectionRole(a.role));
           if (cond) conductorName = cond.name.replace(/\s*\(\d+\)$/, '').trim();
         }
         if (conductorName) {
