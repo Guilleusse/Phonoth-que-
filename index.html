@@ -329,7 +329,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 19:18</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 19:28</div>
 
     <header>
       <div class="top-bar">
@@ -2289,19 +2289,23 @@
         if (artist) document.getElementById("formArtist").value = artist;
 
         let conductorName = '';
-        const isMusicDirectionRole = (roleStr) => {
+        const isStrictConductorRole = (roleStr) => {
           if (!roleStr) return false;
           const r = roleStr.toLowerCase();
-          return (r.includes('conductor') || r.includes('directed by') || r.includes('direction') || r.includes('direct') || r.includes('conductor')) && 
-                 !r.includes('art direction') && !r.includes('artwork');
+          // On bloque de force tout ce qui touche à l'art direction ou l'artwork
+          if (r.includes('art direction') || r.includes('artwork') || r.includes('design') || r.includes('photography')) {
+            return false;
+          }
+          // On cherche les rôles valides de direction musicale
+          return r.includes('conductor') || r.includes('directed by') || r.includes('direction') || r.includes('conductor');
         };
 
         if (data.extraartists && data.extraartists.length) {
-          const cond = data.extraartists.find(a => isMusicDirectionRole(a.role));
+          const cond = data.extraartists.find(a => isStrictConductorRole(a.role));
           if (cond) conductorName = cond.name.replace(/\s*\(\d+\)$/, '').trim();
         }
         if (!conductorName && data.artists && data.artists.length) {
-          const cond = data.artists.find(a => isMusicDirectionRole(a.role));
+          const cond = data.artists.find(a => isStrictConductorRole(a.role));
           if (cond) conductorName = cond.name.replace(/\s*\(\d+\)$/, '').trim();
         }
         if (conductorName) {
