@@ -32,6 +32,7 @@
       --text-sub: #9ca3af;
       --badge-vinyle: #d97706;
       --badge-cd: #2563eb;
+      --badge-cdr: #3b82f6;
       --badge-sacd: #0d9488;
       --badge-coffret: #8b5cf6;
       --badge-wantlist: #f59e0b;
@@ -203,6 +204,7 @@
     .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: white; margin-bottom: 4px; width: fit-content; }
     .badge-vinyle { background: var(--badge-vinyle); }
     .badge-cd { background: var(--badge-cd); }
+    .badge-cdr { background: var(--badge-cdr); }
     .badge-sacd { background: var(--badge-sacd); }
     .badge-coffret { background: var(--badge-coffret); }
     .badge-wantlist { background: var(--badge-wantlist); color: #000; }
@@ -327,7 +329,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 22-09-2026 22:45</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 02:06</div>
 
     <header>
       <div class="top-bar">
@@ -368,6 +370,7 @@
         <button class="filter-chip active" onclick="setFilter('all', this)">Tous</button>
         <button class="filter-chip" onclick="setFilter('Vinyle', this)">Vinyles</button>
         <button class="filter-chip" onclick="setFilter('CD', this)">CD</button>
+        <button class="filter-chip" onclick="setFilter('CD-R', this)">CD-R</button>
         <button class="filter-chip" onclick="setFilter('SACD', this)">SACD</button>
         <button class="filter-chip" onclick="setFilter('Coffret', this)">Coffrets</button>
         <button class="filter-chip filter-chip-wantlist" onclick="setFilter('Wantlist', this)">Liste de souhaits</button>
@@ -599,6 +602,7 @@
             <select id="formSupport" onchange="toggleVinylSpeedField()">
               <option value="Vinyle">Vinyle</option>
               <option value="CD">CD</option>
+              <option value="CD-R">CD-R</option>
               <option value="SACD">SACD</option>
             </select>
           </div>
@@ -748,10 +752,8 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Fonction de nettoyage automatique des formats Discogs collés (ex: [r20865484] -> 20865484)
     function cleanDiscogsInput(inputElement) {
       let val = inputElement.value;
-      // Si le texte contient un format Discogs [r123456], on extrait uniquement les chiffres
       const match = val.match(/\[r(\d+)\]/i) || val.match(/^r(\d+)$/i);
       if (match && match[1]) {
         inputElement.value = match[1];
@@ -1106,7 +1108,7 @@
 
     function openStatsModal() {
       lockBodyScroll();
-      let countVinyle = 0, countCD = 0, countSACD = 0, countCoffret = 0, countWantlist = 0, totalPrice = 0;
+      let countVinyle = 0, countCD = 0, countCDr = 0, countSACD = 0, countCoffret = 0, countWantlist = 0, totalPrice = 0;
       let totalDiscsPhysical = 0;
 
       collection.forEach(a => {
@@ -1130,6 +1132,7 @@
 
           if (a.support === 'Vinyle') countVinyle += realDiscsCount;
           else if (a.support === 'CD') countCD += realDiscsCount;
+          else if (a.support === 'CD-R') countCDr += realDiscsCount;
           else if (a.support === 'SACD') countSACD += realDiscsCount;
 
           if (a.isBoxSet) {
@@ -1163,6 +1166,7 @@
         <div class="details-row"><span class="details-label">Références en propre :</span><span class="details-val">${totalOwned}</span></div>
         <div class="details-row"><span class="details-label">Vinyles :</span><span class="details-val">${countVinyle}</span></div>
         <div class="details-row"><span class="details-label">CD :</span><span class="details-val">${countCD}</span></div>
+        <div class="details-row"><span class="details-label">CD-R :</span><span class="details-val">${countCDr}</span></div>
         <div class="details-row"><span class="details-label">SACD :</span><span class="details-val">${countSACD}</span></div>
         <div class="details-row"><span class="details-label">Coffrets :</span><span class="details-val">${countCoffret}</span></div>
         <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedTotal} €</span></div>
@@ -1322,16 +1326,19 @@
       if (album.isDoubleAlbum) {
         if (album.support === 'Vinyle') baseText = '2 DISQUES VINYLE';
         else if (album.support === 'CD') baseText = '2 DISQUES CD';
+        else if (album.support === 'CD-R') baseText = '2 DISQUES CD-R';
         else if (album.support === 'SACD') baseText = '2 DISQUES SACD';
         else baseText = '2 DISQUES';
       } else if (album.isTripleAlbum) {
         if (album.support === 'Vinyle') baseText = '3 DISQUES VINYLE';
         else if (album.support === 'CD') baseText = '3 DISQUES CD';
+        else if (album.support === 'CD-R') baseText = '3 DISQUES CD-R';
         else if (album.support === 'SACD') baseText = '3 DISQUES SACD';
         else baseText = '3 DISQUES';
       } else if (album.isQuadrupleAlbum) {
         if (album.support === 'Vinyle') baseText = '4 DISQUES VINYLE';
         else if (album.support === 'CD') baseText = '4 DISQUES CD';
+        else if (album.support === 'CD-R') baseText = '4 DISQUES CD-R';
         else if (album.support === 'SACD') baseText = '4 DISQUES SACD';
         else baseText = '4 DISQUES';
       }
@@ -1351,6 +1358,8 @@
         badgeText = `${badgeText} AUDIOPHILE`;
       } else if (album.support === 'Vinyle') {
         badgeClass = 'badge-vinyle';
+      } else if (album.support === 'CD-R') {
+        badgeClass = 'badge-cdr';
       } else if (album.support === 'SACD') {
         badgeClass = 'badge-sacd';
       }
@@ -2314,6 +2323,8 @@
           let detectedSupport = null;
           if (fmtDescriptions.includes('sacd') || fmtName.includes('sacd')) {
             detectedSupport = 'SACD';
+          } else if (fmtDescriptions.includes('cdr') || fmtDescriptions.includes('cd-r') || fmtName.includes('cdr')) {
+            detectedSupport = 'CD-R';
           } else if (fmtName.includes('vinyl')) {
             detectedSupport = 'Vinyle';
           } else if (fmtName.includes('cd')) {
