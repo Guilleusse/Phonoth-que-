@@ -74,13 +74,12 @@
       background: #1c1c1e;
       border: 1px solid #3a3a3c;
       color: #f3f4f6;
-      padding: 10px 36px 10px 12px; /* Espace réservé à droite pour la croix */
+      padding: 10px 36px 10px 12px;
       border-radius: 10px;
       font-size: 15px;
       box-sizing: border-box;
     }
 
-    /* Style de la petite croix pour vider la recherche */
     .search-clear-btn {
       position: absolute;
       right: 10px;
@@ -93,7 +92,7 @@
       height: 22px;
       border-radius: 50%;
       font-size: 12px;
-      display: none; /* Masquée par défaut tant qu'il n'y a pas de texte */
+      display: none;
       align-items: center;
       justify-content: center;
       cursor: pointer;
@@ -424,11 +423,15 @@
               }
 
               var localArtist = localStorage.getItem('local_artist_' + row.id);
+              var localSortName = localStorage.getItem('local_sortname_' + row.id);
+
               var finalArtist = localArtist || row.artist || appData.artist || 'Inconnu';
+              var finalSortName = localSortName !== null ? localSortName : (appData.sortName || '');
 
               return {
                 id: row.id,
                 artist: finalArtist,
+                sortName: finalSortName,
                 title: row.title || appData.title || 'Sans titre',
                 volumes: row.volumes || [],
                 tracks: row.tracks || [],
@@ -445,13 +448,7 @@
               };
             });
 
-            collection.sort(function(a, b) {
-              var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
-              if (artistComp !== 0) return artistComp;
-              return (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' });
-            });
-
-            render();
+            sortAndRender();
           } catch (e) {
             container.innerHTML = '<div class="loading" style="color:#ef4444;">Erreur de traitement.</div>';
           }
@@ -465,6 +462,18 @@
       };
 
       xhr.send();
+    }
+
+    function sortAndRender() {
+      collection.sort(function(a, b) {
+        var keyA = (a.sortName && a.sortName.trim()) ? a.sortName.trim() : (a.artist || '');
+        var keyB = (b.sortName && b.sortName.trim()) ? b.sortName.trim() : (b.artist || '');
+
+        var artistComp = keyA.localeCompare(keyB, 'fr', { sensitivity: 'base' });
+        if (artistComp !== 0) return artistComp;
+        return (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' });
+      });
+      render();
     }
 
     function setFilter(filter, el) {
@@ -481,7 +490,6 @@
       var val = document.getElementById('searchInput').value;
       var clearBtn = document.getElementById('searchClearBtn');
       
-      // Afficher ou masquer la croix selon si le champ contient du texte
       if (val.length > 0) {
         clearBtn.style.display = 'flex';
       } else {
@@ -520,7 +528,8 @@
     function scrollToLetter(letter) {
       var groups = document.getElementsByClassName('artist-group');
       for (var i = 0; i < groups.length; i++) {
-        if (groups[i].textContent.toUpperCase().indexOf(letter) === 0) {
+        var groupKey = groups[i].getAttribute('data-sortkey') || '';
+        if (groupKey.toUpperCase().indexOf(letter) === 0) {
           var headerHeight = 175; 
           var elementPosition = groups[i].getBoundingClientRect().top;
           var offsetPosition = elementPosition + window.pageYOffset - headerHeight;
@@ -563,13 +572,17 @@
 
       renderAlphaIndex();
 
-      var currentArtist = '';
+      var currentGroupKey = '';
       filtered.forEach(function(album) {
-        if (album.artist !== currentArtist) {
-          currentArtist = album.artist;
+        var sortKey = (album.sortName && album.sortName.trim()) ? album.sortName.trim() : (album.artist || '');
+
+        if (sortKey !== currentGroupKey) {
+          currentGroupKey = sortKey;
           var groupHeader = document.createElement('div');
           groupHeader.className = 'artist-group';
-          groupHeader.textContent = currentArtist;
+          groupHeader.setAttribute('data-sortkey', currentGroupKey);
+          // Affiche le nom complet de l'artiste (ex: Alain Bashung) sous l'index de tri
+          groupHeader.textContent = album.artist;
           container.appendChild(groupHeader);
         }
 
@@ -616,17 +629,17 @@
     }
 
     function editArtist(album) {
-      var newArtist = prompt("Modifier l'artiste en local (Nom Prénom) :", album.artist);
+      var newArtist = prompt("Modifier l'artiste affiché (ex: Alain Bashung) :", album.artist);
       if (newArtist !== null && newArtist.trim() !== "") {
-        album.artist = newArtist.trim();
-        localStorage.setItem('local_artist_' + album.id, album.artist);
+        var newSortName = prompt("Modifier le nom de tri (ex: Bashung, Alain) :", album.sortName || album.artist);
         
-        collection.sort(function(a, b) {
-          var artistComp = (a.artist || '').localeCompare(b.artist || '', 'fr', { sensitivity: 'base' });
-          if (artistComp !== 0) return artistComp;
-          return (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' });
-        });
-        render();
+        album.artist = newArtist.trim();
+        album.sortName = newSortName !== null ? newSortName.trim() : '';
+
+        localStorage.setItem('local_artist_' + album.id, album.artist);
+        localStorage.setItem('local_sortname_' + album.id, album.sortName);
+        
+        sortAndRender();
       }
     }
 
