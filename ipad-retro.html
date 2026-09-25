@@ -66,6 +66,7 @@
 
     .search-box {
       margin-bottom: 8px;
+      position: relative;
     }
 
     input[type="text"] {
@@ -73,10 +74,29 @@
       background: #1c1c1e;
       border: 1px solid #3a3a3c;
       color: #f3f4f6;
-      padding: 10px 12px;
+      padding: 10px 36px 10px 12px; /* Espace réservé à droite pour la croix */
       border-radius: 10px;
       font-size: 15px;
       box-sizing: border-box;
+    }
+
+    /* Style de la petite croix pour vider la recherche */
+    .search-clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #3a3a3c;
+      color: #9ca3af;
+      border: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-size: 12px;
+      display: none; /* Masquée par défaut tant qu'il n'y a pas de texte */
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
 
     .filters-bar {
@@ -327,7 +347,8 @@
       </div>
     </div>
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Rechercher artiste, album, label..." oninput="render()">
+      <input type="text" id="searchInput" placeholder="🔍 Rechercher artiste, album, label..." oninput="onSearchInput()">
+      <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" title="Effacer la recherche">✕</button>
     </div>
     <div class="filters-bar">
       <div class="filters">
@@ -367,7 +388,6 @@
     var collection = [];
     var currentFilter = 'all';
 
-    // Fonction proxy pour contourner les blocages d'images (Discogs / CORS) sur iPad
     function formatProxyCoverUrl(url) {
       if (!url) return '';
       if (url.includes('discogs.com')) {
@@ -457,6 +477,27 @@
       render();
     }
 
+    function onSearchInput() {
+      var val = document.getElementById('searchInput').value;
+      var clearBtn = document.getElementById('searchClearBtn');
+      
+      // Afficher ou masquer la croix selon si le champ contient du texte
+      if (val.length > 0) {
+        clearBtn.style.display = 'flex';
+      } else {
+        clearBtn.style.display = 'none';
+      }
+      
+      render();
+    }
+
+    function clearSearch() {
+      var searchInput = document.getElementById('searchInput');
+      searchInput.value = '';
+      document.getElementById('searchClearBtn').style.display = 'none';
+      render();
+    }
+
     function getFilteredList() {
       var searchInput = document.getElementById('searchInput');
       var search = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -538,7 +579,6 @@
         var badgeText = album.support;
         if (album.isBoxSet) badgeText = 'Coffret ' + album.support;
 
-        // Application du proxy d'image pour forcer l'affichage sur iPad
         var proxyCover = formatProxyCoverUrl(album.cover);
         var coverHtml = proxyCover 
           ? '<img src="' + proxyCover + '" crossorigin="anonymous" onerror="this.style.display=\'none\'">' 
