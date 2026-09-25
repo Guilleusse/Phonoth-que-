@@ -309,7 +309,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 21-09-2026 2:54</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">© GD Gemini 2026 - MàJ : 25-09-2026 03:55</div>
 
     <header>
       <div class="top-bar">
@@ -669,6 +669,15 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jaGxqZmh0Z2luZ25xeGNqaXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTY1NzYsImV4cCI6MjEwNTA3MjU3Nn0.aGv9w7XQB-FOVc7xScX-3HN-5ZcA3d3EM7JOBz0HCuQ';
     window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     // -----------------------------------------
+
+    // Helper Proxy d'images pour contourner le blocage CORS de Discogs
+    function formatProxyCoverUrl(url) {
+      if (!url) return '';
+      if (url.includes('discogs.com')) {
+        return `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
+      }
+      return url;
+    }
 
     document.addEventListener('touchstart', function() {}, { passive: true });
 
@@ -1321,7 +1330,7 @@
         badgeClass = 'badge-sacd';
       }
 
-      const coverSrc = album.cover ? album.cover : '';
+      const coverSrc = formatProxyCoverUrl(album.cover);
 
       let subParts = [];
       if (album.artist) {
@@ -1534,7 +1543,7 @@
 
       const coverImg = document.getElementById("modalDetailCover");
       if (album.cover) {
-        coverImg.src = album.cover;
+        coverImg.src = formatProxyCoverUrl(album.cover);
         coverImg.style.display = 'block';
       } else { coverImg.style.display = 'none'; }
 
@@ -1628,11 +1637,13 @@
           coverUrl = parentCover;
         }
 
+        const proxiedVolCover = formatProxyCoverUrl(coverUrl);
+
         const item = document.createElement("div");
         item.style.cssText = "background:#1c1c1e; padding:10px; border-radius:12px; margin-bottom:8px; border:1px solid #3a3a3c;";
         
-        const coverHtml = coverUrl 
-          ? `<img src="${coverUrl}" crossorigin="anonymous" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">`
+        const coverHtml = proxiedVolCover 
+          ? `<img src="${proxiedVolCover}" crossorigin="anonymous" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">`
           : `<div style="width:50px; height:50px; border-radius:8px; background:#2a2a2a; color:var(--text-sub); font-size:9px; display:flex; align-items:center; justify-content:center; text-align:center; flex-shrink:0;">Disque ${idx+1}</div>`;
 
         let tracksAccordionHtml = '';
@@ -1657,7 +1668,6 @@
               <div style="font-size:13px; font-weight:600; color:white; margin-top:2px; word-break:break-word;">${titleText}</div>
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0;">
-              <!-- Ajout de event.stopPropagation() pour bloquer la propagation du clic -->
               <button class="card-action-btn" onclick="event.stopPropagation(); openEditVolumeModal(${idx})" title="Modifier">✏️</button>
               <button class="card-action-btn" onclick="event.stopPropagation(); deleteVolumeItem(${idx})" title="Supprimer">🗑️</button>
             </div>
