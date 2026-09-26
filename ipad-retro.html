@@ -422,11 +422,18 @@
                 coverUrl = row.volumes[0].cover;
               }
 
+              // On regarde d'abord ce que le serveur Supabase (le PC) renvoie par défaut
+              var serverArtist = row.artist || appData.artist || 'Inconnu';
+              var serverSortName = appData.sortName || '';
+
+              // On vérifie s'il y a une modification strictement locale sur l'iPad
               var localArtist = localStorage.getItem('local_artist_' + row.id);
               var localSortName = localStorage.getItem('local_sortname_' + row.id);
 
-              var finalArtist = localArtist || row.artist || appData.artist || 'Inconnu';
-              var finalSortName = localSortName !== null ? localSortName : (appData.sortName || '');
+              // PRIORITÉ AU SERVEUR (PC) : Si le serveur a une valeur, on la prend. 
+              // S'il n'y a rien sur le serveur, on regarde le cache local de l'iPad.
+              var finalArtist = serverArtist !== 'Inconnu' ? serverArtist : (localArtist || serverArtist);
+              var finalSortName = serverSortName !== '' ? serverSortName : (localSortName !== null ? localSortName : '');
 
               return {
                 id: row.id,
@@ -581,7 +588,6 @@
           var groupHeader = document.createElement('div');
           groupHeader.className = 'artist-group';
           groupHeader.setAttribute('data-sortkey', currentGroupKey);
-          // Affiche le nom complet de l'artiste (ex: Alain Bashung) sous l'index de tri
           groupHeader.textContent = album.artist;
           container.appendChild(groupHeader);
         }
