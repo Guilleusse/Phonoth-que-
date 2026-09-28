@@ -262,7 +262,6 @@
     .details-label { color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
     .details-val { font-weight: 600; text-align: right; word-break: break-word; }
     
-    /* Alignement à gauche pour le champ Notes */
     .details-row:has(#modalDetailNotes) { flex-direction: column; align-items: flex-start; gap: 4px; }
     .details-row:has(#modalDetailNotes) .details-val { text-align: left; width: 100%; font-weight: normal; color: var(--text-sub); }
 
@@ -329,7 +328,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 24-09-2026 22:11</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 28-09-2026 14:12</div>
 
     <header>
       <div class="top-bar">
@@ -552,7 +551,7 @@
 
           <div class="form-group">
             <label>Nom de tri (facultatif)</label>
-            <input type="text" id="formSortName" placeholder="ex: Bach, Johann Sebastian    •    ou    Beatles" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" id="formSortName" placeholder="ex: Bach, Johann Sebastian    •    ou    •    Beatles" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <div style="font-size:11px; color:var(--text-sub); margin-top:6px;">Utilisé uniquement pour le tri et l'index A-Z. L'affichage garde toujours le nom complet ci-dessus. Laisser vide pour un classement par nom complet (par défaut).</div>
           </div>
 
@@ -1193,7 +1192,6 @@
       let filtered = collection.filter((album) => {
         if (!album) return false;
 
-        // Si une recherche texte ou un filtre exact est actif, on cherche partout (y compris dans la wantlist)
         const isSearching = (search.length > 0 || activeExactFilter !== null);
 
         if (!isSearching) {
@@ -1856,7 +1854,8 @@
 
           document.getElementById("editVolTracks").value = fetched;
           if (data.images && data.images.length && !pendingEditVolCoverUrl) {
-            pendingEditVolCoverUrl = data.images[0].resource_url || data.images[0].uri;
+            let rawUrl = data.images[0].resource_url || data.images[0].uri;
+            pendingEditVolCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent(rawUrl.replace(/^https?:\/\//, ''))}`;
             document.getElementById("editVolCover").value = pendingEditVolCoverUrl;
           }
           alert(`Disque ${targetDiscNum} isolé et chargé avec succès (${tracks.length} pistes) !`);
@@ -2356,7 +2355,8 @@
           }
         }
         if (data.images && data.images.length) {
-          pendingCoverUrl = data.images[0].resource_url || data.images[0].uri;
+          let rawUrl = data.images[0].resource_url || data.images[0].uri;
+          pendingCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent(rawUrl.replace(/^https?:\/\//, ''))}`;
           document.getElementById("formCover").value = pendingCoverUrl;
         }
 
