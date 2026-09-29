@@ -328,7 +328,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 28-09-2026 14:12</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 30-09-2026 01:19</div>
 
     <header>
       <div class="top-bar">
@@ -582,6 +582,10 @@
 
           <div class="form-group" id="formTracksGroup">
             <label>Titres des morceaux (un par ligne)</label>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+              <input type="checkbox" id="formRawTracks" checked style="width:18px; height:18px; accent-color:var(--accent-blue);">
+              <label for="formRawTracks" style="font-size:12px; color:var(--text-sub); text-transform:none; cursor:pointer; margin-bottom:0;">Conserver le formatage brut (copier-coller sans modifier)</label>
+            </div>
             <textarea id="formTracks" rows="6" placeholder="A1. Malaxe&#10;A2. La Nuit Je Mens..." style="font-size:14px; line-height:1.4; resize:vertical;"></textarea>
           </div>
 
@@ -1593,7 +1597,7 @@
         trackSection.style.display = 'block';
         trackBox.innerHTML = album.tracks.map((t, i) => `
           <div style="font-size:13px; padding:6px 0; border-bottom:1px solid #3a3a3c; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-            <span style="color:white;"><b style="color:var(--text-sub);">${t.position || (i+1)}</b>. ${t.title || ''}</span>
+            <span style="color:white;">${t.title || ''}</span>
             <span style="color:var(--text-sub); font-size:11px; flex-shrink:0;">${t.duration || ''}</span>
           </div>
         `).join('');
@@ -1716,7 +1720,7 @@
               <details style="font-size:12px;">
                 <summary style="cursor:pointer; color:var(--accent-blue); font-weight:600; user-select:none;">Titres (${vTracks.length})</summary>
                 <div style="margin-top:6px; padding-left:8px; display:flex; flex-direction:column; gap:4px;">
-                  ${vTracks.map((t, ti) => `<div style="color:var(--text-main);"><b style="color:var(--text-sub);">${t.position || (ti+1)}.</b> ${t.title || ''}</div>`).join('')}
+                  ${vTracks.map((t, ti) => `<div style="color:var(--text-main);">${t.title || ''}</div>`).join('')}
                 </div>
               </details>
             </div>
@@ -1813,9 +1817,7 @@
       document.getElementById("editVolCover").value = cover;
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
 
-      document.getElementById("editVolTracks").value = tracks.map(t => {
-        return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
-      }).join('\n');
+      document.getElementById("editVolTracks").value = tracks.map(t => t.title || '').join('\n');
 
       document.getElementById("editVolumeModal").classList.add("active");
     }
@@ -1880,12 +1882,7 @@
       let parsedTracks = [];
       if (tracksText) {
         parsedTracks = tracksText.split('\n').map(line => {
-          const cleanLine = line.trim();
-          const match = cleanLine.match(/^([A-Za-z0-9.]+)\s+(.*)$/);
-          if (match && match[2]) {
-            return { position: match[1].replace(/[.-]$/, ''), title: match[2], duration: '' };
-          }
-          return { position: '', title: cleanLine, duration: '' };
+          return { position: '', title: line.trim(), duration: '' };
         }).filter(t => t.title.length > 0);
       }
 
@@ -1931,6 +1928,7 @@
       document.getElementById("isDoubleAlbum").checked = false;
       document.getElementById("isTripleAlbum").checked = false;
       document.getElementById("isQuadrupleAlbum").checked = false;
+      document.getElementById("formRawTracks").checked = true;
       document.getElementById("formTitle").value = '';
       document.getElementById("formArtist").value = '';
       document.getElementById("formSortName").value = '';
@@ -1974,6 +1972,7 @@
       document.getElementById("isTripleAlbum").checked = !!album.isTripleAlbum;
       document.getElementById("isQuadrupleAlbum").checked = !!album.isQuadrupleAlbum;
       document.getElementById("isBoxSet").checked = !!album.isBoxSet;
+      document.getElementById("formRawTracks").checked = true;
       
       document.getElementById("formSupport").value = album.support || 'Vinyle';
       toggleVinylSpeedField();
@@ -1988,9 +1987,7 @@
       document.getElementById("formConductor").value = album.conductor || '';
       
       if (!album.isBoxSet && album.tracks && album.tracks.length > 0) {
-        document.getElementById("formTracks").value = album.tracks.map(t => {
-          return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
-        }).join('\n');
+        document.getElementById("formTracks").value = album.tracks.map(t => t.title || '').join('\n');
       } else {
         document.getElementById("formTracks").value = '';
       }
@@ -2074,12 +2071,7 @@
       let manualTracks = [];
       if (!isBoxSet && tracksText) {
         manualTracks = tracksText.split('\n').map(line => {
-          const cleanLine = line.trim();
-          const match = cleanLine.match(/^([A-Za-z0-9.]+)\s+(.*)$/);
-          if (match && match[2]) {
-            return { position: match[1].replace(/[.-]$/, ''), title: match[2], duration: '' };
-          }
-          return { position: '', title: cleanLine, duration: '' };
+          return { position: '', title: line.trim(), duration: '' };
         }).filter(t => t.title.length > 0);
       }
 
@@ -2362,14 +2354,12 @@
 
         if (data.tracklist && data.tracklist.length) {
           currentFetchedTracks = data.tracklist.map(t => ({
-            position: t.position || '',
-            title: t.title || '',
+            position: '',
+            title: t.position ? `${t.position}. ${t.title || ''}` : (t.title || ''),
             duration: t.duration || ''
           }));
           if (!document.getElementById("isBoxSet").checked) {
-            document.getElementById("formTracks").value = currentFetchedTracks.map(t => {
-              return t.position ? `${t.position}. ${t.title || ''}` : (t.title || '');
-            }).join('\n');
+            document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\n');
           }
         }
 
