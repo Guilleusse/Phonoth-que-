@@ -328,7 +328,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 30-09-2026 02:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 01-10-2026 01:41</div>
 
     <header>
       <div class="top-bar">
@@ -1222,6 +1222,16 @@
           const matchCountry = matchText(album.country, search);
           const matchStyle = matchText(album.style, search);
           const matchNotes = matchText(album.notes, search);
+          
+          const isMultiSearch = search.includes('double') || search.includes('triple') || search.includes('quadruple') || search.includes('disque') || search.includes('multi');
+          let matchMulti = false;
+          if (isMultiSearch) {
+            if ((search.includes('2') || search.includes('double')) && album.isDoubleAlbum) matchMulti = true;
+            if ((search.includes('3') || search.includes('triple')) && album.isTripleAlbum) matchMulti = true;
+            if ((search.includes('4') || search.includes('quadruple')) && album.isQuadrupleAlbum) matchMulti = true;
+            if (search.includes('disque') && (album.isDoubleAlbum || album.isTripleAlbum || album.isQuadrupleAlbum || album.isBoxSet)) matchMulti = true;
+          }
+
           const matchVolumes = album.volumes && album.volumes.some(v => {
             const vText = typeof v === 'object' ? v.title : v;
             const vTracks = (v.tracks && v.tracks.some(t => matchText(t.title, search)));
@@ -1230,7 +1240,7 @@
           const matchTracks = album.tracks && album.tracks.some(t => matchText(t.title, search));
           const matchAudiophile = album.isAudiophile && matchText('audiophile', search);
           const matchRPM = album.is45RPM && (search.includes('45') || search.includes('rpm'));
-          return matchTitle || matchArtist || matchLabel || matchCatalog || matchConductor || matchCountry || matchStyle || matchNotes || matchVolumes || matchTracks || matchAudiophile || matchRPM;
+          return matchTitle || matchArtist || matchLabel || matchCatalog || matchConductor || matchCountry || matchStyle || matchNotes || matchMulti || matchVolumes || matchTracks || matchAudiophile || matchRPM;
         }
         return true;
       });
@@ -1736,7 +1746,7 @@
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0;">
               <button class="card-action-btn" onclick="openEditVolumeModal(${idx})" title="Modifier">✏️</button>
-              <button class="card-action-btn" onclick="deleteVolumeItem(${idx})" title="Supprimer">🗑️️</button>
+              <button class="card-action-btn" onclick="deleteVolumeItem(${idx})" title="Supprimer">🗑</button>
             </div>
           </div>
           ${tracksAccordionHtml}
