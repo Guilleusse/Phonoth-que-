@@ -328,7 +328,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 01-10-2026 02:41</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 01-10-2026 18:44</div>
 
     <header>
       <div class="top-bar">
@@ -1557,6 +1557,12 @@
       else if (album.isDoubleAlbum) detailSupport = `Double Album (${album.support})`;
       else if (album.isTripleAlbum) detailSupport = `Triple Album (${album.support})`;
       else if (album.isQuadrupleAlbum) detailSupport = `Quadruple Album (${album.support})`;
+      
+      // Ajout de la mention Audiophile si cochée
+      if (album.isAudiophile) {
+        detailSupport += ` Audiophile`;
+      }
+
       document.getElementById("modalDetailSupport").textContent = detailSupport;
       
       const speedRow = document.getElementById("rowSpeed");
@@ -2369,9 +2375,6 @@
             duration: t.duration || ''
           }));
           
-          // Respecter la case "Garder le format d'origine (Discogs)" :
-          // Si la case est COCHÉE, on met à jour/remplit la zone des pistes avec les données Discogs.
-          // Si la case est DÉCOCHÉE, on ne touche pas au champ (la liste personnalisée/copiée est préservée).
           const keepRaw = document.getElementById("formRawTracks").checked;
           if (keepRaw && !document.getElementById("isBoxSet").checked) {
             document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\n');
