@@ -328,7 +328,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 01-10-2026 02:32</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 01-10-2026 02:41</div>
 
     <header>
       <div class="top-bar">
@@ -2370,9 +2370,10 @@
           }));
           
           // Respecter la case "Garder le format d'origine (Discogs)" :
-          // Si la case est décochée, on remplace le texte des pistes. Si elle est cochée, on ne touche pas au champ !
+          // Si la case est COCHÉE, on met à jour/remplit la zone des pistes avec les données Discogs.
+          // Si la case est DÉCOCHÉE, on ne touche pas au champ (la liste personnalisée/copiée est préservée).
           const keepRaw = document.getElementById("formRawTracks").checked;
-          if (!keepRaw && !document.getElementById("isBoxSet").checked) {
+          if (keepRaw && !document.getElementById("isBoxSet").checked) {
             document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\n');
           }
         }
