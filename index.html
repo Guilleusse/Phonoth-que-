@@ -884,8 +884,30 @@
     }
     function exportToCSV() {
       let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum\n";
-      collection.forEach(a => { csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.notes||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${a.volumes ? a.volumes.map(v => `${v.title||''}:::${v.cover\vert{}\vert{}''}:::${(v.tracks||[]).map(t=>`${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('##')}`).join('||') : ''}";"${a.tracks ? a.tracks.map(t=>`${t.position||''}:::${t.title\vert{}\vert{}''}:::${t.duration||''}`).join('||') : ''}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\n`; });
-      const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); link.download = `phonotheque_${new Date().toISOString().split('T')[0]}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      collection.forEach(a => {
+        const vols = a.volumes ? a.volumes.map(v => {
+          if (typeof v === 'object' && v !== null) {
+            const trksStr = (v.tracks ? v.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('##') : '');
+            return `${v.title || ''}:::${v.cover || ''}:::${trksStr}`;
+          }
+          return `${v}::::`;
+        }).join('||') : '';
+
+        const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
+
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${a.notes||''}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\n`;
+      });
+
+      const today = new Date().toISOString().split('T')[0];
+      const filename = `phonotheque_backup_${today}.csv`;
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
     window.onload = initApp;
   </script>
