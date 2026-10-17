@@ -844,16 +844,10 @@
         
         const data = await response.json();
 
-        // Affichage de la VRAIE erreur envoyée par les serveurs de Google
+        // Retour à la gestion d'erreur propre et discrète
         if (data.error) {
-            console.error("Détails erreur Google:", data.error);
-            alert("Erreur précise de Google : " + data.error.message);
-            
-            // On ne supprime la clé que si elle est formatée incorrectement
-            if (data.error.code === 400 && data.error.message.includes("API key not valid")) {
-                localStorage.removeItem('phonotheque_gemini_key');
-            }
-            throw new Error(data.error.message);
+            localStorage.removeItem('phonotheque_gemini_key');
+            throw new Error("Clé API invalide, expirée ou modèle refusé.");
         }
         
         if (data.candidates && data.candidates.length > 0) {
@@ -875,6 +869,7 @@
         hideSpinner();
         unlockBodyScroll();
         console.error("Erreur Gemini:", e);
+        alert("La connexion avec DJ Gemini a échoué. Si c'est un problème de clé, elle a été effacée de la mémoire, réessaie de cliquer sur le génie pour en mettre une nouvelle.");
       }
     }
     async function handleCoverFileSelect(event) {
