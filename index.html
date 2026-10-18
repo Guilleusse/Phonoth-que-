@@ -905,7 +905,7 @@
         }
         if (data.images?.length) { pendingCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url||data.images[0].uri).replace(/^https?:\/\//, ''))}`; document.getElementById("formCover").value = pendingCoverUrl; }
         if (data.tracklist?.length) { currentFetchedTracks = data.tracklist.map(t => ({ position: '', title: t.position ? `${t.position}. ${t.title||''}` : t.title||'', duration: t.duration||'' })); if (document.getElementById("formRawTracks").checked && !document.getElementById("isBoxSet").checked) document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\n'); }
-        alert("Données chargées !");
+        alert("Données chargées depuis Discogs !");
       } catch(e) { alert("Erreur de chargement."); }
     }
     function getRandomAlbum() { const owned = collection.filter(a => !a.isWantlist); if (owned.length) showDetails(collection.indexOf(owned[Math.floor(Math.random() * owned.length)])); }
