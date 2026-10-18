@@ -138,7 +138,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 - Version Stable 18-10-2026 02:40</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 Ver. Stable API 18-10-2026 03:15</div>
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -531,7 +531,7 @@
       const ownedAlbums = collection.map((album, index) => ({ ...album, originalIndex: index })).filter(album => !album.isWantlist);
       if (ownedAlbums.length === 0) return alert("Ta phonothèque physique est vide, impossible de choisir !");
       
-      const catalogueText = ownedAlbums.map(a => `[ID: ${a.originalIndex}] Artiste:${a.artist || 'Inconnu'} - Titre: ${a.title \vert{}\vert{} 'Inconnu'} - Genre:${a.style || 'Inconnu'}`).join('\n');
+      const catalogueText = ownedAlbums.map(a => `[ID: ${a.originalIndex}] Artiste:${a.artist || 'Inconnu'} - Titre: ${a.title || 'Inconnu'} - Genre:${a.style || 'Inconnu'}`).join('\n');
       const promptText = `Voici ma collection de disques :\n${catalogueText}\n\nMon humeur / ambiance actuelle est : "${moodText}".\nChoisis UN SEUL album de ma collection qui correspond parfaitement à cette ambiance.\nRends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans aucun autre texte, sans explication, ni ponctuation.`;
       
       document.getElementById("moodModal").classList.remove("active"); showSpinner();
@@ -802,7 +802,7 @@
       document.getElementById("buyWantlistBtn").style.display = album.isWantlist ? 'block' : 'none';
       const coverImg = document.getElementById("modalDetailCover"); if (album.cover) { coverImg.src = album.cover; coverImg.style.display = 'block'; } else coverImg.style.display = 'none';
       const dBtn = document.getElementById("discogsLink"); if(album.discogsId) { dBtn.href = `https://www.discogs.com/release/${album.discogsId}`; dBtn.style.display='inline-flex'; } else dBtn.style.display='none';
-      const q = encodeURIComponent(`${album.artist\vert{}\vert{}''}${album.title||''}`.trim());
+      const q = encodeURIComponent(`${album.artist||''}${album.title||''}`.trim());
       const fBtn = document.getElementById("fnacLink"), jBtn = document.getElementById("jpcLink");
       if(q) { fBtn.href=`https://www.fnac.com/SearchResult/ResultList.aspx?Search=${q}`; fBtn.style.display='inline-flex'; jBtn.href=`https://www.jpc.de/s/${q}`; jBtn.style.display='inline-flex'; } else { fBtn.style.display='none'; jBtn.style.display='none'; }
       if (album.isBoxSet) { document.getElementById("volumesSection").style.display = 'block'; renderVolumesList(album.volumes || [], album.cover); } else document.getElementById("volumesSection").style.display = 'none';
