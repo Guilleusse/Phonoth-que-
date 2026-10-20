@@ -138,7 +138,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 Ver. Stable API 20-10-2026 22:47</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 Ver. Stable API 20-10-2026 23:33</div>
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -531,14 +531,18 @@
       const ownedAlbums = collection.map((album, index) => ({ ...album, originalIndex: index })).filter(album => !album.isWantlist);
       if (ownedAlbums.length === 0) return alert("Ta phonothèque physique est vide, impossible de choisir !");
       
+      // Historique d'exclusion des 5 derniers albums recommandés
+      let lastPicked = JSON.parse(localStorage.getItem('phonotheque_last_picked') || '[]');
+
       const catalogueText = ownedAlbums.map(a => `[ID: ${a.originalIndex}] ${a.artist} - ${a.title} (${a.style || ''})`).join('\n');
-      const promptText = `Voici ma collection de disques :\n${catalogueText}\n\nMon humeur / ambiance actuelle est : "${moodText}".\nChoisis UN SEUL album de ma collection qui correspond parfaitement à cette ambiance.\nRends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans aucun autre texte, sans explication, ni ponctuation.`;
+      const exclusionText = lastPicked.length > 0 ? `\nNE CHOISIS PAS parmi ces IDs d'albums déjà recommandés récemment : [${lastPicked.join(', ')}].` : '';
+      const promptText = `Voici ma collection de disques :\n${catalogueText}\n\nMon humeur / ambiance actuelle est : "${moodText}".${exclusionText}\nChoisis UN SEUL album de ma collection qui correspond parfaitement à cette ambiance.\nRends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans aucun autre texte, sans explication, ni ponctuation.`;
       
       document.getElementById("moodModal").classList.remove("active"); showSpinner();
       try {
           const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], generationConfig: { temperature: 0.7 } })
+          body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], generationConfig: { temperature: 1.0 } })
         });
         const data = await response.json();
         if (data.error) { throw new Error("Erreur reçue de l'API : " + (data.error.message || "Accès refusé")); }
@@ -546,7 +550,14 @@
           const reply = data.candidates[0].content.parts[0].text.trim();
           const selectedId = parseInt(reply.replace(/\D/g, ''));
           hideSpinner(); unlockBodyScroll();
-          if (!isNaN(selectedId) && collection[selectedId]) showDetails(selectedId);
+          if (!isNaN(selectedId) && collection[selectedId]) {
+            // Sauvegarde du nouvel album recommandé dans l'historique (max 5)
+            lastPicked.push(selectedId);
+            if (lastPicked.length > 5) lastPicked.shift();
+            localStorage.setItem('phonotheque_last_picked', JSON.stringify(lastPicked));
+
+            showDetails(selectedId);
+          }
           else alert("Oups, j'ai eu un raté dans ma réflexion musicale. On réessaie ?");
         } else throw new Error("Pas de réponse valide de l'API");
       } catch (e) {
