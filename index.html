@@ -138,7 +138,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 Ver. Stable API 20-10-2026 23:33</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 Ver. Stable API 20-10-2026 23:58</div>
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -886,7 +886,13 @@
         supabaseId: selectedAlbumIndex >= 0 ? collection[selectedAlbumIndex].supabaseId : null, title: title, artist: artist, sortName: document.getElementById("formSortName").value.trim(), label: document.getElementById("formLabel").value.trim(), catalogNumber: document.getElementById("formCatalogNumber").value.trim(), style: document.getElementById("formStyle").value.trim(), conductor: document.getElementById("formConductor").value.trim(), support: document.getElementById("formSupport").value, year: document.getElementById("formYear").value.trim(), country: document.getElementById("formCountry").value.trim(), purchaseDate: document.getElementById("formPurchaseDate").value.trim(), purchasePrice: document.getElementById("formPurchasePrice").value.trim(), purchaseLocation: document.getElementById("formPurchaseLocation").value.trim(), notes: document.getElementById("formNotes").value.trim(), discogsId: discogsId, cover: pendingCoverUrl || document.getElementById("formCover").value.trim(), isBoxSet: isBoxSet, isWantlist: document.getElementById("isWantlist").checked, isAudiophile: document.getElementById("isAudiophile").checked, is45RPM: document.getElementById("formSupport").value === 'Vinyle' ? document.getElementById("is45RPM").checked : false, isDoubleAlbum: document.getElementById("isDoubleAlbum").checked, isTripleAlbum: document.getElementById("isTripleAlbum").checked, isQuadrupleAlbum: document.getElementById("isQuadrupleAlbum").checked, discsCount: isBoxSet ? existingVols.length : 0, volumes: existingVols, tracks: isBoxSet ? [] : (mTrks.length ? mTrks : (currentFetchedTracks.length ? currentFetchedTracks : (selectedAlbumIndex >= 0 ? collection[selectedAlbumIndex].tracks : [])))
       };
       pendingCoverUrl = ""; if (selectedAlbumIndex >= 0) collection[selectedAlbumIndex] = aData; else collection.unshift(aData); syncAlbumToSupabase(aData); document.getElementById("formModal").classList.remove("active"); unlockBodyScroll();
-    }
+
+  // Défilement automatique vers l'artiste qui vient d'être ajouté ou modifié
+  setTimeout(() => {
+    const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
+    scrollToArtistGroup(artistId);
+  }, 100);
+}
     async function startLiveScanner() {
       lockBodyScroll(); document.getElementById("scannerModal").classList.add("active"); if (html5QrCode) { try { if (html5QrCode.isScanning) await html5QrCode.stop(); await html5QrCode.clear(); } catch(e) {} }
       html5QrCode = new Html5Qrcode("reader"); const isMob = /Mobi|Android/i.test(navigator.userAgent);
