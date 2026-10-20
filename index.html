@@ -138,7 +138,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 Ver. Stable API 20-10-2026 23:58</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 6px;">©️ GD Gemini 2026 Ver. Stable API 21-10-2026 00:17</div>
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -872,26 +872,36 @@
       document.getElementById("formDiscsCount").value = a.discsCount || a.volumes?.length || ''; document.getElementById("formModal").classList.add("active");
     }
     function saveAlbumForm() {
-      const title = document.getElementById("formTitle").value.trim(), artist = document.getElementById("formArtist").value.trim(), discogsId = document.getElementById("formDiscogsId").value.trim();
-      if (!title || !artist) return alert("Titre et artiste obligatoires.");
-      if (selectedAlbumIndex === -1) {
-        const isDupDiscogs = discogsId && collection.some(i => String(i.discogsId) === String(discogsId));
-        const isDupTitle = collection.some(i => i.artist?.toLowerCase() === artist.toLowerCase() && i.title?.toLowerCase() === title.toLowerCase());
-        if ((isDupDiscogs || isDupTitle) && !confirm("Album déjà existant dans votre collection, ajouter quand même ?")) return;
-      }
-      const isBoxSet = document.getElementById("isBoxSet").checked; let existingVols = selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes ? [...collection[selectedAlbumIndex].volumes] : [];
-      if (isBoxSet) { const target = parseInt(document.getElementById("formDiscsCount").value) || existingVols.length || 2; while (existingVols.length < target) existingVols.push({ title: `Disque ${existingVols.length + 1}`, cover: '', tracks: [] }); existingVols = existingVols.slice(0, target); } else existingVols = [];
-      const mTrks = document.getElementById("formTracks").value.trim().split('\n').map(l => ({ position: '', title: l.trim(), duration: '' })).filter(t => t.title);
-      const aData = {
-        supabaseId: selectedAlbumIndex >= 0 ? collection[selectedAlbumIndex].supabaseId : null, title: title, artist: artist, sortName: document.getElementById("formSortName").value.trim(), label: document.getElementById("formLabel").value.trim(), catalogNumber: document.getElementById("formCatalogNumber").value.trim(), style: document.getElementById("formStyle").value.trim(), conductor: document.getElementById("formConductor").value.trim(), support: document.getElementById("formSupport").value, year: document.getElementById("formYear").value.trim(), country: document.getElementById("formCountry").value.trim(), purchaseDate: document.getElementById("formPurchaseDate").value.trim(), purchasePrice: document.getElementById("formPurchasePrice").value.trim(), purchaseLocation: document.getElementById("formPurchaseLocation").value.trim(), notes: document.getElementById("formNotes").value.trim(), discogsId: discogsId, cover: pendingCoverUrl || document.getElementById("formCover").value.trim(), isBoxSet: isBoxSet, isWantlist: document.getElementById("isWantlist").checked, isAudiophile: document.getElementById("isAudiophile").checked, is45RPM: document.getElementById("formSupport").value === 'Vinyle' ? document.getElementById("is45RPM").checked : false, isDoubleAlbum: document.getElementById("isDoubleAlbum").checked, isTripleAlbum: document.getElementById("isTripleAlbum").checked, isQuadrupleAlbum: document.getElementById("isQuadrupleAlbum").checked, discsCount: isBoxSet ? existingVols.length : 0, volumes: existingVols, tracks: isBoxSet ? [] : (mTrks.length ? mTrks : (currentFetchedTracks.length ? currentFetchedTracks : (selectedAlbumIndex >= 0 ? collection[selectedAlbumIndex].tracks : [])))
-      };
-      pendingCoverUrl = ""; if (selectedAlbumIndex >= 0) collection[selectedAlbumIndex] = aData; else collection.unshift(aData); syncAlbumToSupabase(aData); document.getElementById("formModal").classList.remove("active"); unlockBodyScroll();
+  const title = document.getElementById("formTitle").value.trim(), artist = document.getElementById("formArtist").value.trim(), discogsId = document.getElementById("formDiscogsId").value.trim();
+  if (!title || !artist) return alert("Titre et artiste obligatoires.");
+  if (selectedAlbumIndex === -1) {
+    const isDupDiscogs = discogsId && collection.some(i => String(i.discogsId) === String(discogsId));
+    const isDupTitle = collection.some(i => i.artist?.toLowerCase() === artist.toLowerCase() && i.title?.toLowerCase() === title.toLowerCase());
+    if ((isDupDiscogs || isDupTitle) && !confirm("Album déjà existant dans votre collection, ajouter quand même ?")) return;
+  }
+  const isBoxSet = document.getElementById("isBoxSet").checked; let existingVols = selectedAlbumIndex >= 0 && collection[selectedAlbumIndex].volumes ? [...collection[selectedAlbumIndex].volumes] : [];
+  if (isBoxSet) { const target = parseInt(document.getElementById("formDiscsCount").value) || existingVols.length || 2; while (existingVols.length < target) existingVols.push({ title: `Disque ${existingVols.length + 1}`, cover: '', tracks: [] }); existingVols = existingVols.slice(0, target); } else existingVols = [];
+  const mTrks = document.getElementById("formTracks").value.trim().split('\n').map(l => ({ position: '', title: l.trim(), duration: '' })).filter(t => t.title);
+  const aData = {
+    supabaseId: selectedAlbumIndex >= 0 ? collection[selectedAlbumIndex].supabaseId : null, title: title, artist: artist, sortName: document.getElementById("formSortName").value.trim(), label: document.getElementById("formLabel").value.trim(), catalogNumber: document.getElementById("formCatalogNumber").value.trim(), style: document.getElementById("formStyle").value.trim(), conductor: document.getElementById("formConductor").value.trim(), support: document.getElementById("formSupport").value, year: document.getElementById("formYear").value.trim(), country: document.getElementById("formCountry").value.trim(), purchaseDate: document.getElementById("formPurchaseDate").value.trim(), purchasePrice: document.getElementById("formPurchasePrice").value.trim(), purchaseLocation: document.getElementById("formPurchaseLocation").value.trim(), notes: document.getElementById("formNotes").value.trim(), discogsId: discogsId, cover: pendingCoverUrl || document.getElementById("formCover").value.trim(), isBoxSet: isBoxSet, isWantlist: document.getElementById("isWantlist").checked, isAudiophile: document.getElementById("isAudiophile").checked, is45RPM: document.getElementById("formSupport").value === 'Vinyle' ? document.getElementById("is45RPM").checked : false, isDoubleAlbum: document.getElementById("isDoubleAlbum").checked, isTripleAlbum: document.getElementById("isTripleAlbum").checked, isQuadrupleAlbum: document.getElementById("isQuadrupleAlbum").checked, discsCount: isBoxSet ? existingVols.length : 0, volumes: existingVols, tracks: isBoxSet ? [] : (mTrks.length ? mTrks : (currentFetchedTracks.length ? currentFetchedTracks : (selectedAlbumIndex >= 0 ? collection[selectedAlbumIndex].tracks : [])))
+  };
+  pendingCoverUrl = ""; if (selectedAlbumIndex >= 0) collection[selectedAlbumIndex] = aData; else collection.unshift(aData);
+  
+  // 1. Rafraîchissement immédiat de la liste dans la page
+  renderCollection(); 
 
-  // Défilement automatique vers l'artiste qui vient d'être ajouté ou modifié
+  // 2. Synchronisation Supabase en arrière-plan
+  syncAlbumToSupabase(aData); 
+
+  // 3. Fermeture du formulaire et déblocage du défilement
+  document.getElementById("formModal").classList.remove("active"); 
+  unlockBodyScroll();
+
+  // 4. Défilement vers l'artiste une fois l'écran libéré
   setTimeout(() => {
     const artistId = 'artist-' + artist.replace(/[^a-zA-Z0-9]/g, '');
     scrollToArtistGroup(artistId);
-  }, 100);
+  }, 250);
 }
     async function startLiveScanner() {
       lockBodyScroll(); document.getElementById("scannerModal").classList.add("active"); if (html5QrCode) { try { if (html5QrCode.isScanning) await html5QrCode.stop(); await html5QrCode.clear(); } catch(e) {} }
