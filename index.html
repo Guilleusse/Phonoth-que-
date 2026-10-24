@@ -524,7 +524,7 @@
       
       let apiKey = localStorage.getItem('phonotheque_gemini_key');
       if (!apiKey) {
-        apiKey = prompt("🔒 Pour activer le DJ Gemini, colle ici ta nouvelle clé API Google :");
+        apiKey = prompt("🔒 Pour activer le DJ Gemini, colle ici la nouvelle clé API Google :");
         if (!apiKey || !apiKey.trim()) return alert("La clé est nécessaire pour utiliser le DJ !");
         localStorage.setItem('phonotheque_gemini_key', apiKey.trim());
       }
@@ -585,7 +585,7 @@
         if (error) throw error;
         const { data: publicUrlData } = supabase.storage.from('Pochettes').getPublicUrl(fileName);
         pendingEditVolCoverUrl = publicUrlData.publicUrl; document.getElementById("editVolCover").value = pendingEditVolCoverUrl;
-        alert("Image du disque envoyée avec succès !");
+        alert("Image de l'album envoyée avec succès sur Supabase Storage !");
       } catch (err) { alert("Erreur d'envoi."); }
       hideSpinner(); event.target.value = '';
     }
