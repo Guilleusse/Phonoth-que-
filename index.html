@@ -69,9 +69,23 @@
     .filter-chip { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-sub); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
     .filter-chip.active { background: rgba(243, 244, 246, 0.70); color: var(--bg-color); border-color: rgba(243, 244, 246, 0.70); }
     .filter-chip-wantlist { margin-left: auto; }
-    .artist-group-header { font-size: 18px; font-weight: 700; color: var(--accent-blue); margin: 15px 0 10px 0; display: flex; justify-content: flex-start; align-items: baseline; gap: 8px; scroll-margin-top: 340px; }
+    .artist-group-header { 
+    font-size: 18px; 
+    font-weight: 700; 
+    color: var(--accent-blue); 
+    margin: 15px 0 10px 0; 
+    display: flex; 
+    justify-content: flex-start; 
+    align-items: baseline; 
+    gap: 8px; 
+    scroll-margin-top: calc(env(safe-area-inset-top) + 15px); /* Ajusté pour arriver juste sous l'horloge */
+    }
     .artist-group-header:first-of-type { margin-top: 0px; }
-    @media (min-width: 768px) { .artist-group-header { scroll-margin-top: 220px; } }
+    @media (min-width: 768px) { 
+    .artist-group-header { 
+    scroll-margin-top: 60px; 
+     } 
+   }
     .artist-count { font-size: 13px; color: var(--text-sub); font-weight: normal; }
     .album-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; margin-bottom: 10px; display: flex; gap: 12px; position: relative; cursor: pointer; }
     .cover-box { width: 75px; height: 75px; border-radius: 10px; background: #2a2a2a; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-sub); font-size: 10px; text-align: center; }
@@ -143,7 +157,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 29-10-2026 18:24</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 29-10-2026 23:46</div>
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
