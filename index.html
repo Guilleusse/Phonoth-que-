@@ -40,7 +40,11 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; scrollbar-width: none; -ms-overflow-style: none; }
     ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
     body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 80px; padding-left: 15px; padding-right: 25px; max-width: 650px; margin: 0 auto; }
-    .sticky-zone { position: -webkit-sticky; position: sticky; top: 0; background-color: var(--bg-color); z-index: 100; padding-top: calc(env(safe-area-inset-top) + 2px); padding-bottom: 2px; margin-left: -15px; margin-right: -25px; padding-left: 15px; padding-right: 25px; border-bottom: 1px solid var(--card-border); }
+    .sticky-zone { position: -webkit-sticky; position: sticky; top: 0; background-color: var(--bg-color); z-index: 100; padding-top: calc(env(safe-area-inset-top) + 2px); padding-bottom: 2px; margin-left: -15px; margin-right: -25px; padding-left: 15px; padding-right: 25px; border-bottom: 1px solid var(--card-border); transition: transform 0.3s ease-in-out; /* Animation fluide */ }
+    /* Cache le bloc en-tête vers le haut */
+    .sticky-zone.hidden {
+    transform: translateY(-100%);
+    }
     header { margin-bottom: 0px; }
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0px; flex-wrap: nowrap; gap: 4px; }
     h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, #f3f4f6 30%, #9ca3af 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); }
@@ -139,7 +143,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 29-10-2026 17:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 29-10-2026 18:24</div>
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -524,12 +528,40 @@
       localStorage.setItem('phonotheque_theme', isLight ? 'light' : 'dark');
     }
 
-    window.addEventListener('scroll', () => {
-      const btn = document.getElementById('backToTopBtn');
-      if (btn) {
-        btn.classList.toggle('visible', window.scrollY > 400);
-      }
-    });
+    let lastScrollY = window.scrollY;
+let scrollUpAccumulator = 0;
+const THRESHOLD_SHOW = 80; // Hauteur équivalente à une vignette (~80px)
+
+window.addEventListener('scroll', () => {
+  // Gestion du bouton "Retour en haut"
+  const btn = document.getElementById('backToTopBtn');
+  if (btn) {
+    btn.classList.toggle('visible', window.scrollY > 400);
+  }
+
+  const stickyZone = document.querySelector('.sticky-zone');
+  if (!stickyZone) return;
+
+  const currentScrollY = window.scrollY;
+  const delta = currentScrollY - lastScrollY;
+
+  // Si on fait défiler vers le bas (on consulte les albums)
+  if (delta > 0 && currentScrollY > 100) {
+    stickyZone.classList.add('hidden');
+    scrollUpAccumulator = 0; // Réinitialise le compteur de remontée
+  } 
+  // Si on remonte vers le haut
+  else if (delta < 0) {
+    scrollUpAccumulator += Math.abs(delta);
+    
+    // Si on a remonté de l'équivalent d'une vignette (80px) ou si on touche le haut de page
+    if (scrollUpAccumulator >= THRESHOLD_SHOW || currentScrollY <= 10) {
+      stickyZone.classList.remove('hidden');
+    }
+  }
+
+  lastScrollY = currentScrollY;
+});
 
     function scrollToTop() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
