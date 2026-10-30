@@ -66,22 +66,22 @@
     margin: 0 auto;
   }
 
-  /* --- EN-TÊTE FIXE ET DYNAMIQUE (SMART HEADER) --- */
-  .sticky-zone {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 0;
-    background-color: var(--bg-color);
-    z-index: 100;
-    padding-top: calc(env(safe-area-inset-top) + 2px);
-    padding-bottom: 2px;
-    margin-left: -15px;
-    margin-right: -25px;
-    padding-left: 15px;
-    padding-right: 25px;
-    border-bottom: 1px solid var(--card-border);
-    transition: transform 0.3s ease-in-out;
-  }
+  /* --- 5. ZONE FIXE GLOBALE --- */
+.sticky-zone {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-color);
+  z-index: 100;
+  padding-top: calc(env(safe-area-inset-top) + 2px);
+  padding-bottom: 6px; /* Était à 2px : donne un peu d'espace avant le début des albums */
+  margin-left: -15px;
+  margin-right: -25px;
+  padding-left: 15px;
+  padding-right: 25px;
+  border-bottom: 1px solid var(--card-border);
+  transition: transform 0.3s ease-in-out;
+}
 
   .sticky-zone.hidden {
     transform: translateY(-100%);
@@ -91,14 +91,15 @@
     margin-bottom: 0px;
   }
 
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0px;
-    flex-wrap: nowrap;
-    gap: 4px;
-  }
+  /* --- 1. BARRE DU HAUT (LOGO + BOUTONS) --- */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px; /* Était à 0px : aère sous le logo et les actions du haut */
+  flex-wrap: nowrap;
+  gap: 4px;
+}
 
   h1 {
     font-size: 28px;
@@ -175,12 +176,13 @@
     }
   }
 
-  .io-bar {
-    display: flex;
-    gap: 8px;
-    margin-top: 2px;
-    margin-bottom: 6px;
-  }
+  /* --- 2. BARRE D'IMPORT / EXPORT / VIDER --- */
+.io-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+  margin-bottom: 10px; /* Était à 6px : aère sous la ligne Exporter/Importer */
+}
 
   .btn-secondary {
     flex: 1;
@@ -205,13 +207,13 @@
     color: var(--text-sub);
   }
 
-  /* --- RECHERCHE ET FILTRES --- */
-  .search-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 6px;
-    align-items: center;
-  }
+  /* --- 3. RECHERCHE ET TRI --- */
+.search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px; /* Était à 6px : aère sous la barre de recherche */
+  align-items: center;
+}
 
   .search-box {
     position: relative;
@@ -296,13 +298,14 @@
     cursor: pointer;
   }
 
-  .filters-scroll {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-bottom: 0px;
-    margin-bottom: 0px;
-  }
+  /* --- 4. FILTRES (TOUS, VINYLES, CD...) --- */
+.filters-scroll {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 8px; /* Était à 8px : augmente l'espace vertical entre les rangées de puces */
+  padding-bottom: 8px; /* Était à 0px : aère le bas sous la dernière rangée de filtres */
+  margin-bottom: 0px;
+}
 
   .filter-chip {
     background: var(--card-bg);
@@ -850,7 +853,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 30-10-2026 01:08</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 30-10-2026 01:46</div>
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
