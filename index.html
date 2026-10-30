@@ -850,7 +850,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 30-10-2026 00:18</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 30-10-2026 01:08</div>
     <header>
       <div class="top-bar">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -2575,11 +2575,36 @@ window.addEventListener('scroll', () => {
     }
 
     function getRandomAlbum() {
-      const owned = collection.filter(a => !a.isWantlist);
-      if (owned.length) {
-        showDetails(collection.indexOf(owned[Math.floor(Math.random() * owned.length)]));
-      }
-    }
+  const owned = collection
+    .map((album, index) => ({ album, index }))
+    .filter(item => !item.album.isWantlist);
+
+  if (!owned.length) return;
+
+  // Récupère la liste des derniers tirages au dé
+  let recentDicePicks = JSON.parse(localStorage.getItem('phonotheque_dice_history') || '[]');
+
+  // Ne garde que les albums qui ne sont PAS sortis récemment
+  let candidates = owned.filter(item => !recentDicePicks.includes(item.index));
+
+  // Si tous les albums ont été tirés, on réinitialise la mémoire
+  if (candidates.length === 0) {
+    recentDicePicks = [];
+    candidates = owned;
+  }
+
+  // Tirage au sort parmi les candidats restants
+  const picked = candidates[Math.floor(Math.random() * candidates.length)];
+
+  // On enregistre ce tirage dans l'historique (garde les 20 derniers en mémoire)
+  recentDicePicks.push(picked.index);
+  if (recentDicePicks.length > 20) {
+    recentDicePicks.shift();
+  }
+  localStorage.setItem('phonotheque_dice_history', JSON.stringify(recentDicePicks));
+
+  showDetails(picked.index);
+}
 
     function closeModal(id) {
       if (id === 'scannerModal') {
