@@ -100,12 +100,19 @@
     margin-bottom: 8px;
   }
 
-  .app-logo {
-    max-height: 80px; /* Ajuste la hauteur max selon ton envie */
-    width: auto;
-    object-fit: contain;
-    display: block;
-  }
+  /* --- 1. REVERROUILLER LE GLISSEMENT HORIZONTAL (CORRIGE LA CAPTURE 2) --- */
+html, body {
+  overflow-x: hidden;
+}
+
+/* --- 2. RÉDUIRE LÉGÈREMENT LE LOGO (CORRIGE LA CAPTURE 2) --- */
+.app-logo {
+  max-height: 80px; /* Redescendu de 120px à 80px : reste bien grand sans déborder */
+  max-width: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
 
   /* --- BOUTONS D'ACTION (ENTRE LOGO ET EXPORTER/IMPORTER) --- */
   .header-actions {
@@ -347,23 +354,24 @@
     font-weight: normal;
   }
 
-  .az-index {
-    position: fixed;
-    right: 4px;
-    top: calc(50% + 140px);
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    z-index: 10;
-    font-size: 9px;
-    font-weight: bold;
-    color: var(--text-sub);
-    background: rgba(18, 18, 18, 0.75);
-    padding: 4px 2px;
-    border-radius: 10px;
-    backdrop-filter: blur(5px);
-  }
+  /* --- 3. REPASSER LA BARRE A-Z AU-DESSUS DU HEADER (CORRIGE LA CAPTURE 1) --- */
+.az-index {
+  position: fixed;
+  right: 4px;
+  top: calc(50% + 140px);
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  z-index: 101; /* Passé de 10 à 101 pour flotter au-dessus du fond de l'en-tête */
+  font-size: 9px;
+  font-weight: bold;
+  color: var(--text-sub);
+  background: rgba(18, 18, 18, 0.75);
+  padding: 4px 2px;
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+}
 
   .az-index .az-letter {
     color: inherit;
@@ -842,7 +850,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 30-10-2026 03:41</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 30-10-2026 03:58</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
