@@ -91,41 +91,30 @@
     margin-bottom: 0px;
   }
 
-  /* --- 1. BARRE DU HAUT (LOGO + BOUTONS) --- */
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px; /* Était à 0px : aère sous le logo et les actions du haut */
-  flex-wrap: nowrap;
-  gap: 4px;
-}
-
-  h1 {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #f3f4f6 30%, #9ca3af 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  /* --- CONTAINER DU LOGO --- */
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
   }
 
   .app-logo {
-    max-height: 100px;
+    max-height: 120px; /* Ajuste la hauteur max selon ton envie */
     width: auto;
     object-fit: contain;
-    vertical-align: middle;
     display: block;
   }
 
-  /* --- BOUTONS & BARRE D'ACTIONS --- */
+  /* --- BOUTONS D'ACTION (ENTRE LOGO ET EXPORTER/IMPORTER) --- */
   .header-actions {
     display: flex;
-    gap: 8px;
+    justify-content: space-between;
     align-items: center;
+    gap: 8px;
+    margin-bottom: 10px; /* Aère l'espace avant la ligne Exporter/Importer */
   }
-
   .icon-btn {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -853,19 +842,21 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 30-10-2026 01:46</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 30-10-2026 03:24</div>
+    
     <header>
-      <div class="top-bar">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <img src="logo.png" alt="Phonothèque" class="app-logo">
-          <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation..."></div>
-        </div>
-        <div class="header-actions">
-          <button class="icon-btn" onclick="openMoodModal()" title="DJ Gemini (Humeur)">🧞‍♂️</button>
-          <button class="icon-btn" onclick="getRandomAlbum()" title="Album au hasard">🎲</button>
-          <button class="icon-btn" onclick="openStatsModal()" title="Statistiques">ℹ️</button>
-          <button class="icon-btn btn-add" onclick="openAddModal()">Ajouter<br>un album</button>
-        </div>
+      <!-- 1. LOGO EN HAUT (CENTRÉ) -->
+      <div class="logo-container">
+        <img src="logo.png" alt="Phonothèque" class="app-logo">
+        <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation..."></div>
+      </div>
+
+      <!-- 2. BOUTONS D'ACTION (SOUS LE LOGO) -->
+      <div class="header-actions">
+        <button class="icon-btn" onclick="openMoodModal()" title="DJ Gemini (Humeur)">🧞‍♂️</button>
+        <button class="icon-btn" onclick="getRandomAlbum()" title="Album au hasard">🎲</button>
+        <button class="icon-btn" onclick="openStatsModal()" title="Statistiques">ℹ️</button>
+        <button class="icon-btn btn-add" onclick="openAddModal()">Ajouter<br>un album</button>
       </div>
 
       <div class="io-bar">
