@@ -284,13 +284,28 @@ html, body {
     cursor: pointer;
   }
 
-  /* --- 4. FILTRES (TOUS, VINYLES, CD...) --- */
+  /* --- FILTRES : BANDE DÉFILANTE HORIZONTALE --- */
 .filters-scroll {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px 8px; /* Était à 8px : augmente l'espace vertical entre les rangées de puces */
-  padding-bottom: 8px; /* Était à 0px : aère le bas sous la dernière rangée de filtres */
+  flex-wrap: nowrap; /* Empêche le retour à la ligne */
+  overflow-x: auto;  /* Active le défilement horizontal */
+  gap: 8px;          /* Espacement fixe et régulier entre chaque puce */
+  padding-bottom: 6px;
   margin-bottom: 0px;
+  -webkit-overflow-scrolling: touch; /* Défilement fluide sur iPhone */
+  scrollbar-width: none; /* Masque la barre de défilement (Firefox) */
+}
+
+/* Masque la barre de défilement sur Safari / Chrome / iPhone */
+.filters-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Garantit que les puces conservent leur taille sans se compresser */
+.filters-scroll button,
+.filters-scroll .filter-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
   .filter-chip {
@@ -840,7 +855,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 31-10-2026 02:07</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 31-10-2026 02:40</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
