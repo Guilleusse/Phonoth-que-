@@ -500,36 +500,72 @@ html, body {
     color: var(--text-main);
   }
 
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: white;
-    margin-bottom: 4px;
-    width: fit-content;
-  }
+  /* --- ÉTAPE 2 : HARMONISATION DES BADGES DE FORMAT --- */
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  width: fit-content;
+  backdrop-filter: blur(4px);
+}
 
-  .badge-vinyle { background: var(--badge-vinyle); }
-  .badge-cd { background: var(--badge-cd); }
-  .badge-cdr { background: var(--badge-cdr); }
-  .badge-sacd { background: var(--badge-sacd); }
-  .badge-coffret { background: var(--badge-coffret); }
-  .badge-wantlist { background: var(--badge-wantlist); color: #000; }
-  .badge-audiophile { background: var(--badge-audiophile); border: 1px solid #f59e0b; color: #fff; }
+/* Badge Vinyle (Orange adouci) */
+.badge-vinyle, .badge-vinyl {
+  background: rgba(255, 149, 0, 0.18);
+  color: #ff9f0a;
+  border: 1px solid rgba(255, 149, 0, 0.35);
+}
 
-  .genre-badge {
-    display: inline-block;
-    font-size: 10px;
-    color: #a0a0a0;
-    background: rgba(255, 255, 255, 0.08);
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-top: 4px;
-    margin-right: 4px;
-  }
+/* Badge CD / CD-R (Bleu pastel) */
+.badge-cd, .badge-cdr {
+  background: rgba(10, 132, 255, 0.18);
+  color: #64d2ff;
+  border: 1px solid rgba(10, 132, 255, 0.35);
+}
+
+/* Badge SACD (Violet adouci) */
+.badge-sacd {
+  background: rgba(191, 90, 242, 0.18);
+  color: #da8fff;
+  border: 1px solid rgba(191, 90, 242, 0.35);
+}
+
+/* Badge Audiophile (Ambre doré) */
+.badge-audiophile {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+/* Badge Coffret & Liste de souhaits */
+.badge-coffret {
+  background: rgba(255, 255, 255, 0.12);
+  color: #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.badge-wantlist {
+  background: rgba(255, 45, 85, 0.18);
+  color: #ff375f;
+  border: 1px solid rgba(255, 45, 85, 0.35);
+}
+
+/* Étiquettes de genres sous l'album */
+.genre-badge {
+  display: inline-block;
+  font-size: 10px;
+  color: #a0a0a0;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  margin-right: 4px;
+}
 
   .card-actions {
     position: absolute;
@@ -861,7 +897,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 01-11-2026 02:25</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 01-11-2026 02:43</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
