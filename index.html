@@ -284,29 +284,30 @@ html, body {
     cursor: pointer;
   }
 
-  /* --- FILTRES : BANDE DÉFILANTE HORIZONTALE --- */
+  /* --- ÉTAPE 1 (CORRECTION IOS) : BANDE DE FILTRES AVEC FONDU --- */
 .filters-scroll {
   display: flex;
-  flex-wrap: nowrap; /* Empêche le retour à la ligne */
-  overflow-x: auto;  /* Active le défilement horizontal */
-  gap: 8px;          /* Espacement fixe et régulier entre chaque puce */
-  padding-bottom: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 0 12px 6px 12px; /* Espacement aux deux extrémités */
   margin-bottom: 0px;
-  -webkit-overflow-scrolling: touch; /* Défilement fluide sur iPhone */
-  scrollbar-width: none; /* Masque la barre de défilement (Firefox) */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  /* Force le rendu du masque sur Safari iOS (GPU layer) */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+
+  /* Fondu progressif à gauche ET à droite sur Safari/iOS */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%);
 }
 
-/* Effet de fondu progressif sur les 15 % à droite */
-  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
-  mask-image: linear-gradient(to right, black 85%, transparent 100%);
-}
-    
-    /* Masque la barre de défilement sur Safari / Chrome / iPhone */
 .filters-scroll::-webkit-scrollbar {
   display: none;
 }
 
-/* Garantit que les puces conservent leur taille sans se compresser */
 .filters-scroll button,
 .filters-scroll .filter-btn {
   flex: 0 0 auto;
@@ -860,7 +861,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 01-11-2026 02:11</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 01-11-2026 02:25</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
