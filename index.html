@@ -898,7 +898,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 01-11-2026 03:13</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 01-11-2026 03:53</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1885,68 +1885,69 @@ window.addEventListener('scroll', () => {
       }
     }
 
-    function renderAlbumCard(album, container) {
-      const realIndex = collection.indexOf(album);
-      const card = document.createElement("div");
-      card.className = "album-card";
+   function renderAlbumCard(album, container) {
+  const realIndex = collection.indexOf(album);
+  const card = document.createElement("div");
+  card.className = "album-card";
 
-      card.onclick = (e) => {
-        if (!e.target.classList.contains('card-action-btn') && !e.target.classList.contains('clickable-tag')) {
-          showDetails(realIndex);
-        }
-      };
-
-      let badgeClass = 'badge-cd';
-      let baseText = album.support || 'CD';
-      let supp = baseText.toUpperCase();
-
-      if (album.isDoubleAlbum) baseText = `2 DISQUES ${supp === 'CD' || supp === 'VINYLE' || supp === 'CD-R' || supp === 'SACD' ? supp : ''}`.trim();
-      else if (album.isTripleAlbum) baseText = `3 DISQUES ${supp === 'CD' || supp === 'VINYLE' || supp === 'CD-R' || supp === 'SACD' ? supp : ''}`.trim();
-      else if (album.isQuadrupleAlbum) baseText = `4 DISQUES ${supp === 'CD' || supp === 'VINYLE' || supp === 'CD-R' || supp === 'SACD' ? supp : ''}`.trim();
-
-      let badgeText = baseText.toUpperCase();
-      const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
-
-      if (album.isWantlist) {
-        badgeClass = 'badge-wantlist';
-        badgeText = `SOUHAITS ${badgeText}`;
-      } else if (album.isBoxSet) {
-        badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
-        badgeText = album.isAudiophile 
-          ? `${nbDisques > 0 ? nbDisques + ' DISQUES' : 'COFFRET'} ${supp} AUDIOPHILE` 
-          : (nbDisques > 0 ? `${nbDisques} DISQUES ${supp}` : `COFFRET ${supp}`);
-      } else if (album.isAudiophile) {
-        badgeClass = 'badge-audiophile';
-        badgeText += ' AUDIOPHILE';
-      } else if (album.support === 'Vinyle') {
-        badgeClass = 'badge-vinyle';
-      } else if (album.support === 'CD-R') {
-        badgeClass = 'badge-cdr';
-      } else if (album.support === 'SACD') {
-        badgeClass = 'badge-sacd';
-      }
-
-      const metaText = [
-        album.label, 
-        album.year, 
-        album.country ? `<span class="clickable-tag" data-country="${album.country.replace(/"/g, '&quot;')}" onclick="onCountryClick(this, event)">${album.country}</span>` : null
-      ].filter(Boolean).join(' • ');
-
-      card.innerHTML = `
-        <div class="card-delete-top"><button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)">🗑️</button></div>
-        <div class="cover-box">${album.cover ? `<img src="${album.cover}" onerror="this.style.display='none'">` : 'Pochette'}</div>
-        <div class="album-info">
-          <span class="badge ${badgeClass}">${badgeText}</span>
-          <div class="album-artist">${album.artist ? `<span class="clickable-tag" data-artist="${album.artist.replace(/"/g, '&quot;')}" onclick="onArtistClick(this, event)">${album.artist}</span>` : 'Artiste inconnu'}</div>
-          <div class="album-title">${album.title || 'Sans titre'}</div>
-          <div class="album-sub">${metaText}</div>
-          ${album.style ? `<div style="margin-top:2px;">${album.style.split(' / ').map(s => `<span class="genre-badge">${s}</span>`).join('')}</div>` : ''}
-        </div>
-        <div class="card-actions"><button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button></div>
-      `;
-      container.appendChild(card);
+  card.onclick = (e) => {
+    if (!e.target.classList.contains('card-action-btn') && !e.target.classList.contains('clickable-tag')) {
+      showDetails(realIndex);
     }
+  };
 
+  let badgeClass = 'badge-cd';
+  let baseText = album.support || 'CD';
+  let supp = baseText.toUpperCase();
+
+  if (album.isDoubleAlbum) baseText = `2 DISQUES ${supp === 'CD' || supp === 'VINYLE' || supp === 'CD-R' || supp === 'SACD' ? supp : ''}`.trim();
+  else if (album.isTripleAlbum) baseText = `3 DISQUES ${supp === 'CD' || supp === 'VINYLE' || supp === 'CD-R' || supp === 'SACD' ? supp : ''}`.trim();
+  else if (album.isQuadrupleAlbum) baseText = `4 DISQUES ${supp === 'CD' || supp === 'VINYLE' || supp === 'CD-R' || supp === 'SACD' ? supp : ''}`.trim();
+
+  let badgeText = baseText.toUpperCase();
+  const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
+
+  if (album.isWantlist) {
+    badgeClass = 'badge-wantlist';
+    badgeText = `SOUHAITS ${badgeText}`;
+  } else if (album.isBoxSet) {
+    badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
+    const details = nbDisques > 0 ? `${nbDisques} DISQUES ` : '';
+    badgeText = album.isAudiophile 
+      ? `COFFRET • ${details}${supp} AUDIOPHILE`.trim()
+      : `COFFRET • ${details}${supp}`.trim();
+  } else if (album.isAudiophile) {
+    badgeClass = 'badge-audiophile';
+    badgeText += ' AUDIOPHILE';
+  } else if (album.support === 'Vinyle') {
+    badgeClass = 'badge-vinyle';
+  } else if (album.support === 'CD-R') {
+    badgeClass = 'badge-cdr';
+  } else if (album.support === 'SACD') {
+    badgeClass = 'badge-sacd';
+  }
+
+  const metaText = [
+    album.label, 
+    album.year, 
+    album.country ? `<span class="clickable-tag" data-country="${album.country.replace(/"/g, '&quot;')}" onclick="onCountryClick(this, event)">${album.country}</span>` : null
+  ].filter(Boolean).join(' • ');
+
+  card.innerHTML = `
+    <div class="card-delete-top"><button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)">🗑️</button></div>
+    <div class="cover-box">${album.cover ? `<img src="${album.cover}" onerror="this.style.display='none'">` : 'Pochette'}</div>
+    <div class="album-info">
+      <span class="badge ${badgeClass}">${badgeText}</span>
+      <div class="album-artist">${album.artist ? `<span class="clickable-tag" data-artist="${album.artist.replace(/"/g, '&quot;')}" onclick="onArtistClick(this, event)">${album.artist}</span>` : 'Artiste inconnu'}</div>
+      <div class="album-title">${album.title || 'Sans titre'}</div>
+      <div class="album-sub">${metaText}</div>
+      ${album.style ? `<div style="margin-top:2px;">${album.style.split(' / ').map(s => `<span class="genre-badge">${s}</span>`).join('')}</div>` : ''}
+    </div>
+    <div class="card-actions"><button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button></div>
+  `;
+  container.appendChild(card);
+}
+    
     function scrollToArtistGroup(elementId) {
       document.getElementById(elementId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
