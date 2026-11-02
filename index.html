@@ -898,7 +898,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 02-11-2026 03:40</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 03-11-2026 00:37</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1932,12 +1932,25 @@ function updateFilterCounts() {
   let baseText = album.support || 'CD';
   let supp = baseText.toUpperCase();
 
-  if (album.isDoubleAlbum) baseText = `2 DISQUES ${supp === 'CD' || supp === 'VINYLE' || supp === 'CD-R' || supp === 'SACD' ? supp : ''}`.trim();
-  else if (album.isTripleAlbum) baseText = `3 DISQUES ${supp === 'CD' || supp === 'VINYLE' || supp === 'CD-R' || supp === 'SACD' ? supp : ''}`.trim();
-  else if (album.isQuadrupleAlbum) baseText = `4 DISQUES ${supp === 'CD' || supp === 'VINYLE' || supp === 'CD-R' || supp === 'SACD' ? supp : ''}`.trim();
+  // 1. Calcul du nombre de disques (multiplie par 2 si c'est un coffret de sous-volumes doubles)
+  let nbDisques = 0;
+  if (album.volumes && album.volumes.length > 0) {
+    const multiplier = (album.isDoubleAlbum || album.discsPerVolume === 2) ? 2 : 1;
+    nbDisques = album.volumes.reduce((acc, v) => acc + (parseInt(v.discsCount) || multiplier), 0);
+  } else {
+    nbDisques = parseInt(album.discsCount) || 0;
+  }
+
+  // 2. Gestion automatique des pluriels (VINYLES et AUDIOPHILES avec un S)
+  const isPlural = nbDisques > 1 || album.isDoubleAlbum || album.isTripleAlbum || album.isQuadrupleAlbum || album.isBoxSet;
+  const suppDisplay = (isPlural && supp === 'VINYLE') ? 'VINYLES' : supp;
+  const audiophileDisplay = isPlural ? 'AUDIOPHILES' : 'AUDIOPHILE';
+
+  if (album.isDoubleAlbum && !album.isBoxSet) baseText = `2 DISQUES ${suppDisplay}`.trim();
+  else if (album.isTripleAlbum) baseText = `3 DISQUES ${suppDisplay}`.trim();
+  else if (album.isQuadrupleAlbum) baseText = `4 DISQUES ${suppDisplay}`.trim();
 
   let badgeText = baseText.toUpperCase();
-  const nbDisques = parseInt(album.discsCount) || (album.volumes ? album.volumes.length : 0);
 
   if (album.isWantlist) {
     badgeClass = 'badge-wantlist';
@@ -1946,11 +1959,11 @@ function updateFilterCounts() {
     badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
     const details = nbDisques > 0 ? `${nbDisques} DISQUES ` : '';
     badgeText = album.isAudiophile 
-      ? `COFFRET • ${details}${supp} AUDIOPHILE`.trim()
-      : `COFFRET • ${details}${supp}`.trim();
+      ? `COFFRET • ${details}${suppDisplay} ${audiophileDisplay}`.trim()
+      : `COFFRET • ${details}${suppDisplay}`.trim();
   } else if (album.isAudiophile) {
     badgeClass = 'badge-audiophile';
-    badgeText += ' AUDIOPHILE';
+    badgeText += ` ${audiophileDisplay}`;
   } else if (album.support === 'Vinyle') {
     badgeClass = 'badge-vinyle';
   } else if (album.support === 'CD-R') {
