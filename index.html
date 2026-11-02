@@ -898,7 +898,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 02-11-2026 02:23</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 02-11-2026 02:44</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1789,12 +1789,11 @@ window.addEventListener('scroll', () => {
       document.getElementById("statsModal").classList.add("active");
     }
 
-    /* --- ÉTAPE 3 : COMPTEURS DYNAMIQUES DANS LES FILTRES (CORRIGÉ) --- */
+    /* --- ÉTAPE 3 : COMPTEURS DYNAMIQUES DANS LES FILTRES (CORRECTIF FINAL) --- */
 function updateFilterCounts() {
-  // Vérification de l'existence du tableau collection
   if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
 
-  // Calcul des totaux par catégorie
+  // Calcul des références par filtre
   const counts = {
     all: collection.filter(a => a && !a.isWantlist).length,
     vinyle: collection.filter(a => a && !a.isWantlist && a.support === 'Vinyle').length,
@@ -1805,17 +1804,18 @@ function updateFilterCounts() {
     wantlist: collection.filter(a => a && a.isWantlist).length
   };
 
-  // Mise à jour ciblée sur le texte de chaque puce
+  // Identification précise via l'action onclick du bouton
   const chips = document.querySelectorAll('.filters-scroll .filter-chip');
   chips.forEach(chip => {
-    const txt = chip.textContent || '';
-    if (txt.includes('Tous')) chip.textContent = `Tous (${counts.all})`;
-    else if (txt.includes('Vinyle')) chip.textContent = `Vinyles (${counts.vinyle})`;
-    else if (txt.includes('CD-R')) chip.textContent = `CD-R (${counts.cdr})`;
-    else if (txt.includes('CD')) chip.textContent = `CD (${counts.cd})`;
-    else if (txt.includes('SACD')) chip.textContent = `SACD (${counts.sacd})`;
-    else if (txt.includes('Coffret')) chip.textContent = `Coffrets (${counts.coffret})`;
-    else if (txt.includes('Souhait') || txt.includes('Liste')) chip.textContent = `Liste de souhaits (${counts.wantlist})`;
+    const act = chip.getAttribute('onclick') || '';
+
+    if (act.includes("'all'")) chip.textContent = `Tous (${counts.all})`;
+    else if (act.includes("'Vinyle'")) chip.textContent = `Vinyles (${counts.vinyle})`;
+    else if (act.includes("'SACD'")) chip.textContent = `SACD (${counts.sacd})`;
+    else if (act.includes("'CD-R'")) chip.textContent = `CD-R (${counts.cdr})`;
+    else if (act.includes("'CD'")) chip.textContent = `CD (${counts.cd})`;
+    else if (act.includes("'Coffret'")) chip.textContent = `Coffrets (${counts.coffret})`;
+    else if (act.includes("'Wantlist'")) chip.textContent = `Liste de souhaits (${counts.wantlist})`;
   });
 }
     
