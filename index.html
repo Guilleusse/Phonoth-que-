@@ -898,7 +898,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 02-11-2026 02:12</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 02-11-2026 02:23</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1789,42 +1789,33 @@ window.addEventListener('scroll', () => {
       document.getElementById("statsModal").classList.add("active");
     }
 
-    /* --- ÉTAPE 3 : COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
+    /* --- ÉTAPE 3 : COMPTEURS DYNAMIQUES DANS LES FILTRES (CORRIGÉ) --- */
 function updateFilterCounts() {
-  if (!window.collection || !Array.isArray(collection)) return;
+  // Vérification de l'existence du tableau collection
+  if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
 
   // Calcul des totaux par catégorie
   const counts = {
-    all: collection.filter(a => !a.isWantlist).length,
-    vinyle: collection.filter(a => !a.isWantlist && a.support === 'Vinyle').length,
-    cd: collection.filter(a => !a.isWantlist && a.support === 'CD').length,
-    cdr: collection.filter(a => !a.isWantlist && a.support === 'CD-R').length,
-    sacd: collection.filter(a => !a.isWantlist && a.support === 'SACD').length,
-    coffret: collection.filter(a => !a.isWantlist && a.isBoxSet).length,
-    wantlist: collection.filter(a => a.isWantlist).length
+    all: collection.filter(a => a && !a.isWantlist).length,
+    vinyle: collection.filter(a => a && !a.isWantlist && a.support === 'Vinyle').length,
+    cd: collection.filter(a => a && !a.isWantlist && a.support === 'CD').length,
+    cdr: collection.filter(a => a && !a.isWantlist && a.support === 'CD-R').length,
+    sacd: collection.filter(a => a && !a.isWantlist && a.support === 'SACD').length,
+    coffret: collection.filter(a => a && !a.isWantlist && (a.isBoxSet || a.is_coffret)).length,
+    wantlist: collection.filter(a => a && a.isWantlist).length
   };
 
-  // Libellés associés
-  const labels = {
-    'all': `Tous (${counts.all})`,
-    'Vinyle': `Vinyles (${counts.vinyle})`,
-    'CD': `CD (${counts.cd})`,
-    'CD-R': `CD-R (${counts.cdr})`,
-    'SACD': `SACD (${counts.sacd})`,
-    'Coffret': `Coffrets (${counts.coffret})`,
-    'Wantlist': `Liste de souhaits (${counts.wantlist})`
-  };
-
-  // Mise à jour automatique du texte dans chaque bouton
-  const filterBtns = document.querySelectorAll('.filters-scroll .filter-chip');
-  filterBtns.forEach(btn => {
-    const onclickAttr = btn.getAttribute('onclick') || '';
-    for (const [key, text] of Object.entries(labels)) {
-      if (onclickAttr.includes(`'${key}'`)) {
-        btn.innerText = text;
-        break;
-      }
-    }
+  // Mise à jour ciblée sur le texte de chaque puce
+  const chips = document.querySelectorAll('.filters-scroll .filter-chip');
+  chips.forEach(chip => {
+    const txt = chip.textContent || '';
+    if (txt.includes('Tous')) chip.textContent = `Tous (${counts.all})`;
+    else if (txt.includes('Vinyle')) chip.textContent = `Vinyles (${counts.vinyle})`;
+    else if (txt.includes('CD-R')) chip.textContent = `CD-R (${counts.cdr})`;
+    else if (txt.includes('CD')) chip.textContent = `CD (${counts.cd})`;
+    else if (txt.includes('SACD')) chip.textContent = `SACD (${counts.sacd})`;
+    else if (txt.includes('Coffret')) chip.textContent = `Coffrets (${counts.coffret})`;
+    else if (txt.includes('Souhait') || txt.includes('Liste')) chip.textContent = `Liste de souhaits (${counts.wantlist})`;
   });
 }
     
