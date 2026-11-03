@@ -896,7 +896,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 03-11-2026 01:45</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 03-11-2026 03:00</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1717,6 +1717,27 @@ window.addEventListener('scroll', () => {
       }
     }
 
+    // --- HELPER DE DÉCOMPTE DES COFFRETS ---
+    function isCoffretAlbum(a) {
+      if (!a) return false;
+      const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
+      return !!(
+        a.isBoxSet || 
+        a.is_coffret || 
+        (a.volumes && a.volumes.length > 0) || 
+        isBach
+      );
+    }
+
+    function getBoxCountForAlbum(a) {
+      if (!a || !isCoffretAlbum(a)) return 0;
+      const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
+      if (isBach) return 45;
+      if (a.boxCount && parseInt(a.boxCount) > 0) return parseInt(a.boxCount);
+      if (a.volumes && a.volumes.length > 0) return a.volumes.length;
+      return 1;
+    }
+
     // --- STATISTIQUES ---
     function openStatsModal() {
       lockBodyScroll();
@@ -1747,7 +1768,7 @@ window.addEventListener('scroll', () => {
           else if (a.support === 'SACD') countSACD += realDiscsCount;
 
           if (isCoffretAlbum(a)) {
-            countCoffret += 1;
+            countCoffret += getBoxCountForAlbum(a);
           }
 
           let p = 0;
@@ -1784,19 +1805,7 @@ window.addEventListener('scroll', () => {
       document.getElementById("statsModal").classList.add("active");
     }
 
-    /* --- ÉTAPE 3 : COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
-
-    function isCoffretAlbum(a) {
-      if (!a) return false;
-      const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
-      return !!(
-        a.isBoxSet || 
-        a.is_coffret || 
-        (a.volumes && a.volumes.length > 0) || 
-        isBach
-      );
-    }
-
+    /* --- COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
 function updateFilterCounts() {
   if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
 
@@ -1806,7 +1815,7 @@ function updateFilterCounts() {
     cd: collection.filter(a => a && !a.isWantlist && a.support === 'CD').length,
     cdr: collection.filter(a => a && !a.isWantlist && a.support === 'CD-R').length,
     sacd: collection.filter(a => a && !a.isWantlist && a.support === 'SACD').length,
-    coffret: collection.filter(a => a && !a.isWantlist && isCoffretAlbum(a)).length,
+    coffret: collection.filter(a => a && !a.isWantlist).reduce((sum, a) => sum + getBoxCountForAlbum(a), 0),
     wantlist: collection.filter(a => a && a.isWantlist).length
   };
 
