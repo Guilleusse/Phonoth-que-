@@ -896,7 +896,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 03-11-2026 01:34</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 03-11-2026 01:45</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1792,11 +1792,7 @@ window.addEventListener('scroll', () => {
       return !!(
         a.isBoxSet || 
         a.is_coffret || 
-        a.isDoubleAlbum || 
-        a.isTripleAlbum || 
-        a.isQuadrupleAlbum || 
         (a.volumes && a.volumes.length > 0) || 
-        (parseInt(a.discsCount) > 1) || 
         isBach
       );
     }
@@ -2114,8 +2110,7 @@ function updateFilterCounts() {
       lockBodyScroll();
       selectedAlbumIndex = index;
       const album = collection[index];
-      const isBach = (album.title && (album.title.includes('Kantaten') || album.title.includes('Kantatenwerk'))) || (album.volumes && album.volumes.length === 45);
-      const isBox = album.isBoxSet || isBach;
+      const isBox = isCoffretAlbum(album);
 
       document.getElementById("modalDetailTitle").textContent = album.isWantlist 
         ? "💡 Élément recherché (Wantlist)" 
