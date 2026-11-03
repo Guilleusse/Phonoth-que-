@@ -74,7 +74,7 @@
   background-color: var(--bg-color);
   z-index: 100;
   padding-top: calc(env(safe-area-inset-top) + 2px);
-  padding-bottom: 6px; /* Était à 2px : donne un peu d'espace avant le début des albums */
+  padding-bottom: 6px;
   margin-left: -15px;
   margin-right: -25px;
   padding-left: 15px;
@@ -100,14 +100,14 @@
     margin-bottom: 8px;
   }
 
-  /* --- 1. REVERROUILLER LE GLISSEMENT HORIZONTAL (CORRIGE LA CAPTURE 2) --- */
+  /* --- 1. REVERROUILLER LE GLISSEMENT HORIZONTAL --- */
 html, body {
   overflow-x: hidden;
 }
 
-/* --- 2. RÉDUIRE LÉGÈREMENT LE LOGO (CORRIGE LA CAPTURE 2) --- */
+/* --- 2. LOGO --- */
 .app-logo {
-  max-height: 80px; /* Redescendu de 120px à 80px : reste bien grand sans déborder */
+  max-height: 80px;
   max-width: 100%;
   width: auto;
   object-fit: contain;
@@ -120,8 +120,8 @@ html, body {
     justify-content: space-between;
     align-items: center;
     gap: 6px;
-    margin-bottom: 10px; /* Aère l'espace avant la ligne Exporter/Importer */
-}
+    margin-bottom: 10px;
+  }
   
   .header-actions .icon-btn {
     flex: 1;
@@ -167,7 +167,7 @@ html, body {
   display: flex;
   gap: 8px;
   margin-top: 2px;
-  margin-bottom: 14px; /* Était à 6px : aère sous la ligne Exporter/Importer */
+  margin-bottom: 14px;
 }
 
   .btn-secondary {
@@ -197,7 +197,7 @@ html, body {
 .search-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 14px; /* Était à 6px : aère sous la barre de recherche */
+  margin-bottom: 14px;
   align-items: center;
 }
 
@@ -284,22 +284,20 @@ html, body {
     cursor: pointer;
   }
 
-  /* --- ÉTAPE 1 (CORRECTION IOS) : BANDE DE FILTRES AVEC FONDU --- */
+  /* --- BANDE DE FILTRES AVEC FONDU --- */
 .filters-scroll {
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
   gap: 8px;
-  padding: 0 12px 6px 12px; /* Espacement aux deux extrémités */
+  padding: 0 12px 6px 12px;
   margin-bottom: 0px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 
-  /* Force le rendu du masque sur Safari iOS (GPU layer) */
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 
-  /* Fondu progressif à gauche ET à droite sur Safari/iOS */
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%);
 }
@@ -365,7 +363,7 @@ html, body {
     font-weight: normal;
   }
 
-  /* --- 3. REPASSER LA BARRE A-Z AU-DESSUS DU HEADER (CORRIGE LA CAPTURE 1) --- */
+  /* --- BARRE A-Z --- */
 .az-index {
   position: fixed;
   right: 4px;
@@ -374,7 +372,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  z-index: 101; /* Passé de 10 à 101 pour flotter au-dessus du fond de l'en-tête */
+  z-index: 101;
   font-size: 9px;
   font-weight: bold;
   color: var(--text-sub);
@@ -500,7 +498,7 @@ html, body {
     color: var(--text-main);
   }
 
-  /* --- ÉTAPE 2 : HARMONISATION DES BADGES (PALETTE FINALE) --- */
+  /* --- HARMONISATION DES BADGES --- */
 .badge {
   display: inline-block;
   font-size: 10px;
@@ -535,7 +533,7 @@ html, body {
   border: 1px solid rgba(191, 90, 242, 0.35);
 }
 
-/* Badge Audiophile (Jaune Or pur - distinct de l'orange) */
+/* Badge Audiophile (Jaune Or pur) */
 .badge-audiophile {
   background: rgba(255, 214, 10, 0.18);
   color: #ffd60a;
@@ -898,7 +896,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 03-11-2026 00:37</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 03-11-2026 01:00</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1287,10 +1285,9 @@ html, body {
 
     let lastScrollY = window.scrollY;
 let scrollUpAccumulator = 0;
-const THRESHOLD_SHOW = 80; // Hauteur équivalente à une vignette (~80px)
+const THRESHOLD_SHOW = 80;
 
 window.addEventListener('scroll', () => {
-  // Gestion du bouton "Retour en haut"
   const btn = document.getElementById('backToTopBtn');
   if (btn) {
     btn.classList.toggle('visible', window.scrollY > 400);
@@ -1302,16 +1299,13 @@ window.addEventListener('scroll', () => {
   const currentScrollY = window.scrollY;
   const delta = currentScrollY - lastScrollY;
 
-  // Si on fait défiler vers le bas (on consulte les albums)
   if (delta > 0 && currentScrollY > 100) {
     stickyZone.classList.add('hidden');
-    scrollUpAccumulator = 0; // Réinitialise le compteur de remontée
+    scrollUpAccumulator = 0;
   } 
-  // Si on remonte vers le haut
   else if (delta < 0) {
     scrollUpAccumulator += Math.abs(delta);
     
-    // Si on a remonté de l'équivalent d'une vignette (80px) ou si on touche le haut de page
     if (scrollUpAccumulator >= THRESHOLD_SHOW || currentScrollY <= 10) {
       stickyZone.classList.remove('hidden');
     }
@@ -1740,7 +1734,8 @@ window.addEventListener('scroll', () => {
         if (a.isWantlist) {
           countWantlist++;
         } else {
-          const explicitDiscs = parseInt(a.discsCount) || 0;
+          const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
+          const explicitDiscs = isBach ? 90 : (parseInt(a.discsCount) || 0);
           const subBoxes = (a.volumes && a.volumes.length > 0) ? a.volumes.length : 1;
           let realDiscsCount = explicitDiscs > 0 ? explicitDiscs : (a.isBoxSet ? subBoxes * 2 : (a.isDoubleAlbum ? 2 : (a.isTripleAlbum ? 3 : (a.isQuadrupleAlbum ? 4 : 1))));
           
@@ -1751,8 +1746,8 @@ window.addEventListener('scroll', () => {
           else if (a.support === 'CD-R') countCDr += realDiscsCount;
           else if (a.support === 'SACD') countSACD += realDiscsCount;
 
-          if (a.isBoxSet) {
-            countCoffret += (a.title && a.title.includes("Kantatenwerk") ? subBoxes : 1);
+          if (a.isBoxSet || isBach) {
+            countCoffret += 1;
           }
 
           let p = 0;
@@ -1789,22 +1784,20 @@ window.addEventListener('scroll', () => {
       document.getElementById("statsModal").classList.add("active");
     }
 
-    /* --- ÉTAPE 3 : COMPTEURS DYNAMIQUES DANS LES FILTRES (CORRECTIF FINAL) --- */
+    /* --- ÉTAPE 3 : COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
 function updateFilterCounts() {
   if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
 
-  // Calcul des références par filtre
   const counts = {
     all: collection.filter(a => a && !a.isWantlist).length,
     vinyle: collection.filter(a => a && !a.isWantlist && a.support === 'Vinyle').length,
     cd: collection.filter(a => a && !a.isWantlist && a.support === 'CD').length,
     cdr: collection.filter(a => a && !a.isWantlist && a.support === 'CD-R').length,
     sacd: collection.filter(a => a && !a.isWantlist && a.support === 'SACD').length,
-    coffret: collection.filter(a => a && !a.isWantlist && (a.isBoxSet || a.is_coffret)).length,
+    coffret: collection.filter(a => a && !a.isWantlist && (a.isBoxSet || a.is_coffret || (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45))).length,
     wantlist: collection.filter(a => a && a.isWantlist).length
   };
 
-  // Identification précise via l'action onclick du bouton
   const chips = document.querySelectorAll('.filters-scroll .filter-chip');
   chips.forEach(chip => {
     const act = chip.getAttribute('onclick') || '';
@@ -1832,10 +1825,12 @@ function updateFilterCounts() {
       let filtered = collection.filter(album => {
         if (!album) return false;
 
+        const isBach = (album.title && (album.title.includes('Kantaten') || album.title.includes('Kantatenwerk'))) || (album.volumes && album.volumes.length === 45);
+
         if (!search && !activeExactFilter) {
           if (currentFilter === 'Wantlist') return album.isWantlist;
           if (album.isWantlist) return false;
-          if (currentFilter === 'Coffret' && !album.isBoxSet) return false;
+          if (currentFilter === 'Coffret' && !album.isBoxSet && !isBach) return false;
           if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
         }
 
@@ -1849,7 +1844,7 @@ function updateFilterCounts() {
             ((search.includes('2') || search.includes('double')) && album.isDoubleAlbum) || 
             ((search.includes('3') || search.includes('triple')) && album.isTripleAlbum) || 
             ((search.includes('4') || search.includes('quadruple')) && album.isQuadrupleAlbum) || 
-            (search.includes('disque') && (album.isDoubleAlbum || album.isTripleAlbum || album.isQuadrupleAlbum || album.isBoxSet))
+            (search.includes('disque') && (album.isDoubleAlbum || album.isTripleAlbum || album.isQuadrupleAlbum || album.isBoxSet || isBach))
           );
 
           return matchText(album.title, search) ||
@@ -1928,13 +1923,19 @@ function updateFilterCounts() {
     }
   };
 
+  // Exception spécifique : Integrale des Cantates de Bach (45 volumes = 90 LPs Coffret Audiophile)
+  const isBachCantates = (album.title && (album.title.includes('Kantaten') || album.title.includes('Kantatenwerk'))) || (album.volumes && album.volumes.length === 45);
+
+  let isBoxSet = album.isBoxSet || isBachCantates;
   let badgeClass = 'badge-cd';
   let baseText = album.support || 'CD';
   let supp = baseText.toUpperCase();
 
-  // 1. Calcul du nombre de disques (multiplie par 2 si c'est un coffret de sous-volumes doubles)
+  // 1. Calcul du nombre de disques
   let nbDisques = 0;
-  if (album.volumes && album.volumes.length > 0) {
+  if (isBachCantates) {
+    nbDisques = 90;
+  } else if (album.volumes && album.volumes.length > 0) {
     const multiplier = (album.isDoubleAlbum || album.discsPerVolume === 2) ? 2 : 1;
     nbDisques = album.volumes.reduce((acc, v) => acc + (parseInt(v.discsCount) || multiplier), 0);
   } else {
@@ -1942,11 +1943,11 @@ function updateFilterCounts() {
   }
 
   // 2. Gestion automatique des pluriels (VINYLES et AUDIOPHILES avec un S)
-  const isPlural = nbDisques > 1 || album.isDoubleAlbum || album.isTripleAlbum || album.isQuadrupleAlbum || album.isBoxSet;
+  const isPlural = nbDisques > 1 || album.isDoubleAlbum || album.isTripleAlbum || album.isQuadrupleAlbum || isBoxSet;
   const suppDisplay = (isPlural && supp === 'VINYLE') ? 'VINYLES' : supp;
   const audiophileDisplay = isPlural ? 'AUDIOPHILES' : 'AUDIOPHILE';
 
-  if (album.isDoubleAlbum && !album.isBoxSet) baseText = `2 DISQUES ${suppDisplay}`.trim();
+  if (album.isDoubleAlbum && !isBoxSet) baseText = `2 DISQUES ${suppDisplay}`.trim();
   else if (album.isTripleAlbum) baseText = `3 DISQUES ${suppDisplay}`.trim();
   else if (album.isQuadrupleAlbum) baseText = `4 DISQUES ${suppDisplay}`.trim();
 
@@ -1955,7 +1956,7 @@ function updateFilterCounts() {
   if (album.isWantlist) {
     badgeClass = 'badge-wantlist';
     badgeText = `SOUHAITS ${badgeText}`;
-  } else if (album.isBoxSet) {
+  } else if (isBoxSet) {
     badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
     const details = nbDisques > 0 ? `${nbDisques} DISQUES ` : '';
     badgeText = album.isAudiophile 
@@ -2097,15 +2098,17 @@ function updateFilterCounts() {
       lockBodyScroll();
       selectedAlbumIndex = index;
       const album = collection[index];
+      const isBach = (album.title && (album.title.includes('Kantaten') || album.title.includes('Kantatenwerk'))) || (album.volumes && album.volumes.length === 45);
+      const isBox = album.isBoxSet || isBach;
 
       document.getElementById("modalDetailTitle").textContent = album.isWantlist 
         ? "💡 Élément recherché (Wantlist)" 
-        : (album.isBoxSet ? "Détails du Coffret" : "Détails de l'album");
+        : (isBox ? "Détails du Coffret" : "Détails de l'album");
 
       document.getElementById("modalDetailArtist").textContent = album.artist || '';
       document.getElementById("modalDetailAlbumName").textContent = album.title || '';
 
-      document.getElementById("modalDetailSupport").textContent = album.isBoxSet 
+      document.getElementById("modalDetailSupport").textContent = isBox 
         ? `Coffret (${album.support})` 
         : (album.isDoubleAlbum ? `Double Album (${album.support})` : (album.isTripleAlbum ? `Triple Album (${album.support})` : (album.isQuadrupleAlbum ? `Quadruple Album (${album.support})` : album.support))) + (album.isAudiophile ? ' Audiophile' : '');
 
@@ -2135,7 +2138,7 @@ function updateFilterCounts() {
       document.getElementById("modalDetailNotes").textContent = album.notes || '';
 
       const trackBox = document.getElementById("tracksList");
-      if (!album.isBoxSet && album.tracks?.length > 0) {
+      if (!isBox && album.tracks?.length > 0) {
         document.getElementById("tracksSection").style.display = 'block';
         trackBox.innerHTML = album.tracks.map(t => `
           <div style="font-size:13px; padding:6px 0; border-bottom:1px solid #3a3a3c; display:flex; justify-content:space-between; gap:10px;">
@@ -2179,7 +2182,7 @@ function updateFilterCounts() {
         jBtn.style.display = 'none';
       }
 
-      if (album.isBoxSet) {
+      if (isBox) {
         document.getElementById("volumesSection").style.display = 'block';
         renderVolumesList(album.volumes || [], album.cover);
       } else {
@@ -2677,22 +2680,17 @@ function updateFilterCounts() {
 
   if (!owned.length) return;
 
-  // Récupère la liste des derniers tirages au dé
   let recentDicePicks = JSON.parse(localStorage.getItem('phonotheque_dice_history') || '[]');
 
-  // Ne garde que les albums qui ne sont PAS sortis récemment
   let candidates = owned.filter(item => !recentDicePicks.includes(item.index));
 
-  // Si tous les albums ont été tirés, on réinitialise la mémoire
   if (candidates.length === 0) {
     recentDicePicks = [];
     candidates = owned;
   }
 
-  // Tirage au sort parmi les candidats restants
   const picked = candidates[Math.floor(Math.random() * candidates.length)];
 
-  // On enregistre ce tirage dans l'historique (garde les 20 derniers en mémoire)
   recentDicePicks.push(picked.index);
   if (recentDicePicks.length > 20) {
     recentDicePicks.shift();
