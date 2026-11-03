@@ -896,7 +896,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 03-11-2026 01:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 03-11-2026 01:34</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1746,7 +1746,7 @@ window.addEventListener('scroll', () => {
           else if (a.support === 'CD-R') countCDr += realDiscsCount;
           else if (a.support === 'SACD') countSACD += realDiscsCount;
 
-          if (a.isBoxSet || isBach) {
+          if (isCoffretAlbum(a)) {
             countCoffret += 1;
           }
 
@@ -1785,6 +1785,22 @@ window.addEventListener('scroll', () => {
     }
 
     /* --- ÉTAPE 3 : COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
+
+    function isCoffretAlbum(a) {
+      if (!a) return false;
+      const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
+      return !!(
+        a.isBoxSet || 
+        a.is_coffret || 
+        a.isDoubleAlbum || 
+        a.isTripleAlbum || 
+        a.isQuadrupleAlbum || 
+        (a.volumes && a.volumes.length > 0) || 
+        (parseInt(a.discsCount) > 1) || 
+        isBach
+      );
+    }
+
 function updateFilterCounts() {
   if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
 
@@ -1794,7 +1810,7 @@ function updateFilterCounts() {
     cd: collection.filter(a => a && !a.isWantlist && a.support === 'CD').length,
     cdr: collection.filter(a => a && !a.isWantlist && a.support === 'CD-R').length,
     sacd: collection.filter(a => a && !a.isWantlist && a.support === 'SACD').length,
-    coffret: collection.filter(a => a && !a.isWantlist && (a.isBoxSet || a.is_coffret || (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45))).length,
+    coffret: collection.filter(a => a && !a.isWantlist && isCoffretAlbum(a)).length,
     wantlist: collection.filter(a => a && a.isWantlist).length
   };
 
@@ -1830,7 +1846,7 @@ function updateFilterCounts() {
         if (!search && !activeExactFilter) {
           if (currentFilter === 'Wantlist') return album.isWantlist;
           if (album.isWantlist) return false;
-          if (currentFilter === 'Coffret' && !album.isBoxSet && !isBach) return false;
+          if (currentFilter === 'Coffret' && !isCoffretAlbum(album)) return false;
           if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
         }
 
@@ -1926,7 +1942,7 @@ function updateFilterCounts() {
   // Exception spécifique : Integrale des Cantates de Bach (45 volumes = 90 LPs Coffret Audiophile)
   const isBachCantates = (album.title && (album.title.includes('Kantaten') || album.title.includes('Kantatenwerk'))) || (album.volumes && album.volumes.length === 45);
 
-  let isBoxSet = album.isBoxSet || isBachCantates;
+  let isBoxSet = isCoffretAlbum(album);
   let badgeClass = 'badge-cd';
   let baseText = album.support || 'CD';
   let supp = baseText.toUpperCase();
