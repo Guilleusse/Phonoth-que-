@@ -896,7 +896,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 04-11-2026 01:11</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 04-11-2026 01:35</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1233,7 +1233,7 @@ html, body {
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script>
+<script>
     // --- CONFIGURATION SUPABASE ---
     const SUPABASE_URL = 'https://mchljfhtgingnqxcjizf.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jaGxqZmh0Z2luZ25xeGNqaXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTY1NzYsImV4cCI6MjEwNTA3MjU3Nn0.aGv9w7XQB-FOVc7xScX-3HN-5ZcA3d3EM7JOBz0HCuQ';
@@ -1284,35 +1284,35 @@ html, body {
     }
 
     let lastScrollY = window.scrollY;
-let scrollUpAccumulator = 0;
-const THRESHOLD_SHOW = 80;
+    let scrollUpAccumulator = 0;
+    const THRESHOLD_SHOW = 80;
 
-window.addEventListener('scroll', () => {
-  const btn = document.getElementById('backToTopBtn');
-  if (btn) {
-    btn.classList.toggle('visible', window.scrollY > 400);
-  }
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('backToTopBtn');
+      if (btn) {
+        btn.classList.toggle('visible', window.scrollY > 400);
+      }
 
-  const stickyZone = document.querySelector('.sticky-zone');
-  if (!stickyZone) return;
+      const stickyZone = document.querySelector('.sticky-zone');
+      if (!stickyZone) return;
 
-  const currentScrollY = window.scrollY;
-  const delta = currentScrollY - lastScrollY;
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollY;
 
-  if (delta > 0 && currentScrollY > 100) {
-    stickyZone.classList.add('hidden');
-    scrollUpAccumulator = 0;
-  } 
-  else if (delta < 0) {
-    scrollUpAccumulator += Math.abs(delta);
-    
-    if (scrollUpAccumulator >= THRESHOLD_SHOW || currentScrollY <= 10) {
-      stickyZone.classList.remove('hidden');
-    }
-  }
+      if (delta > 0 && currentScrollY > 100) {
+        stickyZone.classList.add('hidden');
+        scrollUpAccumulator = 0;
+      } 
+      else if (delta < 0) {
+        scrollUpAccumulator += Math.abs(delta);
+        
+        if (scrollUpAccumulator >= THRESHOLD_SHOW || currentScrollY <= 10) {
+          stickyZone.classList.remove('hidden');
+        }
+      }
 
-  lastScrollY = currentScrollY;
-});
+      lastScrollY = currentScrollY;
+    });
 
     function scrollToTop() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1717,9 +1717,9 @@ window.addEventListener('scroll', () => {
       }
     }
 
-    // --- HELPER DE DÉCOMPTE DES COFFRETS ---
+    // --- HELPER DE DÉCOMPTE DES COFFRETS & DISQUES (CORRIGÉ) ---
     function isCoffretAlbum(a) {
-      if (!a) return false;
+      if (!a || a.isWantlist) return false;
       const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
       return !!(
         a.isBoxSet || 
@@ -1732,13 +1732,32 @@ window.addEventListener('scroll', () => {
     function getBoxCountForAlbum(a) {
       if (!a || !isCoffretAlbum(a)) return 0;
       const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
-      if (isBach) return 45;
+      if (isBach) return 45; // L'intégrale Bach vaut 45 coffrets physiques
       if (a.boxCount && parseInt(a.boxCount) > 0) return parseInt(a.boxCount);
-      if (a.volumes && a.volumes.length > 0) return a.volumes.length;
+      return 1; // Un coffret individuel vaut 1 coffret physique
+    }
+
+    function getPhysicalDiscsForAlbum(a) {
+      if (!a || a.isWantlist) return 0;
+      const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
+      if (isBach) return 90; // 45 volumes x 2 LPs
+
+      const cnt = parseInt(a.discsCount) || 0;
+      if (cnt > 0) return cnt;
+
+      const volsCount = (a.volumes && Array.isArray(a.volumes)) ? a.volumes.length : 0;
+      if (volsCount > 0) {
+        if (a.isDoubleAlbum) return volsCount * 2;
+        return volsCount;
+      }
+
+      if (a.isQuadrupleAlbum) return 4;
+      if (a.isTripleAlbum) return 3;
+      if (a.isDoubleAlbum) return 2;
       return 1;
     }
 
-    // --- STATISTIQUES ---
+    // --- STATISTIQUES (CORRIGÉ) ---
     function openStatsModal() {
       lockBodyScroll();
       let countVinyle = 0;
@@ -1755,17 +1774,13 @@ window.addEventListener('scroll', () => {
         if (a.isWantlist) {
           countWantlist++;
         } else {
-          const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
-          const explicitDiscs = isBach ? 90 : (parseInt(a.discsCount) || 0);
-          const subBoxes = (a.volumes && a.volumes.length > 0) ? a.volumes.length : 1;
-          let realDiscsCount = explicitDiscs > 0 ? explicitDiscs : (a.isBoxSet ? subBoxes * 2 : (a.isDoubleAlbum ? 2 : (a.isTripleAlbum ? 3 : (a.isQuadrupleAlbum ? 4 : 1))));
-          
-          totalDiscsPhysical += realDiscsCount;
+          const realDiscs = getPhysicalDiscsForAlbum(a);
+          totalDiscsPhysical += realDiscs;
 
-          if (a.support === 'Vinyle') countVinyle += realDiscsCount;
-          else if (a.support === 'CD') countCD += realDiscsCount;
-          else if (a.support === 'CD-R') countCDr += realDiscsCount;
-          else if (a.support === 'SACD') countSACD += realDiscsCount;
+          if (a.support === 'Vinyle') countVinyle += realDiscs;
+          else if (a.support === 'CD') countCD += realDiscs;
+          else if (a.support === 'CD-R') countCDr += realDiscs;
+          else if (a.support === 'SACD') countSACD += realDiscs;
 
           if (isCoffretAlbum(a)) {
             countCoffret += getBoxCountForAlbum(a);
@@ -1787,6 +1802,8 @@ window.addEventListener('scroll', () => {
         }
       });
 
+      const formattedPrice = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalPrice);
+
       document.getElementById("statsModalContent").innerHTML = `
       <div class="details-row"><span class="details-label">Nb réel de disques :</span><span class="details-val">${totalDiscsPhysical}</span></div>
       <div class="details-row"><span class="details-label">Nb de vignettes (appli) :</span><span class="details-val">${collection.length - countWantlist}</span></div>
@@ -1795,7 +1812,7 @@ window.addEventListener('scroll', () => {
       <div class="details-row"><span class="details-label">Nb réel de CD-R :</span><span class="details-val">${countCDr}</span></div>
       <div class="details-row"><span class="details-label">Nb réel de SACD :</span><span class="details-val">${countSACD}</span></div>
       <div class="details-row"><span class="details-label">Nb réel de coffrets :</span><span class="details-val">${countCoffret}</span></div>
-      <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${totalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €</span></div>
+      <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
       <div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
       <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
         <div style="margin-top: 20px; text-align: center;">
@@ -1805,33 +1822,33 @@ window.addEventListener('scroll', () => {
       document.getElementById("statsModal").classList.add("active");
     }
 
-    /* --- COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
-function updateFilterCounts() {
-  if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
+    /* --- COMPTEURS DYNAMIQUES DANS LES FILTRES (CORRIGÉ) --- */
+    function updateFilterCounts() {
+      if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
 
-  const counts = {
-    all: collection.filter(a => a && !a.isWantlist).length,
-    vinyle: collection.filter(a => a && !a.isWantlist && a.support === 'Vinyle').length,
-    cd: collection.filter(a => a && !a.isWantlist && a.support === 'CD').length,
-    cdr: collection.filter(a => a && !a.isWantlist && a.support === 'CD-R').length,
-    sacd: collection.filter(a => a && !a.isWantlist && a.support === 'SACD').length,
-    coffret: collection.filter(a => a && !a.isWantlist).reduce((sum, a) => sum + getBoxCountForAlbum(a), 0),
-    wantlist: collection.filter(a => a && a.isWantlist).length
-  };
+      const counts = {
+        all: collection.filter(a => a && !a.isWantlist).length,
+        vinyle: collection.filter(a => a && !a.isWantlist && a.support === 'Vinyle').length,
+        cd: collection.filter(a => a && !a.isWantlist && a.support === 'CD').length,
+        cdr: collection.filter(a => a && !a.isWantlist && a.support === 'CD-R').length,
+        sacd: collection.filter(a => a && !a.isWantlist && a.support === 'SACD').length,
+        coffret: collection.filter(a => a && !a.isWantlist).reduce((sum, a) => sum + getBoxCountForAlbum(a), 0),
+        wantlist: collection.filter(a => a && a.isWantlist).length
+      };
 
-  const chips = document.querySelectorAll('.filters-scroll .filter-chip');
-  chips.forEach(chip => {
-    const act = chip.getAttribute('onclick') || '';
+      const chips = document.querySelectorAll('.filters-scroll .filter-chip');
+      chips.forEach(chip => {
+        const act = chip.getAttribute('onclick') || '';
 
-    if (act.includes("'all'")) chip.textContent = `Tous (${counts.all})`;
-    else if (act.includes("'Vinyle'")) chip.textContent = `Vinyles (${counts.vinyle})`;
-    else if (act.includes("'SACD'")) chip.textContent = `SACD (${counts.sacd})`;
-    else if (act.includes("'CD-R'")) chip.textContent = `CD-R (${counts.cdr})`;
-    else if (act.includes("'CD'")) chip.textContent = `CD (${counts.cd})`;
-    else if (act.includes("'Coffret'")) chip.textContent = `Coffrets (${counts.coffret})`;
-    else if (act.includes("'Wantlist'")) chip.textContent = `Liste de souhaits (${counts.wantlist})`;
-  });
-}
+        if (act.includes("'all'")) chip.textContent = `Tous (${counts.all})`;
+        else if (act.includes("'Vinyle'")) chip.textContent = `Vinyles (${counts.vinyle})`;
+        else if (act.includes("'SACD'")) chip.textContent = `SACD (${counts.sacd})`;
+        else if (act.includes("'CD-R'")) chip.textContent = `CD-R (${counts.cdr})`;
+        else if (act.includes("'CD'")) chip.textContent = `CD (${counts.cd})`;
+        else if (act.includes("'Coffret'")) chip.textContent = `Coffrets (${counts.coffret})`;
+        else if (act.includes("'Wantlist'")) chip.textContent = `Liste de souhaits (${counts.wantlist})`;
+      });
+    }
     
     // --- RENDU ET FILTRAGE DE LA COLLECTION ---
     function renderCollection() {
@@ -1933,87 +1950,84 @@ function updateFilterCounts() {
       }
     }
 
-   function renderAlbumCard(album, container) {
-  const realIndex = collection.indexOf(album);
-  const card = document.createElement("div");
-  card.className = "album-card";
+    function renderAlbumCard(album, container) {
+      const realIndex = collection.indexOf(album);
+      const card = document.createElement("div");
+      card.className = "album-card";
 
-  card.onclick = (e) => {
-    if (!e.target.classList.contains('card-action-btn') && !e.target.classList.contains('clickable-tag')) {
-      showDetails(realIndex);
+      card.onclick = (e) => {
+        if (!e.target.classList.contains('card-action-btn') && !e.target.classList.contains('clickable-tag')) {
+          showDetails(realIndex);
+        }
+      };
+
+      const isBachCantates = (album.title && (album.title.includes('Kantaten') || album.title.includes('Kantatenwerk'))) || (album.volumes && album.volumes.length === 45);
+
+      let isBoxSet = isCoffretAlbum(album);
+      let badgeClass = 'badge-cd';
+      let baseText = album.support || 'CD';
+      let supp = baseText.toUpperCase();
+
+      let nbDisques = 0;
+      if (isBachCantates) {
+        nbDisques = 90;
+      } else if (album.volumes && album.volumes.length > 0) {
+        const multiplier = (album.isDoubleAlbum || album.discsPerVolume === 2) ? 2 : 1;
+        nbDisques = album.volumes.reduce((acc, v) => acc + (parseInt(v.discsCount) || multiplier), 0);
+      } else {
+        nbDisques = parseInt(album.discsCount) || 0;
+      }
+
+      const isPlural = nbDisques > 1 || album.isDoubleAlbum || album.isTripleAlbum || album.isQuadrupleAlbum || isBoxSet;
+      const suppDisplay = (isPlural && supp === 'VINYLE') ? 'VINYLES' : supp;
+      const audiophileDisplay = isPlural ? 'AUDIOPHILES' : 'AUDIOPHILE';
+
+      if (album.isDoubleAlbum && !isBoxSet) baseText = `2 DISQUES ${suppDisplay}`.trim();
+      else if (album.isTripleAlbum) baseText = `3 DISQUES ${suppDisplay}`.trim();
+      else if (album.isQuadrupleAlbum) baseText = `4 DISQUES ${suppDisplay}`.trim();
+
+      let badgeText = baseText.toUpperCase();
+
+      if (album.isWantlist) {
+        badgeClass = 'badge-wantlist';
+        badgeText = `SOUHAITS ${badgeText}`;
+      } else if (isBoxSet) {
+        badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
+        const details = nbDisques > 0 ? `${nbDisques} DISQUES ` : '';
+        badgeText = album.isAudiophile 
+          ? `COFFRET • ${details}${suppDisplay} ${audiophileDisplay}`.trim()
+          : `COFFRET • ${details}${suppDisplay}`.trim();
+      } else if (album.isAudiophile) {
+        badgeClass = 'badge-audiophile';
+        badgeText += ` ${audiophileDisplay}`;
+      } else if (album.support === 'Vinyle') {
+        badgeClass = 'badge-vinyle';
+      } else if (album.support === 'CD-R') {
+        badgeClass = 'badge-cdr';
+      } else if (album.support === 'SACD') {
+        badgeClass = 'badge-sacd';
+      }
+
+      const metaText = [
+        album.label, 
+        album.year, 
+        album.country ? `<span class="clickable-tag" data-country="${album.country.replace(/"/g, '&quot;')}" onclick="onCountryClick(this, event)">${album.country}</span>` : null
+      ].filter(Boolean).join(' • ');
+
+      card.innerHTML = `
+        <div class="card-delete-top"><button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)">🗑️</button></div>
+        <div class="cover-box">${album.cover ? `<img src="${album.cover}" onerror="this.style.display='none'">` : 'Pochette'}</div>
+        <div class="album-info">
+          <span class="badge ${badgeClass}">${badgeText}</span>
+          <div class="album-artist">${album.artist ? `<span class="clickable-tag" data-artist="${album.artist.replace(/"/g, '&quot;')}" onclick="onArtistClick(this, event)">${album.artist}</span>` : 'Artiste inconnu'}</div>
+          <div class="album-title">${album.title || 'Sans titre'}</div>
+          <div class="album-sub">${metaText}</div>
+          ${album.style ? `<div style="margin-top:2px;">${album.style.split(' / ').map(s => `<span class="genre-badge">${s}</span>`).join('')}</div>` : ''}
+        </div>
+        <div class="card-actions"><button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button></div>
+      `;
+      container.appendChild(card);
     }
-  };
-
-  // Exception spécifique : Integrale des Cantates de Bach (45 volumes = 90 LPs Coffret Audiophile)
-  const isBachCantates = (album.title && (album.title.includes('Kantaten') || album.title.includes('Kantatenwerk'))) || (album.volumes && album.volumes.length === 45);
-
-  let isBoxSet = isCoffretAlbum(album);
-  let badgeClass = 'badge-cd';
-  let baseText = album.support || 'CD';
-  let supp = baseText.toUpperCase();
-
-  // 1. Calcul du nombre de disques
-  let nbDisques = 0;
-  if (isBachCantates) {
-    nbDisques = 90;
-  } else if (album.volumes && album.volumes.length > 0) {
-    const multiplier = (album.isDoubleAlbum || album.discsPerVolume === 2) ? 2 : 1;
-    nbDisques = album.volumes.reduce((acc, v) => acc + (parseInt(v.discsCount) || multiplier), 0);
-  } else {
-    nbDisques = parseInt(album.discsCount) || 0;
-  }
-
-  // 2. Gestion automatique des pluriels (VINYLES et AUDIOPHILES avec un S)
-  const isPlural = nbDisques > 1 || album.isDoubleAlbum || album.isTripleAlbum || album.isQuadrupleAlbum || isBoxSet;
-  const suppDisplay = (isPlural && supp === 'VINYLE') ? 'VINYLES' : supp;
-  const audiophileDisplay = isPlural ? 'AUDIOPHILES' : 'AUDIOPHILE';
-
-  if (album.isDoubleAlbum && !isBoxSet) baseText = `2 DISQUES ${suppDisplay}`.trim();
-  else if (album.isTripleAlbum) baseText = `3 DISQUES ${suppDisplay}`.trim();
-  else if (album.isQuadrupleAlbum) baseText = `4 DISQUES ${suppDisplay}`.trim();
-
-  let badgeText = baseText.toUpperCase();
-
-  if (album.isWantlist) {
-    badgeClass = 'badge-wantlist';
-    badgeText = `SOUHAITS ${badgeText}`;
-  } else if (isBoxSet) {
-    badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
-    const details = nbDisques > 0 ? `${nbDisques} DISQUES ` : '';
-    badgeText = album.isAudiophile 
-      ? `COFFRET • ${details}${suppDisplay} ${audiophileDisplay}`.trim()
-      : `COFFRET • ${details}${suppDisplay}`.trim();
-  } else if (album.isAudiophile) {
-    badgeClass = 'badge-audiophile';
-    badgeText += ` ${audiophileDisplay}`;
-  } else if (album.support === 'Vinyle') {
-    badgeClass = 'badge-vinyle';
-  } else if (album.support === 'CD-R') {
-    badgeClass = 'badge-cdr';
-  } else if (album.support === 'SACD') {
-    badgeClass = 'badge-sacd';
-  }
-
-  const metaText = [
-    album.label, 
-    album.year, 
-    album.country ? `<span class="clickable-tag" data-country="${album.country.replace(/"/g, '&quot;')}" onclick="onCountryClick(this, event)">${album.country}</span>` : null
-  ].filter(Boolean).join(' • ');
-
-  card.innerHTML = `
-    <div class="card-delete-top"><button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)">🗑️</button></div>
-    <div class="cover-box">${album.cover ? `<img src="${album.cover}" onerror="this.style.display='none'">` : 'Pochette'}</div>
-    <div class="album-info">
-      <span class="badge ${badgeClass}">${badgeText}</span>
-      <div class="album-artist">${album.artist ? `<span class="clickable-tag" data-artist="${album.artist.replace(/"/g, '&quot;')}" onclick="onArtistClick(this, event)">${album.artist}</span>` : 'Artiste inconnu'}</div>
-      <div class="album-title">${album.title || 'Sans titre'}</div>
-      <div class="album-sub">${metaText}</div>
-      ${album.style ? `<div style="margin-top:2px;">${album.style.split(' / ').map(s => `<span class="genre-badge">${s}</span>`).join('')}</div>` : ''}
-    </div>
-    <div class="card-actions"><button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button></div>
-  `;
-  container.appendChild(card);
-}
     
     function scrollToArtistGroup(elementId) {
       document.getElementById(elementId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2694,31 +2708,31 @@ function updateFilterCounts() {
     }
 
     function getRandomAlbum() {
-  const owned = collection
-    .map((album, index) => ({ album, index }))
-    .filter(item => !item.album.isWantlist);
+      const owned = collection
+        .map((album, index) => ({ album, index }))
+        .filter(item => !item.album.isWantlist);
 
-  if (!owned.length) return;
+      if (!owned.length) return;
 
-  let recentDicePicks = JSON.parse(localStorage.getItem('phonotheque_dice_history') || '[]');
+      let recentDicePicks = JSON.parse(localStorage.getItem('phonotheque_dice_history') || '[]');
 
-  let candidates = owned.filter(item => !recentDicePicks.includes(item.index));
+      let candidates = owned.filter(item => !recentDicePicks.includes(item.index));
 
-  if (candidates.length === 0) {
-    recentDicePicks = [];
-    candidates = owned;
-  }
+      if (candidates.length === 0) {
+        recentDicePicks = [];
+        candidates = owned;
+      }
 
-  const picked = candidates[Math.floor(Math.random() * candidates.length)];
+      const picked = candidates[Math.floor(Math.random() * candidates.length)];
 
-  recentDicePicks.push(picked.index);
-  if (recentDicePicks.length > 20) {
-    recentDicePicks.shift();
-  }
-  localStorage.setItem('phonotheque_dice_history', JSON.stringify(recentDicePicks));
+      recentDicePicks.push(picked.index);
+      if (recentDicePicks.length > 20) {
+        recentDicePicks.shift();
+      }
+      localStorage.setItem('phonotheque_dice_history', JSON.stringify(recentDicePicks));
 
-  showDetails(picked.index);
-}
+      showDetails(picked.index);
+    }
 
     function closeModal(id) {
       if (id === 'scannerModal') {
@@ -2796,8 +2810,9 @@ function updateFilterCounts() {
         }).join('||') : '';
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
+        const cleanNotes = (a.notes || '').replace(/\r?\n|\r/g, ' ');
 
-      csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${(a.notes||'').replace(/\r?\n|\r/g, ' ')}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\n`;  
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${cleanNotes}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\n`;  
       });
 
       const today = new Date().toISOString().split('T')[0];
@@ -2813,6 +2828,6 @@ function updateFilterCounts() {
     }
 
     window.onload = initApp;
-  </script>
+</script>
 </body>
 </html>
