@@ -963,7 +963,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 01:17</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 01:50</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1751,7 +1751,7 @@
 
     // --- RECHERCHE ET UTILITAIRES DE TEXTE ---
     function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     function matchText(text, search) {
@@ -1760,7 +1760,7 @@
       const s = search.toLowerCase().trim();
       if (!s) return true;
       if (s.length <= 3) {
-        return new RegExp('\\\\b' + escapeRegExp(s) + '\\\\b', 'i').test(t);
+        return new RegExp('\\b' + escapeRegExp(s) + '\\b', 'i').test(t);
       }
       return t.includes(s);
     }
@@ -1776,7 +1776,7 @@
 
     function parsePurchaseTimestamp(str) {
       if (!str) return 0;
-      const parts = str.trim().replace(/\\//g, '-').split('-');
+      const parts = str.trim().replace(/\//g, '-').split('-');
       if (parts.length === 3) {
         if (parts[0].length === 4) {
           return new Date(`${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`).getTime() || 0;
@@ -1881,10 +1881,10 @@
 
           let p = 0;
           if (a.purchasePrice) {
-            let priceStr = a.purchasePrice.toString().replace(/[\\s€a-zA-Z]/g, '');
+            let priceStr = a.purchasePrice.toString().replace(/[\s€a-zA-Z]/g, '');
             if (priceStr.includes('.') && priceStr.includes(',')) {
               priceStr = priceStr.lastIndexOf(',') > priceStr.lastIndexOf('.') 
-                ? priceStr.replace(/\\./g, '').replace(',', '.') 
+                ? priceStr.replace(/\./g, '').replace(',', '.') 
                 : priceStr.replace(/,/g, '');
             } else if (priceStr.includes(',')) {
               priceStr = priceStr.replace(',', '.');
@@ -2025,8 +2025,8 @@
           const al = groups[art];
           const sn = al.find(a => a.sortName?.trim());
           if (sn) return sn.sortName.trim();
-          if (al.some(a => (a.style||'').toLowerCase().includes('classical'))) return art.trim().split(/\\s+/).pop() || art;
-          return art.replace(/^(the)\\s+/i, '');
+          if (al.some(a => (a.style||'').toLowerCase().includes('classical'))) return art.trim().split(/\s+/).pop() || art;
+          return art.replace(/^(the)\s+/i, '');
         };
 
         const sortedArtists = Object.keys(groups).sort((a, b) => 
@@ -2423,7 +2423,7 @@
               ${coverUrl ? `<img src="${coverUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">` : `<div style="width:50px; height:50px; border-radius:8px; background:#2a2a2a; color:var(--text-sub); font-size:9px; display:flex; align-items:center; justify-content:center;">Disque ${idx+1}</div>`}
               <div style="flex:1;">
                 <span style="font-size:9px; background:var(--badge-coffret); color:white; padding:2px 6px; border-radius:4px; font-weight:bold;">DISQUE ${idx+1}</span>
-                <div style="font-size:13px; font-weight:600; color:white; margin-top:2px;">${v.title && !/^\\d+$/.test(v.title) ? v.title : `Disque ${idx+1}`}</div>
+                <div style="font-size:13px; font-weight:600; color:white; margin-top:2px;">${v.title && !/^\d+$/.test(v.title) ? v.title : `Disque ${idx+1}`}</div>
               </div>
               <div style="display:flex; gap:6px;">
                 <button class="card-action-btn" onclick="openEditVolumeModal(${idx})">✏️</button>
@@ -2449,7 +2449,7 @@
       const text = document.getElementById("bulkInput").value.trim();
 
       if (text) {
-        const lines = text.split('\\n').map(l => l.trim()).filter(l => l.length > 0);
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         if (!album.volumes) album.volumes = [];
         lines.forEach((line, idx) => {
           album.volumes[idx] = album.volumes[idx] || { cover: album.cover || '', tracks: [] };
@@ -2489,10 +2489,10 @@
       pendingEditVolCoverUrl = current.cover || '';
 
       document.getElementById("editVolIndex").value = volIdx;
-      document.getElementById("editVolTitle").value = current.title && !/^\\d+$/.test(current.title) ? current.title : `Disque ${volIdx + 1}`;
+      document.getElementById("editVolTitle").value = current.title && !/^\d+$/.test(current.title) ? current.title : `Disque ${volIdx + 1}`;
       document.getElementById("editVolCover").value = current.cover || '';
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
-      document.getElementById("editVolTracks").value = (current.tracks || []).map(t => t.title || '').join('\\n');
+      document.getElementById("editVolTracks").value = (current.tracks || []).map(t => t.title || '').join('\n');
       document.getElementById("editVolumeModal").classList.add("active");
     }
 
@@ -2514,10 +2514,10 @@
 
           if (!tracks.length) tracks = data.tracklist;
 
-          document.getElementById("editVolTracks").value = tracks.map(t => t.position ? `${t.position}. ${t.title||''}` : t.title||'').join('\\n');
+          document.getElementById("editVolTracks").value = tracks.map(t => t.position ? `${t.position}. ${t.title||''}` : t.title||'').join('\n');
 
           if (data.images?.length && !pendingEditVolCoverUrl) {
-            pendingEditVolCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\\/\\//, ''))}`;
+            pendingEditVolCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\/\//, ''))}`;
             document.getElementById("editVolCover").value = pendingEditVolCoverUrl;
           }
           alert(`Disque isolé avec succès !`);
@@ -2539,7 +2539,7 @@
       album.volumes[volIdx] = {
         title: document.getElementById("editVolTitle").value.trim(),
         cover: pendingEditVolCoverUrl || document.getElementById("editVolCover").value.trim(),
-        tracks: document.getElementById("editVolTracks").value.trim().split('\\n')
+        tracks: document.getElementById("editVolTracks").value.trim().split('\n')
           .map(line => ({ position: '', title: line.trim(), duration: '' }))
           .filter(t => t.title.length > 0)
       };
@@ -2612,7 +2612,7 @@
         document.getElementById(id).value = a[key] || '';
       });
 
-      document.getElementById("formTracks").value = (!a.isBoxSet && a.tracks?.length) ? a.tracks.map(t => t.title || '').join('\\n') : '';
+      document.getElementById("formTracks").value = (!a.isBoxSet && a.tracks?.length) ? a.tracks.map(t => t.title || '').join('\n') : '';
       pendingCoverUrl = a.cover || '';
       document.getElementById("formCover").value = a.cover || '';
       document.getElementById("formDiscsCount").value = a.discsCount || a.volumes?.length || '';
@@ -2645,7 +2645,7 @@
         existingVols = [];
       }
 
-      const mTrks = document.getElementById("formTracks").value.trim().split('\\n')
+      const mTrks = document.getElementById("formTracks").value.trim().split('\n')
         .map(l => ({ position: '', title: l.trim(), duration: '' }))
         .filter(t => t.title);
 
@@ -2758,18 +2758,18 @@
       const val = input.value.trim();
       if (!val) return alert("Saisissez un ID ou code.");
 
-      if (/^\\d+$/.test(val) && val.length < 11) {
+      if (/^\d+$/.test(val) && val.length < 11) {
         await fetchDiscogsById(val);
       } else {
         try {
           showSpinner();
-          const res = await fetch(`https://api.discogs.com/database/search?${/^\\d+$/.test(val) ? `q=${encodeURIComponent(val)}` : `catno=${encodeURIComponent(val)}`}&type=release`);
+          const res = await fetch(`https://api.discogs.com/database/search?${/^\d+$/.test(val) ? `q=${encodeURIComponent(val)}` : `catno=${encodeURIComponent(val)}`}&type=release`);
           const data = await res.json();
           hideSpinner();
 
           if (data.results?.length) {
             document.getElementById("formDiscogsId").value = data.results[0].id;
-            if (!/^\\d+$/.test(val)) document.getElementById("formCatalogNumber").value = val;
+            if (!/^\d+$/.test(val)) document.getElementById("formCatalogNumber").value = val;
             await fetchDiscogsById(data.results[0].id);
           } else {
             alert(`Aucun résultat trouvé pour : ${val}`);
@@ -2796,11 +2796,11 @@
 
         const data = await res.json();
         if (data.title) document.getElementById("formTitle").value = data.title;
-        if (data.artists?.length) document.getElementById("formArtist").value = data.artists.map(a => a.name.replace(/\\s*\\(\\d+\\)$/, '')).join(', ');
+        if (data.artists?.length) document.getElementById("formArtist").value = data.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ');
 
         let cond = data.extraartists?.find(a => a.role?.toLowerCase().includes('conductor') || a.role?.toLowerCase().includes('directed by')) 
                 || data.artists?.find(a => a.role?.toLowerCase().includes('conductor'));
-        if (cond) document.getElementById("formConductor").value = cond.name.replace(/\\s*\\(\\d+\\)$/, '').trim();
+        if (cond) document.getElementById("formConductor").value = cond.name.replace(/\s*\(\d+\)$/, '').trim();
 
         if (data.labels?.length) {
           document.getElementById("formLabel").value = data.labels[0].name;
@@ -2833,7 +2833,7 @@
         }
 
         if (data.images?.length) {
-          pendingCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\\/\\//, ''))}`;
+          pendingCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\/\//, ''))}`;
           document.getElementById("formCover").value = pendingCoverUrl;
         }
 
@@ -2845,7 +2845,7 @@
           }));
 
           if (document.getElementById("formRawTracks").checked && !document.getElementById("isBoxSet").checked) {
-            document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\\n');
+            document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\n');
           }
         }
         alert("Données chargées depuis Discogs !");
@@ -2902,7 +2902,7 @@
     async function importFromCSV(e) {
       const r = new FileReader();
       r.onload = async (ev) => {
-        const lines = ev.target.result.split('\\n').map(l => l.trim()).filter(l => l);
+        const lines = ev.target.result.split('\n').map(l => l.trim()).filter(l => l);
         let n = [];
 
         if (lines.length > 1) {
@@ -2946,7 +2946,7 @@
     }
 
     function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum\\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum\n";
 
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
@@ -2958,9 +2958,9 @@
         }).join('||') : '';
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
-        const cleanNotes = (a.notes || '').replace(/\\r?\\n|\\r/g, ' ');
+        const cleanNotes = (a.notes || '').replace(/\r?\n|\r/g, ' ');
 
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${cleanNotes}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\\n`;  
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${cleanNotes}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\n`;  
       });
 
       const today = new Date().toISOString().split('T')[0];
