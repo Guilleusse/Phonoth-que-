@@ -955,7 +955,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 03:36</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 03:58</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -974,7 +974,7 @@
 
       <div class="io-bar">
         <button class="btn-secondary" onclick="exportToCSV()">📤 Exporter la collection</button>
-        <button class="btn-secondary" onclick="document.getElementById('csvInput').click()">📥 Importer un fichier</button>
+        <button class="btn-secondary" onclick="document.getElementById('csvInput').click()">📥 Importer la collection</button>
         <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="importFromCSV(event)">
       </div>
 
@@ -1714,7 +1714,7 @@
     }
 
             async function clearCollection() {
-      const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?\n\n1/2 - Tapez SUPPRIMER ci-dessous pour continuer :");
+      const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?\n\n1/2 - Saisissez SUPPRIMER ci-dessous pour continuer :");
       if (!confirmWord || confirmWord.trim().toUpperCase() !== "SUPPRIMER") {
         if (confirmWord !== null) alert("Action annulée : mot de confirmation incorrect.");
         return;
