@@ -587,13 +587,14 @@
   .album-row-compact {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    padding: 6px 12px;
+    padding: 6px 10px;
     cursor: pointer;
     transition: background 0.15s ease, border-color 0.15s ease;
+    overflow: hidden;
   }
 
   .album-row-compact:hover {
@@ -615,18 +616,25 @@
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .album-row-compact .row-artist {
     font-weight: 700;
     color: white;
     white-space: nowrap;
+    flex-shrink: 1;
+    max-width: 45%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .album-row-compact .row-separator {
     color: var(--text-sub);
     font-size: 12px;
+    flex-shrink: 0;
   }
 
   .album-row-compact .row-title {
@@ -634,23 +642,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .album-row-compact .row-meta {
-    font-size: 12px;
-    color: var(--text-sub);
-    margin-left: auto;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .album-row-compact .row-actions {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
   }
 
   /* --- FENÊTRES MODALES & FORMULAIRES --- */
@@ -963,7 +956,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 01:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 02:05</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -2134,10 +2127,8 @@
       const row = document.createElement("div");
       row.className = "album-row-compact";
 
-      row.onclick = (e) => {
-        if (!e.target.classList.contains('card-action-btn') && !e.target.classList.contains('clickable-tag')) {
-          showDetails(realIndex);
-        }
+      row.onclick = () => {
+        showDetails(realIndex);
       };
 
       const isBoxSet = isCoffretAlbum(album);
@@ -2151,26 +2142,13 @@
       else if (album.support === 'CD-R') badgeClass = 'badge-cdr';
       else if (album.support === 'SACD') badgeClass = 'badge-sacd';
 
-      const metaParts = [
-        album.label, 
-        album.year, 
-        album.country ? `<span class="clickable-tag" data-country="${album.country.replace(/"/g, '&quot;')}" onclick="onCountryClick(this, event)">${album.country}</span>` : null
-      ].filter(Boolean).join(' • ');
-
       row.innerHTML = `
         <img class="row-cover" src="${album.cover || ''}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2236%22 height=%2236%22 viewBox=%220 0 36 36%22><rect width=%2236%22 height=%2236%22 fill=%22%232a2a2a%22/></svg>'">
         <div class="row-main">
-          <span class="badge ${badgeClass}" style="font-size: 10px; padding: 2px 5px;">${supp}</span>
+          <span class="badge ${badgeClass}" style="font-size: 10px; padding: 2px 5px; flex-shrink: 0;">${supp}</span>
           <span class="row-artist clickable-tag" data-artist="${(album.artist || '').replace(/"/g, '&quot;')}" onclick="onArtistClick(this, event)">${album.artist || 'Artiste inconnu'}</span>
           <span class="row-separator">—</span>
           <span class="row-title">${album.title || 'Sans titre'}</span>
-        </div>
-        <div class="row-meta">
-          <span>${metaParts}</span>
-        </div>
-        <div class="row-actions">
-          <button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button>
-          <button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)">🗑️</button>
         </div>
       `;
 
