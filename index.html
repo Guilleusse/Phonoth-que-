@@ -955,7 +955,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 03:25</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 03:36</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1713,19 +1713,15 @@
       renderCollection();
     }
 
-        async function clearCollection() {
-      const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?
-
-1/2 - Tapez SUPPRIMER ci-dessous pour continuer :");
+            async function clearCollection() {
+      const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?\n\n1/2 - Tapez SUPPRIMER ci-dessous pour continuer :");
       if (!confirmWord || confirmWord.trim().toUpperCase() !== "SUPPRIMER") {
         if (confirmWord !== null) alert("Action annulée : mot de confirmation incorrect.");
         return;
       }
 
       if (authUser) {
-        const pass = prompt(`⚠️ VÉRIFICATION D'IDENTITÉ :
-
-2/2 - Entrez le mot de passe de votre compte (${authUser.email}) pour valider :`);
+        const pass = prompt("⚠️ VÉRIFICATION D'IDENTITÉ :\n\n2/2 - Entrez le mot de passe de votre compte (" + authUser.email + ") pour valider :");
         if (!pass) {
           if (pass !== null) alert("Action annulée : mot de passe non saisi.");
           return;
