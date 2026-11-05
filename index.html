@@ -36,6 +36,7 @@
     --badge-wantlist: #f59e0b;
     --badge-audiophile: #b45309;
     --danger: #ef4444;
+    --sticky-bg: rgba(18, 18, 18, 0.82);
   }
 
   /* --- STYLES DE BASE & RESET --- */
@@ -71,7 +72,9 @@
     position: -webkit-sticky;
     position: sticky;
     top: 0;
-    background-color: var(--bg-color);
+    background-color: var(--sticky-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
     z-index: 100;
     padding-top: calc(env(safe-area-inset-top) + 2px);
     padding-bottom: 6px;
@@ -80,7 +83,8 @@
     padding-left: 15px;
     padding-right: 25px;
     border-bottom: 1px solid var(--card-border);
-    transition: transform 0.3s ease-in-out;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    will-change: opacity, transform, backdrop-filter;
   }
 
   .sticky-zone.hidden {
@@ -894,6 +898,7 @@
     --card-border: #e5e7eb;
     --text-main: #111827;
     --text-sub: #4b5563;
+    --sticky-bg: rgba(243, 244, 246, 0.82);
   }
 
   body.light-mode h1 {
@@ -950,7 +955,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 02:25</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 03:05</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1366,31 +1371,35 @@
     let scrollUpAccumulator = 0;
     const THRESHOLD_SHOW = 80;
 
+    let isScrollTicking = false;
     window.addEventListener('scroll', () => {
       const btn = document.getElementById('backToTopBtn');
       if (btn) {
         btn.classList.toggle('visible', window.scrollY > 400);
       }
 
-      const stickyZone = document.querySelector('.sticky-zone');
-      if (!stickyZone) return;
+      if (!isScrollTicking) {
+        window.requestAnimationFrame(() => {
+          const stickyZone = document.querySelector('.sticky-zone');
+          if (stickyZone) {
+            const scrollY = window.scrollY;
+            const maxScroll = 140; // Distance en px pour la disparition progressive
+            const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
+            
+            const opacity = (1 - progress).toFixed(2);
+            const translateY = (-progress * 50).toFixed(1);
+            const blurVal = (20 * (1 - progress)).toFixed(1);
 
-      const currentScrollY = window.scrollY;
-      const delta = currentScrollY - lastScrollY;
-
-      if (delta > 0 && currentScrollY > 100) {
-        stickyZone.classList.add('hidden');
-        scrollUpAccumulator = 0;
-      } 
-      else if (delta < 0) {
-        scrollUpAccumulator += Math.abs(delta);
-        
-        if (scrollUpAccumulator >= THRESHOLD_SHOW || currentScrollY <= 10) {
-          stickyZone.classList.remove('hidden');
-        }
+            stickyZone.style.opacity = opacity;
+            stickyZone.style.transform = `translateY(${translateY}px)`;
+            stickyZone.style.webkitBackdropFilter = `blur(${blurVal}px) saturate(180%)`;
+            stickyZone.style.backdropFilter = `blur(${blurVal}px) saturate(180%)`;
+            stickyZone.style.pointerEvents = progress > 0.85 ? 'none' : 'auto';
+          }
+          isScrollTicking = false;
+        });
+        isScrollTicking = true;
       }
-
-      lastScrollY = currentScrollY;
     });
 
     function scrollToTop() {
