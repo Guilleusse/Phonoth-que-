@@ -955,7 +955,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 03:05</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 03:25</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -973,9 +973,8 @@
       </div>
 
       <div class="io-bar">
-        <button class="btn-secondary" onclick="exportToCSV()">📤 Exporter</button>
-        <button class="btn-secondary" onclick="document.getElementById('csvInput').click()">📥 Importer</button>
-        <button class="btn-secondary btn-danger-soft" onclick="clearCollection()">🗑️ Vider</button>
+        <button class="btn-secondary" onclick="exportToCSV()">📤 Exporter la collection</button>
+        <button class="btn-secondary" onclick="document.getElementById('csvInput').click()">📥 Importer un fichier</button>
         <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="importFromCSV(event)">
       </div>
 
@@ -1036,7 +1035,7 @@
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
       <div class="modal-header" style="border-radius: 20px 20px 0 0;">
         <span class="modal-title">🧞‍♂️ Le Choix du DJ (Gemini)</span>
-        <button class="modal-close" onclick="closeModal('moodModal')">Fermer</button>
+        <button class="modal-close" onclick="closeModal('moodModal', event)">Fermer</button>
       </div>
       <div class="modal-body" style="padding:15px; overflow-y:auto;">
         <label style="display:block; font-size:13px; color:var(--text-sub); margin-bottom:10px; font-weight:bold;">1. Choisis tes ambiances (cumulables) :</label>
@@ -1081,7 +1080,7 @@
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
       <div class="modal-header" style="border-radius: 20px 20px 0 0;">
         <span class="modal-title">📊 Statistiques de la phonothèque</span>
-        <button class="modal-close" onclick="closeModal('statsModal')">Fermer</button>
+        <button class="modal-close" onclick="closeModal('statsModal', event)">Fermer</button>
       </div>
       <div class="modal-body" style="padding: 15px;">
         <div class="details-grid" style="margin: 0;" id="statsModalContent"></div>
@@ -1094,7 +1093,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <span class="modal-title" id="modalDetailTitle">Détails de l'album</span>
-        <button class="modal-close" onclick="closeModal('detailsModal')">Fermer</button>
+        <button class="modal-close" onclick="closeModal('detailsModal', event)">Fermer</button>
       </div>
       <div class="modal-body">
         <img id="modalDetailCover" class="modal-cover" src="" alt="Pochette">
@@ -1137,7 +1136,7 @@
     <div class="modal-content" style="height: auto; max-height: 85vh;">
       <div class="modal-header">
         <span class="modal-title">Coller une liste de disques</span>
-        <button class="modal-close" onclick="closeModal('bulkModal')">Fermer</button>
+        <button class="modal-close" onclick="closeModal('bulkModal', event)">Fermer</button>
       </div>
       <div class="modal-body" style="padding:15px;">
         <label style="display:block; font-size:12px; color:var(--text-sub); margin-bottom:8px; font-weight:bold;">COLLEZ VOS NOMS DE DISQUES CI-DESSOUS :</label>
@@ -1152,7 +1151,7 @@
     <div class="modal-content" style="height: auto; max-height: 90vh;">
       <div class="modal-header">
         <span class="modal-title" id="editVolumeModalTitle">Modifier le disque</span>
-        <button class="modal-close" onclick="closeModal('editVolumeModal')">Fermer</button>
+        <button class="modal-close" onclick="closeModal('editVolumeModal', event)">Fermer</button>
       </div>
       <div class="modal-body" style="padding:15px;">
         <input type="hidden" id="editVolIndex">
@@ -1188,7 +1187,7 @@
       <div class="modal-header">
         <span class="modal-title" id="formModalTitle">Ajouter une référence</span>
         <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
-          <button type="button" class="btn-secondary" style="padding: 6px 12px; width: auto; font-size: 13px; background: #3a3a3c; color: white; border: none; border-radius: 8px;" onclick="closeModal('formModal')">Annuler</button>
+          <button type="button" class="btn-secondary" style="padding: 6px 12px; width: auto; font-size: 13px; background: #3a3a3c; color: white; border: none; border-radius: 8px;" onclick="closeModal('formModal', event)">Annuler</button>
           <button type="button" class="btn-submit" style="padding: 6px 12px; width: auto; font-size: 13px; border-radius: 8px;" onclick="saveAlbumForm()">Enregistrer</button>
         </div>
       </div>
@@ -1714,24 +1713,52 @@
       renderCollection();
     }
 
-    function clearCollection() {
-      if (confirm("ATTENTION : Voulez-vous vraiment vider toute votre phonothèque ?")) {
-        if (authUser) {
-          showSpinner();
-          supabase.from('albums').delete().not('id', 'is', null).then(({ error }) => {
-            if (!error) {
-              collection = [];
-              try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
-              alert("Phonothèque vidée.");
-            }
-            hideSpinner();
-            renderCollection();
-          });
-        } else {
-          collection = [];
-          renderCollection();
-          alert("Phonothèque locale vidée.");
+        async function clearCollection() {
+      const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?
+
+1/2 - Tapez SUPPRIMER ci-dessous pour continuer :");
+      if (!confirmWord || confirmWord.trim().toUpperCase() !== "SUPPRIMER") {
+        if (confirmWord !== null) alert("Action annulée : mot de confirmation incorrect.");
+        return;
+      }
+
+      if (authUser) {
+        const pass = prompt(`⚠️ VÉRIFICATION D'IDENTITÉ :
+
+2/2 - Entrez le mot de passe de votre compte (${authUser.email}) pour valider :`);
+        if (!pass) {
+          if (pass !== null) alert("Action annulée : mot de passe non saisi.");
+          return;
         }
+
+        showSpinner();
+        const { error: authErr } = await supabase.auth.signInWithPassword({
+          email: authUser.email,
+          password: pass
+        });
+
+        if (authErr) {
+          hideSpinner();
+          alert("⛔ Mot de passe incorrect ! Suppression annulée.");
+          return;
+        }
+
+        const { error: deleteErr } = await supabase.from('albums').delete().not('id', 'is', null);
+        hideSpinner();
+        if (!deleteErr) {
+          collection = [];
+          try { localStorage.setItem("phonotheque_backup", JSON.stringify(collection)); } catch(e) {}
+          alert("Phonothèque intégralement vidée avec succès.");
+          closeModal('statsModal');
+          renderCollection();
+        } else {
+          alert("Erreur lors de la suppression sur la base de données : " + deleteErr.message);
+        }
+      } else {
+        collection = [];
+        closeModal('statsModal');
+        renderCollection();
+        alert("Phonothèque locale vidée.");
       }
     }
 
@@ -1904,8 +1931,9 @@
       <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
       <div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
       <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
-        <div style="margin-top: 20px; text-align: center;">
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
           <button class="btn-secondary" style="width: 100%; justify-content: center; background: var(--bg-color);" onclick="toggleTheme()">🌓 Activer / Désactiver le mode Clair</button>
+          <button class="btn-secondary btn-danger-soft" style="width: 100%; justify-content: center; border-color: rgba(239, 68, 68, 0.4); color: var(--danger);" onclick="clearCollection()">🗑️ Vider toute la phonothèque</button>
         </div>
       `;
       document.getElementById("statsModal").classList.add("active");
@@ -2865,11 +2893,13 @@
       showDetails(picked.index);
     }
 
-    function closeModal(id) {
+    function closeModal(id, event) {
+      if (event && event.stopPropagation) event.stopPropagation();
       if (id === 'scannerModal') {
         stopLiveScanner();
       } else {
-        document.getElementById(id).classList.remove("active");
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.remove("active");
         unlockBodyScroll();
       }
     }
