@@ -66,22 +66,22 @@
     margin: 0 auto;
   }
 
-  /* --- 5. ZONE FIXE GLOBALE --- */
-.sticky-zone {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  background-color: var(--bg-color);
-  z-index: 100;
-  padding-top: calc(env(safe-area-inset-top) + 2px);
-  padding-bottom: 6px;
-  margin-left: -15px;
-  margin-right: -25px;
-  padding-left: 15px;
-  padding-right: 25px;
-  border-bottom: 1px solid var(--card-border);
-  transition: transform 0.3s ease-in-out;
-}
+  /* --- ZONE FIXE GLOBALE --- */
+  .sticky-zone {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color);
+    z-index: 100;
+    padding-top: calc(env(safe-area-inset-top) + 2px);
+    padding-bottom: 6px;
+    margin-left: -15px;
+    margin-right: -25px;
+    padding-left: 15px;
+    padding-right: 25px;
+    border-bottom: 1px solid var(--card-border);
+    transition: transform 0.3s ease-in-out;
+  }
 
   .sticky-zone.hidden {
     transform: translateY(-100%);
@@ -100,21 +100,20 @@
     margin-bottom: 8px;
   }
 
-  /* --- 1. REVERROUILLER LE GLISSEMENT HORIZONTAL --- */
-html, body {
-  overflow-x: hidden;
-}
+  html, body {
+    overflow-x: hidden;
+  }
 
-/* --- 2. LOGO --- */
-.app-logo {
-  max-height: 80px;
-  max-width: 100%;
-  width: auto;
-  object-fit: contain;
-  display: block;
-}
+  /* --- LOGO --- */
+  .app-logo {
+    max-height: 80px;
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
 
-  /* --- BOUTONS D'ACTION HARMONISÉS (4 BOUTONS ÉGAUX) --- */
+  /* --- BOUTONS D'ACTION HARMONISÉS --- */
   .header-actions {
     display: flex;
     justify-content: space-between;
@@ -162,13 +161,13 @@ html, body {
     }
   }
 
-  /* --- 2. BARRE D'IMPORT / EXPORT / VIDER --- */
-.io-bar {
-  display: flex;
-  gap: 8px;
-  margin-top: 2px;
-  margin-bottom: 14px;
-}
+  /* --- BARRE D'IMPORT / EXPORT / VIDER --- */
+  .io-bar {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+    margin-bottom: 14px;
+  }
 
   .btn-secondary {
     flex: 1;
@@ -193,13 +192,13 @@ html, body {
     color: var(--text-sub);
   }
 
-  /* --- 3. RECHERCHE ET TRI --- */
-.search-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-  align-items: center;
-}
+  /* --- RECHERCHE ET TRI --- */
+  .search-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    align-items: center;
+  }
 
   .search-box {
     position: relative;
@@ -285,32 +284,30 @@ html, body {
   }
 
   /* --- BANDE DE FILTRES AVEC FONDU --- */
-.filters-scroll {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  gap: 8px;
-  padding: 0 12px 6px 12px;
-  margin-bottom: 0px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  .filters-scroll {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 0 12px 6px 12px;
+    margin-bottom: 0px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%);
+  }
 
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  .filters-scroll::-webkit-scrollbar {
+    display: none;
+  }
 
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%);
-}
-
-.filters-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.filters-scroll button,
-.filters-scroll .filter-btn {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
+  .filters-scroll button,
+  .filters-scroll .filter-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
 
   .filter-chip {
     background: var(--card-bg);
@@ -364,23 +361,23 @@ html, body {
   }
 
   /* --- BARRE A-Z --- */
-.az-index {
-  position: fixed;
-  right: 4px;
-  top: calc(50% + 140px);
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  z-index: 101;
-  font-size: 9px;
-  font-weight: bold;
-  color: var(--text-sub);
-  background: rgba(18, 18, 18, 0.75);
-  padding: 4px 2px;
-  border-radius: 10px;
-  backdrop-filter: blur(5px);
-}
+  .az-index {
+    position: fixed;
+    right: 4px;
+    top: calc(50% + 140px);
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    z-index: 101;
+    font-size: 9px;
+    font-weight: bold;
+    color: var(--text-sub);
+    background: rgba(18, 18, 18, 0.75);
+    padding: 4px 2px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+  }
 
   .az-index .az-letter {
     color: inherit;
@@ -499,72 +496,65 @@ html, body {
   }
 
   /* --- HARMONISATION DES BADGES --- */
-.badge {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-  width: fit-content;
-  backdrop-filter: blur(4px);
-}
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    width: fit-content;
+    backdrop-filter: blur(4px);
+  }
 
-/* Badge Vinyle (Orange) */
-.badge-vinyle, .badge-vinyl {
-  background: rgba(255, 149, 0, 0.18);
-  color: #ff9f0a;
-  border: 1px solid rgba(255, 149, 0, 0.35);
-}
+  .badge-vinyle, .badge-vinyl {
+    background: rgba(255, 149, 0, 0.18);
+    color: #ff9f0a;
+    border: 1px solid rgba(255, 149, 0, 0.35);
+  }
 
-/* Badge CD / CD-R (Bleu pastel) */
-.badge-cd, .badge-cdr {
-  background: rgba(10, 132, 255, 0.18);
-  color: #64d2ff;
-  border: 1px solid rgba(10, 132, 255, 0.35);
-}
+  .badge-cd, .badge-cdr {
+    background: rgba(10, 132, 255, 0.18);
+    color: #64d2ff;
+    border: 1px solid rgba(10, 132, 255, 0.35);
+  }
 
-/* Badge SACD (Violet) */
-.badge-sacd {
-  background: rgba(191, 90, 242, 0.18);
-  color: #da8fff;
-  border: 1px solid rgba(191, 90, 242, 0.35);
-}
+  .badge-sacd {
+    background: rgba(191, 90, 242, 0.18);
+    color: #da8fff;
+    border: 1px solid rgba(191, 90, 242, 0.35);
+  }
 
-/* Badge Audiophile (Jaune Or pur) */
-.badge-audiophile {
-  background: rgba(255, 214, 10, 0.18);
-  color: #ffd60a;
-  border: 1px solid rgba(255, 214, 10, 0.4);
-}
+  .badge-audiophile {
+    background: rgba(255, 214, 10, 0.18);
+    color: #ffd60a;
+    border: 1px solid rgba(255, 214, 10, 0.4);
+  }
 
-/* Badge Coffret & Multi-disques (Vert Émeraude) */
-.badge-coffret {
-  background: rgba(48, 209, 88, 0.18);
-  color: #30d158;
-  border: 1px solid rgba(48, 209, 88, 0.35);
-}
+  .badge-coffret {
+    background: rgba(48, 209, 88, 0.18);
+    color: #30d158;
+    border: 1px solid rgba(48, 209, 88, 0.35);
+  }
 
-/* Badge Liste de souhaits (Rouge / Rose iOS) */
-.badge-wantlist {
-  background: rgba(255, 45, 85, 0.18);
-  color: #ff375f;
-  border: 1px solid rgba(255, 45, 85, 0.35);
-}
+  .badge-wantlist {
+    background: rgba(255, 45, 85, 0.18);
+    color: #ff375f;
+    border: 1px solid rgba(255, 45, 85, 0.35);
+  }
 
-/* Étiquettes de genres sous l'album */
-.genre-badge {
-  display: inline-block;
-  font-size: 10px;
-  color: #a0a0a0;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-top: 4px;
-  margin-right: 4px;
-}
+  .genre-badge {
+    display: inline-block;
+    font-size: 10px;
+    color: #a0a0a0;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 4px;
+    margin-right: 4px;
+  }
 
   .card-actions {
     position: absolute;
@@ -584,6 +574,83 @@ html, body {
     color: var(--text-sub);
     font-size: 16px;
     cursor: pointer;
+  }
+
+  /* --- MODE LISTE COMPACTE --- */
+  #collectionContainer.list-view-active {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    gap: 6px !important;
+  }
+
+  .album-row-compact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .album-row-compact:hover {
+    background: #2c2c2e;
+    border-color: var(--accent-blue);
+  }
+
+  .album-row-compact .row-cover {
+    width: 38px;
+    height: 38px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #2a2a2a;
+  }
+
+  .album-row-compact .row-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .album-row-compact .row-artist {
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+  }
+
+  .album-row-compact .row-separator {
+    color: var(--text-sub);
+    font-size: 12px;
+  }
+
+  .album-row-compact .row-title {
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .album-row-compact .row-meta {
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-left: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .album-row-compact .row-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-shrink: 0;
   }
 
   /* --- FENÊTRES MODALES & FORMULAIRES --- */
@@ -896,7 +963,7 @@ html, body {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 04-11-2026 01:35</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 05-11-2026 01:17</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -933,6 +1000,9 @@ html, body {
           <option value="year-desc">Année sortie (Récents)</option>
           <option value="year-asc">Année sortie (Anciens)</option>
         </select>
+        <button id="viewToggleBtn" class="btn-secondary" onclick="toggleViewMode()" title="Changer le mode d'affichage" style="flex: 0 0 45px; width: 45px; height: 45px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 16px;">
+          <span id="viewToggleIcon">☰</span>
+        </button>
       </div>
 
       <div class="filters-scroll">
@@ -1233,7 +1303,7 @@ html, body {
   </div>
 
   <!-- SCRIPT APPLICATION -->
-<script>
+  <script>
     // --- CONFIGURATION SUPABASE ---
     const SUPABASE_URL = 'https://mchljfhtgingnqxcjizf.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jaGxqZmh0Z2luZ25xeGNqaXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTY1NzYsImV4cCI6MjEwNTA3MjU3Nn0.aGv9w7XQB-FOVc7xScX-3HN-5ZcA3d3EM7JOBz0HCuQ';
@@ -1255,6 +1325,28 @@ html, body {
     let pendingCoverUrl = "";
     let pendingEditVolCoverUrl = "";
     let searchDebounceTimer = null;
+    let currentViewMode = localStorage.getItem('phonotheque_view_mode') || 'cards';
+
+    function toggleViewMode() {
+      currentViewMode = (currentViewMode === 'cards') ? 'list' : 'cards';
+      localStorage.setItem('phonotheque_view_mode', currentViewMode);
+      updateViewToggleButton();
+      renderCollection();
+    }
+
+    function updateViewToggleButton() {
+      const icon = document.getElementById('viewToggleIcon');
+      const btn = document.getElementById('viewToggleBtn');
+      if (!icon || !btn) return;
+
+      if (currentViewMode === 'list') {
+        icon.textContent = '🎴';
+        btn.title = "Passer en vue Cartes";
+      } else {
+        icon.textContent = '☰';
+        btn.title = "Passer en vue Liste compacte";
+      }
+    }
 
     // --- GESTION DU DEFILEMENT ET DE L'INTERFACE ---
     function lockBodyScroll() {
@@ -1466,6 +1558,7 @@ html, body {
     // --- INITIALISATION & AUTHENTIFICATION ---
     async function initApp() {
       loadLocal();
+      updateViewToggleButton();
       if (localStorage.getItem('phonotheque_theme') === 'light') {
         document.body.classList.add('light-mode');
       }
@@ -1658,7 +1751,7 @@ html, body {
 
     // --- RECHERCHE ET UTILITAIRES DE TEXTE ---
     function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return string.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
     }
 
     function matchText(text, search) {
@@ -1667,7 +1760,7 @@ html, body {
       const s = search.toLowerCase().trim();
       if (!s) return true;
       if (s.length <= 3) {
-        return new RegExp('\\b' + escapeRegExp(s) + '\\b', 'i').test(t);
+        return new RegExp('\\\\b' + escapeRegExp(s) + '\\\\b', 'i').test(t);
       }
       return t.includes(s);
     }
@@ -1683,7 +1776,7 @@ html, body {
 
     function parsePurchaseTimestamp(str) {
       if (!str) return 0;
-      const parts = str.trim().replace(/\//g, '-').split('-');
+      const parts = str.trim().replace(/\\//g, '-').split('-');
       if (parts.length === 3) {
         if (parts[0].length === 4) {
           return new Date(`${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`).getTime() || 0;
@@ -1717,7 +1810,7 @@ html, body {
       }
     }
 
-    // --- HELPER DE DÉCOMPTE DES COFFRETS & DISQUES (CORRIGÉ) ---
+    // --- HELPER DE DÉCOMPTE DES COFFRETS & DISQUES ---
     function isCoffretAlbum(a) {
       if (!a || a.isWantlist) return false;
       const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
@@ -1732,15 +1825,15 @@ html, body {
     function getBoxCountForAlbum(a) {
       if (!a || !isCoffretAlbum(a)) return 0;
       const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
-      if (isBach) return 45; // L'intégrale Bach vaut 45 coffrets physiques
+      if (isBach) return 45;
       if (a.boxCount && parseInt(a.boxCount) > 0) return parseInt(a.boxCount);
-      return 1; // Un coffret individuel vaut 1 coffret physique
+      return 1;
     }
 
     function getPhysicalDiscsForAlbum(a) {
       if (!a || a.isWantlist) return 0;
       const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
-      if (isBach) return 90; // 45 volumes x 2 LPs
+      if (isBach) return 90;
 
       const cnt = parseInt(a.discsCount) || 0;
       if (cnt > 0) return cnt;
@@ -1757,7 +1850,7 @@ html, body {
       return 1;
     }
 
-    // --- STATISTIQUES (CORRIGÉ) ---
+    // --- STATISTIQUES ---
     function openStatsModal() {
       lockBodyScroll();
       let countVinyle = 0;
@@ -1788,10 +1881,10 @@ html, body {
 
           let p = 0;
           if (a.purchasePrice) {
-            let priceStr = a.purchasePrice.toString().replace(/[\s€a-zA-Z]/g, '');
+            let priceStr = a.purchasePrice.toString().replace(/[\\s€a-zA-Z]/g, '');
             if (priceStr.includes('.') && priceStr.includes(',')) {
               priceStr = priceStr.lastIndexOf(',') > priceStr.lastIndexOf('.') 
-                ? priceStr.replace(/\./g, '').replace(',', '.') 
+                ? priceStr.replace(/\\./g, '').replace(',', '.') 
                 : priceStr.replace(/,/g, '');
             } else if (priceStr.includes(',')) {
               priceStr = priceStr.replace(',', '.');
@@ -1822,7 +1915,7 @@ html, body {
       document.getElementById("statsModal").classList.add("active");
     }
 
-    /* --- COMPTEURS DYNAMIQUES DANS LES FILTRES (CORRIGÉ) --- */
+    /* --- COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
     function updateFilterCounts() {
       if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
 
@@ -1853,9 +1946,16 @@ html, body {
     // --- RENDU ET FILTRAGE DE LA COLLECTION ---
     function renderCollection() {
       updateFilterCounts();
+      updateViewToggleButton();
       
       const container = document.getElementById("collectionContainer");
       if (!container) return;
+
+      if (currentViewMode === 'list') {
+        container.classList.add("list-view-active");
+      } else {
+        container.classList.remove("list-view-active");
+      }
 
       const search = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
       container.innerHTML = "";
@@ -1925,8 +2025,8 @@ html, body {
           const al = groups[art];
           const sn = al.find(a => a.sortName?.trim());
           if (sn) return sn.sortName.trim();
-          if (al.some(a => (a.style||'').toLowerCase().includes('classical'))) return art.trim().split(/\s+/).pop() || art;
-          return art.replace(/^(the)\s+/i, '');
+          if (al.some(a => (a.style||'').toLowerCase().includes('classical'))) return art.trim().split(/\\s+/).pop() || art;
+          return art.replace(/^(the)\\s+/i, '');
         };
 
         const sortedArtists = Object.keys(groups).sort((a, b) => 
@@ -1942,11 +2042,11 @@ html, body {
           grpHdr.id = 'artist-' + art.replace(/[^a-zA-Z0-9]/g, '');
           grpHdr.innerHTML = `${art} <span class="artist-count">(${groups[art].length})</span>`;
           container.appendChild(grpHdr);
-          groups[art].forEach(a => renderAlbumCard(a, container));
+          groups[art].forEach(a => currentViewMode === "list" ? renderAlbumRow(a, container) : renderAlbumCard(a, container));
         });
       } else {
         if (document.getElementById("azIndex")) document.getElementById("azIndex").innerHTML = "";
-        filtered.forEach(a => renderAlbumCard(a, container));
+        filtered.forEach(a => currentViewMode === "list" ? renderAlbumRow(a, container) : renderAlbumCard(a, container));
       }
     }
 
@@ -2027,6 +2127,54 @@ html, body {
         <div class="card-actions"><button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button></div>
       `;
       container.appendChild(card);
+    }
+
+    function renderAlbumRow(album, container) {
+      const realIndex = collection.indexOf(album);
+      const row = document.createElement("div");
+      row.className = "album-row-compact";
+
+      row.onclick = (e) => {
+        if (!e.target.classList.contains('card-action-btn') && !e.target.classList.contains('clickable-tag')) {
+          showDetails(realIndex);
+        }
+      };
+
+      const isBoxSet = isCoffretAlbum(album);
+      let badgeClass = 'badge-cd';
+      let supp = (album.support || 'CD').toUpperCase();
+
+      if (album.isWantlist) badgeClass = 'badge-wantlist';
+      else if (isBoxSet) badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
+      else if (album.isAudiophile) badgeClass = 'badge-audiophile';
+      else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
+      else if (album.support === 'CD-R') badgeClass = 'badge-cdr';
+      else if (album.support === 'SACD') badgeClass = 'badge-sacd';
+
+      const metaParts = [
+        album.label, 
+        album.year, 
+        album.country ? `<span class="clickable-tag" data-country="${album.country.replace(/"/g, '&quot;')}" onclick="onCountryClick(this, event)">${album.country}</span>` : null
+      ].filter(Boolean).join(' • ');
+
+      row.innerHTML = `
+        <img class="row-cover" src="${album.cover || ''}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2236%22 height=%2236%22 viewBox=%220 0 36 36%22><rect width=%2236%22 height=%2236%22 fill=%22%232a2a2a%22/></svg>'">
+        <div class="row-main">
+          <span class="badge ${badgeClass}" style="font-size: 10px; padding: 2px 5px;">${supp}</span>
+          <span class="row-artist clickable-tag" data-artist="${(album.artist || '').replace(/"/g, '&quot;')}" onclick="onArtistClick(this, event)">${album.artist || 'Artiste inconnu'}</span>
+          <span class="row-separator">—</span>
+          <span class="row-title">${album.title || 'Sans titre'}</span>
+        </div>
+        <div class="row-meta">
+          <span>${metaParts}</span>
+        </div>
+        <div class="row-actions">
+          <button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button>
+          <button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)">🗑️</button>
+        </div>
+      `;
+
+      container.appendChild(row);
     }
     
     function scrollToArtistGroup(elementId) {
@@ -2275,7 +2423,7 @@ html, body {
               ${coverUrl ? `<img src="${coverUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">` : `<div style="width:50px; height:50px; border-radius:8px; background:#2a2a2a; color:var(--text-sub); font-size:9px; display:flex; align-items:center; justify-content:center;">Disque ${idx+1}</div>`}
               <div style="flex:1;">
                 <span style="font-size:9px; background:var(--badge-coffret); color:white; padding:2px 6px; border-radius:4px; font-weight:bold;">DISQUE ${idx+1}</span>
-                <div style="font-size:13px; font-weight:600; color:white; margin-top:2px;">${v.title && !/^\d+$/.test(v.title) ? v.title : `Disque ${idx+1}`}</div>
+                <div style="font-size:13px; font-weight:600; color:white; margin-top:2px;">${v.title && !/^\\d+$/.test(v.title) ? v.title : `Disque ${idx+1}`}</div>
               </div>
               <div style="display:flex; gap:6px;">
                 <button class="card-action-btn" onclick="openEditVolumeModal(${idx})">✏️</button>
@@ -2301,7 +2449,7 @@ html, body {
       const text = document.getElementById("bulkInput").value.trim();
 
       if (text) {
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        const lines = text.split('\\n').map(l => l.trim()).filter(l => l.length > 0);
         if (!album.volumes) album.volumes = [];
         lines.forEach((line, idx) => {
           album.volumes[idx] = album.volumes[idx] || { cover: album.cover || '', tracks: [] };
@@ -2341,10 +2489,10 @@ html, body {
       pendingEditVolCoverUrl = current.cover || '';
 
       document.getElementById("editVolIndex").value = volIdx;
-      document.getElementById("editVolTitle").value = current.title && !/^\d+$/.test(current.title) ? current.title : `Disque ${volIdx + 1}`;
+      document.getElementById("editVolTitle").value = current.title && !/^\\d+$/.test(current.title) ? current.title : `Disque ${volIdx + 1}`;
       document.getElementById("editVolCover").value = current.cover || '';
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
-      document.getElementById("editVolTracks").value = (current.tracks || []).map(t => t.title || '').join('\n');
+      document.getElementById("editVolTracks").value = (current.tracks || []).map(t => t.title || '').join('\\n');
       document.getElementById("editVolumeModal").classList.add("active");
     }
 
@@ -2366,10 +2514,10 @@ html, body {
 
           if (!tracks.length) tracks = data.tracklist;
 
-          document.getElementById("editVolTracks").value = tracks.map(t => t.position ? `${t.position}. ${t.title||''}` : t.title||'').join('\n');
+          document.getElementById("editVolTracks").value = tracks.map(t => t.position ? `${t.position}. ${t.title||''}` : t.title||'').join('\\n');
 
           if (data.images?.length && !pendingEditVolCoverUrl) {
-            pendingEditVolCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\/\//, ''))}`;
+            pendingEditVolCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\\/\\//, ''))}`;
             document.getElementById("editVolCover").value = pendingEditVolCoverUrl;
           }
           alert(`Disque isolé avec succès !`);
@@ -2391,7 +2539,7 @@ html, body {
       album.volumes[volIdx] = {
         title: document.getElementById("editVolTitle").value.trim(),
         cover: pendingEditVolCoverUrl || document.getElementById("editVolCover").value.trim(),
-        tracks: document.getElementById("editVolTracks").value.trim().split('\n')
+        tracks: document.getElementById("editVolTracks").value.trim().split('\\n')
           .map(line => ({ position: '', title: line.trim(), duration: '' }))
           .filter(t => t.title.length > 0)
       };
@@ -2464,7 +2612,7 @@ html, body {
         document.getElementById(id).value = a[key] || '';
       });
 
-      document.getElementById("formTracks").value = (!a.isBoxSet && a.tracks?.length) ? a.tracks.map(t => t.title || '').join('\n') : '';
+      document.getElementById("formTracks").value = (!a.isBoxSet && a.tracks?.length) ? a.tracks.map(t => t.title || '').join('\\n') : '';
       pendingCoverUrl = a.cover || '';
       document.getElementById("formCover").value = a.cover || '';
       document.getElementById("formDiscsCount").value = a.discsCount || a.volumes?.length || '';
@@ -2497,7 +2645,7 @@ html, body {
         existingVols = [];
       }
 
-      const mTrks = document.getElementById("formTracks").value.trim().split('\n')
+      const mTrks = document.getElementById("formTracks").value.trim().split('\\n')
         .map(l => ({ position: '', title: l.trim(), duration: '' }))
         .filter(t => t.title);
 
@@ -2610,18 +2758,18 @@ html, body {
       const val = input.value.trim();
       if (!val) return alert("Saisissez un ID ou code.");
 
-      if (/^\d+$/.test(val) && val.length < 11) {
+      if (/^\\d+$/.test(val) && val.length < 11) {
         await fetchDiscogsById(val);
       } else {
         try {
           showSpinner();
-          const res = await fetch(`https://api.discogs.com/database/search?${/^\d+$/.test(val) ? `q=${encodeURIComponent(val)}` : `catno=${encodeURIComponent(val)}`}&type=release`);
+          const res = await fetch(`https://api.discogs.com/database/search?${/^\\d+$/.test(val) ? `q=${encodeURIComponent(val)}` : `catno=${encodeURIComponent(val)}`}&type=release`);
           const data = await res.json();
           hideSpinner();
 
           if (data.results?.length) {
             document.getElementById("formDiscogsId").value = data.results[0].id;
-            if (!/^\d+$/.test(val)) document.getElementById("formCatalogNumber").value = val;
+            if (!/^\\d+$/.test(val)) document.getElementById("formCatalogNumber").value = val;
             await fetchDiscogsById(data.results[0].id);
           } else {
             alert(`Aucun résultat trouvé pour : ${val}`);
@@ -2648,11 +2796,11 @@ html, body {
 
         const data = await res.json();
         if (data.title) document.getElementById("formTitle").value = data.title;
-        if (data.artists?.length) document.getElementById("formArtist").value = data.artists.map(a => a.name.replace(/\s*\(\d+\)$/, '')).join(', ');
+        if (data.artists?.length) document.getElementById("formArtist").value = data.artists.map(a => a.name.replace(/\\s*\\(\\d+\\)$/, '')).join(', ');
 
         let cond = data.extraartists?.find(a => a.role?.toLowerCase().includes('conductor') || a.role?.toLowerCase().includes('directed by')) 
                 || data.artists?.find(a => a.role?.toLowerCase().includes('conductor'));
-        if (cond) document.getElementById("formConductor").value = cond.name.replace(/\s*\(\d+\)$/, '').trim();
+        if (cond) document.getElementById("formConductor").value = cond.name.replace(/\\s*\\(\\d+\\)$/, '').trim();
 
         if (data.labels?.length) {
           document.getElementById("formLabel").value = data.labels[0].name;
@@ -2685,7 +2833,7 @@ html, body {
         }
 
         if (data.images?.length) {
-          pendingCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\/\//, ''))}`;
+          pendingCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\\/\\//, ''))}`;
           document.getElementById("formCover").value = pendingCoverUrl;
         }
 
@@ -2697,7 +2845,7 @@ html, body {
           }));
 
           if (document.getElementById("formRawTracks").checked && !document.getElementById("isBoxSet").checked) {
-            document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\n');
+            document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\\n');
           }
         }
         alert("Données chargées depuis Discogs !");
@@ -2754,7 +2902,7 @@ html, body {
     async function importFromCSV(e) {
       const r = new FileReader();
       r.onload = async (ev) => {
-        const lines = ev.target.result.split('\n').map(l => l.trim()).filter(l => l);
+        const lines = ev.target.result.split('\\n').map(l => l.trim()).filter(l => l);
         let n = [];
 
         if (lines.length > 1) {
@@ -2798,7 +2946,7 @@ html, body {
     }
 
     function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum\\n";
 
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
@@ -2810,9 +2958,9 @@ html, body {
         }).join('||') : '';
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
-        const cleanNotes = (a.notes || '').replace(/\r?\n|\r/g, ' ');
+        const cleanNotes = (a.notes || '').replace(/\\r?\\n|\\r/g, ' ');
 
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${cleanNotes}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\n`;  
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${cleanNotes}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\\n`;  
       });
 
       const today = new Date().toISOString().split('T')[0];
@@ -2828,6 +2976,6 @@ html, body {
     }
 
     window.onload = initApp;
-</script>
+  </script>
 </body>
 </html>
