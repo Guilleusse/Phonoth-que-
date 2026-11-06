@@ -955,7 +955,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 06-11-2026 03:23</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 06-11-2026 03:32</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1326,24 +1326,35 @@
     }
 
     function updateViewToggleButton() {
-      const icon = document.getElementById('viewToggleIcon');
-      const btn = document.getElementById('viewToggleBtn');
-      if (!icon || !btn) return;
+  const icon = document.getElementById('viewToggleIcon');
+  const btn = document.getElementById('viewToggleBtn');
+  if (!icon || !btn) return;
 
-     // Configuration universelle Windows & iOS (Safari)
-      icon.style.display = 'inline-block';
-      icon.style.fontSize = '20px';               // Taille de base identique sur tous les écrans
-      icon.style.transform = 'scale(1.15)';        // Force le grossissement visuel
-      icon.style.webkitTransform = 'scale(1.15)';  // Compatibilité Safari sur iPhone
+  // Détection mobile (iPhone / smartphone)
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
-      if (currentViewMode === 'list') {
-      icon.textContent = '⊞';
-      btn.title = "Passer en vue Cartes";
-      } else {
-      icon.textContent = '⊟';
-      btn.title = "Passer en vue Liste compacte";
-      }
-    }
+  icon.style.display = 'inline-block';
+  
+  if (isMobile) {
+    // Réglage pour iPhone / mobile
+    icon.style.fontSize = '22px';
+    icon.style.transform = 'scale(1.25)';
+    icon.style.webkitTransform = 'scale(1.25)';
+  } else {
+    // Réglage sobre pour Windows / PC
+    icon.style.fontSize = '18px';
+    icon.style.transform = 'scale(1.0)';
+    icon.style.webkitTransform = 'scale(1.0)';
+  }
+
+  if (currentViewMode === 'list') {
+    icon.textContent = '⊞';
+    btn.title = "Passer en vue Cartes";
+  } else {
+    icon.textContent = '⊟';
+    btn.title = "Passer en vue Liste compacte";
+  }
+}
     
     // --- GESTION DU DEFILEMENT ET DE L'INTERFACE ---
     function lockBodyScroll() {
