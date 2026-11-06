@@ -955,7 +955,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 06-11-2026 02:56</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 06-11-2026 03:14</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1326,24 +1326,25 @@
     }
 
     function updateViewToggleButton() {
-  const icon = document.getElementById('viewToggleIcon');
-  const btn = document.getElementById('viewToggleBtn');
-  if (!icon || !btn) return;
+      const icon = document.getElementById('viewToggleIcon');
+      const btn = document.getElementById('viewToggleBtn');
+      if (!icon || !btn) return;
 
-  // Agrandit uniquement le symbole intérieur
-  icon.style.fontSize = '1.5rem'; // Ajuste à 1.3rem, 1.4rem, 1.5rem ou 22px selon ton goût
-  icon.style.lineHeight = '1';
-  icon.style.display = 'inline-block';
+     // Configuration universelle Windows & iOS (Safari)
+      icon.style.display = 'inline-block';
+      icon.style.fontSize = '22px';               // Taille de base identique sur tous les écrans
+      icon.style.transform = 'scale(1.25)';        // Force le grossissement visuel
+      icon.style.webkitTransform = 'scale(1.25)';  // Compatibilité Safari sur iPhone
 
-  if (currentViewMode === 'list') {
-    icon.textContent = '⊞'; // (ou '日' si tu préfères les symboles précédents)
-    btn.title = "Passer en vue Cartes";
-  } else {
-    icon.textContent = '⊟'; // (ou '田')
-    btn.title = "Passer en vue Liste compacte";
-  }
-}
-
+      if (currentViewMode === 'list') {
+      icon.textContent = '⊞';
+      btn.title = "Passer en vue Cartes";
+      } else {
+      icon.textContent = '⊟';
+      btn.title = "Passer en vue Liste compacte";
+      }
+    }
+    
     // --- GESTION DU DEFILEMENT ET DE L'INTERFACE ---
     function lockBodyScroll() {
       if (isBodyLocked) return;
