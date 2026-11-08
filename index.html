@@ -955,7 +955,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 06-11-2026 03:32</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 09-11-2026 00:50</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1317,7 +1317,8 @@
     let pendingEditVolCoverUrl = "";
     let searchDebounceTimer = null;
     let currentViewMode = localStorage.getItem('phonotheque_view_mode') || 'cards';
-
+    let albumDeck = [];
+    
     function toggleViewMode() {
       currentViewMode = (currentViewMode === 'cards') ? 'list' : 'cards';
       localStorage.setItem('phonotheque_view_mode', currentViewMode);
@@ -2880,31 +2881,29 @@
     }
 
     function getRandomAlbum() {
-      const owned = collection
-        .map((album, index) => ({ album, index }))
-        .filter(item => !item.album.isWantlist);
+  const owned = collection
+    .map((album, index) => ({ album, index }))
+    .filter(item => !item.album.isWantlist);
 
-      if (!owned.length) return;
+  if (!owned.length) return;
 
-      let recentDicePicks = JSON.parse(localStorage.getItem('phonotheque_dice_history') || '[]');
+  // 1. Si la pioche est vide (au démarrage ou après avoir fait le tour complet)
+  if (albumDeck.length === 0) {
+    albumDeck = [...owned];
 
-      let candidates = owned.filter(item => !recentDicePicks.includes(item.index));
-
-      if (candidates.length === 0) {
-        recentDicePicks = [];
-        candidates = owned;
-      }
-
-      const picked = candidates[Math.floor(Math.random() * candidates.length)];
-
-      recentDicePicks.push(picked.index);
-      if (recentDicePicks.length > 20) {
-        recentDicePicks.shift();
-      }
-      localStorage.setItem('phonotheque_dice_history', JSON.stringify(recentDicePicks));
-
-      showDetails(picked.index);
+    // 2. Mélange parfait de Fisher-Yates
+    for (let i = albumDeck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [albumDeck[i], albumDeck[j]] = [albumDeck[j], albumDeck[i]];
     }
+  }
+
+  // 3. On tire et on retire le dernier album du paquet mélangé
+  const picked = albumDeck.pop();
+
+  // 4. Affichage de la fiche album
+  showDetails(picked.index);
+}
 
     function closeModal(id, event) {
       if (event && event.stopPropagation) event.stopPropagation();
