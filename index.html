@@ -516,33 +516,35 @@
     border: 1px solid rgba(255, 255, 255, 0.15);
   }
 
-  /* Badges Simples (Effet surligneur 100% uni) */
-  .badge-audiophile { background: #fef08a; color: #1e293b !important; text-shadow: none !important; }
-  .badge-coffret { background: #bbf7d0; color: #1e293b !important; text-shadow: none !important; }
-  .badge-vinyle, .badge-vinyl { background: #fb923c; color: #1e293b !important; text-shadow: none !important; }
-  .badge-sacd { background: #d8b4fe; color: #1e293b !important; text-shadow: none !important; }
-  .badge-cd { background: #7dd3fc; color: #1e293b !important; text-shadow: none !important; }
-  .badge-cdr { background: #5eead4; color: #1e293b !important; text-shadow: none !important; }
-  .badge-wantlist { background: #f87171; color: #1e293b !important; text-shadow: none !important; }
+    
+    /* Badges Simples (Effet Stabilo texturé) */
+  .badge-audiophile { background-image: url('https://i.ibb.co/r423DkL/stabilo-texture-jaune.png'); background-color: #fef08a; background-blend-mode: multiply; color: #1e293b !important; text-shadow: none !important; }
+  .badge-coffret { background-image: url('https://i.ibb.co/V3VvV5G/stabilo-texture-vert.png'); background-color: #bbf7d0; background-blend-mode: multiply; color: #1e293b !important; text-shadow: none !important; }
+  .badge-vinyle, .badge-vinyl { background-image: url('https://i.ibb.co/K93PqWf/stabilo-texture-orange.png'); background-color: #fb923c; background-blend-mode: multiply; color: #1e293b !important; text-shadow: none !important; }
+  .badge-sacd { background-image: url('https://i.ibb.co/ySBf9Zq/stabilo-texture-violet.png'); background-color: #d8b4fe; background-blend-mode: multiply; color: #1e293b !important; text-shadow: none !important; }
+  .badge-cd { background-image: url('https://i.ibb.co/P4w5kL5/stabilo-texture-bleu.png'); background-color: #7dd3fc; background-blend-mode: multiply; color: #1e293b !important; text-shadow: none !important; }
+  .badge-cdr { background-image: url('https://i.ibb.co/hR3DkR4/stabilo-texture-turq.png'); background-color: #5eead4; background-blend-mode: multiply; color: #1e293b !important; text-shadow: none !important; }
+  .badge-wantlist { background-image: url('https://i.ibb.co/K6D73vG/stabilo-texture-rouge.png'); background-color: #f87171; background-blend-mode: multiply; color: #1e293b !important; text-shadow: none !important; }
 
-  /* Badges Combinés (Inclinés en biais style trait de Stabilo) */
-  .badge-coffret-vinyle { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 47%, #fb923c 53%, #fb923c 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-coffret-cd { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 47%, #7dd3fc 53%, #7dd3fc 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-coffret-sacd { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 47%, #d8b4fe 53%, #d8b4fe 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-coffret-cdr { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 47%, #5eead4 53%, #5eead4 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-coffret-audiophile { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 47%, #fef08a 53%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
+  /* Badges Combinés (Bandes de surligneurs juxtaposées) */
+  .badge-coffret-vinyle { background: linear-gradient(90deg, #bbf7d0 0% 50%, #fb923c 50% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-coffret-cd { background: linear-gradient(90deg, #bbf7d0 0% 50%, #7dd3fc 50% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-coffret-sacd { background: linear-gradient(90deg, #bbf7d0 0% 50%, #d8b4fe 50% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-coffret-cdr { background: linear-gradient(90deg, #bbf7d0 0% 50%, #5eead4 50% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-coffret-audiophile { background: linear-gradient(90deg, #bbf7d0 0% 50%, #fef08a 50% 100%); color: #1e293b !important; text-shadow: none !important; }
 
-  /* Badges Audiophiles Spécifiques (Inclinés en biais) */
-  .badge-audiophile-vinyle { background: linear-gradient(102deg, #fb923c 0%, #fb923c 47%, #fef08a 53%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-audiophile-cd { background: linear-gradient(102deg, #7dd3fc 0%, #7dd3fc 47%, #fef08a 53%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-audiophile-sacd { background: linear-gradient(102deg, #d8b4fe 0%, #d8b4fe 47%, #fef08a 53%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-audiophile-cdr { background: linear-gradient(102deg, #5eead4 0%, #5eead4 47%, #fef08a 53%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
+  /* Badges Audiophiles Spécifiques */
+  .badge-audiophile-vinyle { background: linear-gradient(90deg, #fb923c 0% 50%, #fef08a 50% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-audiophile-cd { background: linear-gradient(90deg, #7dd3fc 0% 50%, #fef08a 50% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-audiophile-sacd { background: linear-gradient(90deg, #d8b4fe 0% 50%, #fef08a 50% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-audiophile-cdr { background: linear-gradient(90deg, #5eead4 0% 50%, #fef08a 50% 100%); color: #1e293b !important; text-shadow: none !important; }
 
-  /* Badges Tri-couleurs (Inclinés en biais sur les 3 blocs) */
-  .badge-coffret-audiophile-vinyle { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 31%, #fb923c 36%, #fb923c 64%, #fef08a 69%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-coffret-audiophile-cd { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 31%, #7dd3fc 36%, #7dd3fc 64%, #fef08a 69%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-coffret-audiophile-sacd { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 31%, #d8b4fe 36%, #d8b4fe 64%, #fef08a 69%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
-  .badge-coffret-audiophile-cdr { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 31%, #5eead4 36%, #5eead4 64%, #fef08a 69%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
+  /* Badges Tri-couleurs (Coffret + Support + Jaune Audiophile) */
+  .badge-coffret-audiophile-vinyle { background: linear-gradient(90deg, #bbf7d0 0% 33.3%, #fb923c 33.3% 66.6%, #fef08a 66.6% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-coffret-audiophile-cd { background: linear-gradient(90deg, #bbf7d0 0% 33.3%, #7dd3fc 33.3% 66.6%, #fef08a 66.6% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-coffret-audiophile-sacd { background: linear-gradient(90deg, #bbf7d0 0% 33.3%, #d8b4fe 33.3% 66.6%, #fef08a 66.6% 100%); color: #1e293b !important; text-shadow: none !important; }
+  .badge-coffret-audiophile-cdr { background: linear-gradient(90deg, #bbf7d0 0% 33.3%, #5eead4 33.3% 66.6%, #fef08a 66.6% 100%); color: #1e293b !important; text-shadow: none !important; }
+
     
     .genre-badge {
     display: inline-block;
@@ -950,7 +952,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 21:45</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 22:00</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
