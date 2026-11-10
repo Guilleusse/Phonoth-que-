@@ -560,7 +560,8 @@
   .dot-cdr { background-color: #5eead4; }
   .dot-sacd { background-color: #d8b4fe; }
   .dot-coffret { background-color: #bbf7d0; }
-
+  .dot-audiophile { background-color: #fef08a; }
+    
     .genre-badge {
     display: inline-block;
     font-size: 10px;
@@ -967,7 +968,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 23:40</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 11-11-2026 00:00</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1954,6 +1955,7 @@ document.getElementById("statsModalContent").innerHTML = `
 <div class="details-row"><span class="details-label">Nb réel de CD-R : <span class="stat-dot dot-cdr"></span></span><span class="details-val">${countCDr}</span></div>
 <div class="details-row"><span class="details-label">Nb réel de SACD : <span class="stat-dot dot-sacd"></span></span><span class="details-val">${countSACD}</span></div>
 <div class="details-row"><span class="details-label">Nb réel de coffrets : <span class="stat-dot dot-coffret"></span></span><span class="details-val">${countCoffret}</span></div>
+<div class="details-row"><span class="details-label">Éditions audiophiles : <span class="stat-dot dot-audiophile"></span></span><span class="details-val">${countAudiophile}</span></div>
 <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
 <div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
 <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
