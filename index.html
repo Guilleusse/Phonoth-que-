@@ -516,7 +516,7 @@
     border: 1px solid rgba(255, 255, 255, 0.15);
   }
 
-  .badge-vinyle, .badge-vinyl { background: linear-gradient(115deg, #f59e0b 0%, #d97706 100%); }
+    .badge-vinyle, .badge-vinyl { background: linear-gradient(115deg, #f59e0b 0%, #d97706 100%); }
   .badge-cd { background: linear-gradient(115deg, #38bdf8 0%, #0284c7 100%); }
   .badge-cdr { background: linear-gradient(115deg, #2dd4bf 0%, #0d9488 100%); }
   .badge-sacd { background: linear-gradient(115deg, #c084fc 0%, #7c3aed 100%); }
@@ -525,17 +525,23 @@
   .badge-wantlist { background: linear-gradient(115deg, #ff375f 0%, #e11d48 100%); }
 
   /* Badges Combinés (Dégradés dynamiques) */
-  .badge-coffret-vinyle { background: linear-gradient(115deg, #4ade80 0%, #d97706 100%); }
-  .badge-coffret-cd { background: linear-gradient(115deg, #4ade80 0%, #0284c7 100%); }
-  .badge-coffret-sacd { background: linear-gradient(115deg, #4ade80 0%, #7c3aed 100%); }
-  .badge-coffret-cdr { background: linear-gradient(115deg, #4ade80 0%, #0d9488 100%); }
+  .badge-coffret-vinyle { background: linear-gradient(115deg, #4ade80 0%, #f59e0b 100%); }
+  .badge-coffret-cd { background: linear-gradient(115deg, #4ade80 0%, #38bdf8 100%); }
+  .badge-coffret-sacd { background: linear-gradient(115deg, #4ade80 0%, #c084fc 100%); }
+  .badge-coffret-cdr { background: linear-gradient(115deg, #4ade80 0%, #2dd4bf 100%); }
   .badge-coffret-audiophile { background: linear-gradient(115deg, #4ade80 0%, #d4af37 100%); }
 
-  /* Badge spécial Tri-couleur : Vert Coffret -> Orange Ambré -> Or Chaud Audiophile */
-  .badge-audiophile-box {
-    background: linear-gradient(115deg, #2e7d32 0%, #d97706 50%, #d4af37 100%);
-    border: 1px solid rgba(212, 175, 55, 0.5);
-  }
+  /* Badges Audiophiles Spécifiques (Support -> Or) */
+  .badge-audiophile-vinyle { background: linear-gradient(115deg, #f59e0b 0%, #d4af37 100%); border: 1px solid rgba(212, 175, 55, 0.5); }
+  .badge-audiophile-cd { background: linear-gradient(115deg, #38bdf8 0%, #d4af37 100%); border: 1px solid rgba(212, 175, 55, 0.5); }
+  .badge-audiophile-sacd { background: linear-gradient(115deg, #c084fc 0%, #d4af37 100%); border: 1px solid rgba(212, 175, 55, 0.5); }
+  .badge-audiophile-cdr { background: linear-gradient(115deg, #2dd4bf 0%, #d4af37 100%); border: 1px solid rgba(212, 175, 55, 0.5); }
+
+  /* Badges Spéciaux Tri-couleurs (Vert Coffret -> Support -> Or Audiophile) */
+  .badge-coffret-audiophile-vinyle { background: linear-gradient(115deg, #4ade80 0%, #f59e0b 50%, #d4af37 100%); border: 1px solid rgba(212, 175, 55, 0.5); }
+  .badge-coffret-audiophile-cd { background: linear-gradient(115deg, #4ade80 0%, #38bdf8 50%, #d4af37 100%); border: 1px solid rgba(212, 175, 55, 0.5); }
+  .badge-coffret-audiophile-sacd { background: linear-gradient(115deg, #4ade80 0%, #c084fc 50%, #d4af37 100%); border: 1px solid rgba(212, 175, 55, 0.5); }
+  .badge-coffret-audiophile-cdr { background: linear-gradient(115deg, #4ade80 0%, #2dd4bf 50%, #d4af37 100%); border: 1px solid rgba(212, 175, 55, 0.5); }
 
   .genre-badge {
     display: inline-block;
@@ -943,7 +949,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 01:36</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 02:04</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -2118,20 +2124,18 @@
         badgeClass = 'badge-wantlist';
         badgeText = `SOUHAITS ${badgeText}`;
       } else if (isBoxSet) {
-        if (album.isAudiophile && (supp === 'VINYLE' || supp === 'VINYL')) {
-          badgeClass = 'badge-audiophile-box';
-        } else if (album.isAudiophile) {
-          badgeClass = 'badge-coffret-audiophile';
-        } else if (supp === 'VINYLE' || supp === 'VINYL') {
-          badgeClass = 'badge-coffret-vinyle';
-        } else if (supp === 'CD') {
-          badgeClass = 'badge-coffret-cd';
-        } else if (supp === 'SACD') {
-          badgeClass = 'badge-coffret-sacd';
-        } else if (supp === 'CD-R') {
-          badgeClass = 'badge-coffret-cdr';
+        if (album.isAudiophile) {
+          if (supp === 'VINYLE' || supp === 'VINYL') badgeClass = 'badge-coffret-audiophile-vinyle';
+          else if (supp === 'CD') badgeClass = 'badge-coffret-audiophile-cd';
+          else if (supp === 'SACD') badgeClass = 'badge-coffret-audiophile-sacd';
+          else if (supp === 'CD-R') badgeClass = 'badge-coffret-audiophile-cdr';
+          else badgeClass = 'badge-coffret-audiophile';
         } else {
-          badgeClass = 'badge-coffret';
+          if (supp === 'VINYLE' || supp === 'VINYL') badgeClass = 'badge-coffret-vinyle';
+          else if (supp === 'CD') badgeClass = 'badge-coffret-cd';
+          else if (supp === 'SACD') badgeClass = 'badge-coffret-sacd';
+          else if (supp === 'CD-R') badgeClass = 'badge-coffret-cdr';
+          else badgeClass = 'badge-coffret';
         }
         
         const details = nbDisques > 0 ? `${nbDisques} DISQUES ` : '';
@@ -2139,7 +2143,11 @@
           ? `COFFRET • ${details}${suppDisplay} ${audiophileDisplay}`.trim()
           : `COFFRET • ${details}${suppDisplay}`.trim();
       } else if (album.isAudiophile) {
-        badgeClass = 'badge-audiophile';
+        if (supp === 'VINYLE' || supp === 'VINYL') badgeClass = 'badge-audiophile-vinyle';
+        else if (supp === 'CD') badgeClass = 'badge-audiophile-cd';
+        else if (supp === 'SACD') badgeClass = 'badge-audiophile-sacd';
+        else if (supp === 'CD-R') badgeClass = 'badge-audiophile-cdr';
+        else badgeClass = 'badge-audiophile';
         badgeText += ` ${audiophileDisplay}`;
       } else if (supp === 'VINYLE' || supp === 'VINYL') {
         badgeClass = 'badge-vinyle';
@@ -2186,15 +2194,25 @@
       if (album.isWantlist) {
         badgeClass = 'badge-wantlist';
       } else if (isBoxSet) {
-        if (album.isAudiophile && (supp === 'VINYLE' || supp === 'VINYL')) badgeClass = 'badge-audiophile-box';
-        else if (album.isAudiophile) badgeClass = 'badge-coffret-audiophile';
-        else if (supp === 'VINYLE' || supp === 'VINYL') badgeClass = 'badge-coffret-vinyle';
-        else if (supp === 'CD') badgeClass = 'badge-coffret-cd';
-        else if (supp === 'SACD') badgeClass = 'badge-coffret-sacd';
-        else if (supp === 'CD-R') badgeClass = 'badge-coffret-cdr';
-        else badgeClass = 'badge-coffret';
+        if (album.isAudiophile) {
+          if (supp === 'VINYLE' || supp === 'VINYL') badgeClass = 'badge-coffret-audiophile-vinyle';
+          else if (supp === 'CD') badgeClass = 'badge-coffret-audiophile-cd';
+          else if (supp === 'SACD') badgeClass = 'badge-coffret-audiophile-sacd';
+          else if (supp === 'CD-R') badgeClass = 'badge-coffret-audiophile-cdr';
+          else badgeClass = 'badge-coffret-audiophile';
+        } else {
+          if (supp === 'VINYLE' || supp === 'VINYL') badgeClass = 'badge-coffret-vinyle';
+          else if (supp === 'CD') badgeClass = 'badge-coffret-cd';
+          else if (supp === 'SACD') badgeClass = 'badge-coffret-sacd';
+          else if (supp === 'CD-R') badgeClass = 'badge-coffret-cdr';
+          else badgeClass = 'badge-coffret';
+        }
       } else if (album.isAudiophile) {
-        badgeClass = 'badge-audiophile';
+        if (supp === 'VINYLE' || supp === 'VINYL') badgeClass = 'badge-audiophile-vinyle';
+        else if (supp === 'CD') badgeClass = 'badge-audiophile-cd';
+        else if (supp === 'SACD') badgeClass = 'badge-audiophile-sacd';
+        else if (supp === 'CD-R') badgeClass = 'badge-audiophile-cdr';
+        else badgeClass = 'badge-audiophile';
       } else if (supp === 'VINYLE' || supp === 'VINYL') {
         badgeClass = 'badge-vinyle';
       } else if (supp === 'CD-R') {
