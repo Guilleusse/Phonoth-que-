@@ -545,7 +545,22 @@
   .badge-coffret-audiophile-sacd { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 31%, #d8b4fe 36%, #d8b4fe 64%, #fef08a 69%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
   .badge-coffret-audiophile-cdr { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 31%, #5eead4 36%, #5eead4 64%, #fef08a 69%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
 
-    
+  /* Petits carrés de rappel dans la fenêtre Stats */
+  .stat-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border-radius: 3px;
+    vertical-align: middle;
+    border: 1px solid rgba(30, 41, 59, 0.15);
+  }
+  .dot-vinyle { background-color: #fdba74; }
+  .dot-cd { background-color: #7dd3fc; }
+  .dot-cdr { background-color: #5eead4; }
+  .dot-sacd { background-color: #d8b4fe; }
+  .dot-coffret { background-color: #bbf7d0; }
+
     .genre-badge {
     display: inline-block;
     font-size: 10px;
@@ -952,7 +967,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 22:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 23:10</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1929,27 +1944,27 @@
         }
       });
 
-      const formattedPrice = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalPrice);
+     const formattedPrice = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalPrice);
 
-      document.getElementById("statsModalContent").innerHTML = `
-      <div class="details-row"><span class="details-label">Nb réel de disques :</span><span class="details-val">${totalDiscsPhysical}</span></div>
-      <div class="details-row"><span class="details-label">Nb de vignettes (appli) :</span><span class="details-val">${collection.length - countWantlist}</span></div>
-      <div class="details-row"><span class="details-label">Nb réel de vinyles :</span><span class="details-val">${countVinyle}</span></div>
-      <div class="details-row"><span class="details-label">Nb réel de CD :</span><span class="details-val">${countCD}</span></div>
-      <div class="details-row"><span class="details-label">Nb réel de CD-R :</span><span class="details-val">${countCDr}</span></div>
-      <div class="details-row"><span class="details-label">Nb réel de SACD :</span><span class="details-val">${countSACD}</span></div>
-      <div class="details-row"><span class="details-label">Nb réel de coffrets :</span><span class="details-val">${countCoffret}</span></div>
-      <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
-      <div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
-      <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
-        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
-          <button class="btn-secondary" style="width: 100%; justify-content: center; background: var(--bg-color);" onclick="toggleTheme()">🌓 Activer / Désactiver le mode Clair</button>
-          <button class="btn-secondary btn-danger-soft" style="width: 100%; justify-content: center; border-color: rgba(239, 68, 68, 0.4); color: var(--danger);" onclick="clearCollection()">🗑️ Vider toute la phonothèque</button>
-        </div>
-      `;
-      document.getElementById("statsModal").classList.add("active");
-    }
-
+document.getElementById("statsModalContent").innerHTML = `
+<div class="details-row"><span class="details-label">Nb réel de disques :</span><span class="details-val">${totalDiscsPhysical}</span></div>
+<div class="details-row"><span class="details-label">Nb de vignettes (appli) :</span><span class="details-val">${collection.length - countWantlist}</span></div>
+<div class="details-row"><span class="details-label">Nb réel de vinyles :</span><span class="details-val">${countVinyle} <span class="stat-dot dot-vinyle"></span></span></div>
+<div class="details-row"><span class="details-label">Nb réel de CD :</span><span class="details-val">${countCD} <span class="stat-dot dot-cd"></span></span></div>
+<div class="details-row"><span class="details-label">Nb réel de CD-R :</span><span class="details-val">${countCDr} <span class="stat-dot dot-cdr"></span></span></div>
+<div class="details-row"><span class="details-label">Nb réel de SACD :</span><span class="details-val">${countSACD} <span class="stat-dot dot-sacd"></span></span></div>
+<div class="details-row"><span class="details-label">Nb réel de coffrets :</span><span class="details-val">${countCoffret} <span class="stat-dot dot-coffret"></span></span></div>
+<div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
+<div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
+<div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
+  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
+    <button class="btn-secondary" style="width: 100%; justify-content: center; background: var(--bg-color);" onclick="toggleTheme()">🌓 Activer / Désactiver le mode Clair</button>
+    <button class="btn-secondary btn-danger-soft" style="width: 100%; justify-content: center; border-color: rgba(239, 68, 68, 0.4); color: var(--danger);" onclick="clearCollection()">🗑️ Vider toute la phonothèque</button>
+  </div>
+`;
+document.getElementById("statsModal").classList.add("active");
+}
+      
     /* --- COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
     function updateFilterCounts() {
       if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
