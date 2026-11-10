@@ -29,10 +29,10 @@
     --text-main: #f3f4f6;
     --text-sub: #9ca3af;
     --badge-vinyle: #d97706;
-    --badge-cd: #2563eb;
-    --badge-cdr: #3b82f6;
-    --badge-sacd: #0d9488;
-    --badge-coffret: #8b5cf6;
+    --badge-cd: #0284c7;
+    --badge-cdr: #0d9488;
+    --badge-sacd: #7c3aed;
+    --badge-coffret: #2e7d32;
     --badge-wantlist: #f59e0b;
     --badge-audiophile: #b45309;
     --danger: #ef4444;
@@ -308,7 +308,7 @@
   }
 
   .filters-scroll button,
-  .filters-scroll .filter-btn {
+  .filters-scroll .filter-chip {
     flex: 0 0 auto;
     white-space: nowrap;
   }
@@ -499,7 +499,7 @@
     color: var(--text-main);
   }
 
-  /* --- HARMONISATION DES BADGES --- */
+  /* --- HARMONISATION ET PERSONNALISATION DES BADGES --- */
   .badge {
     display: inline-block;
     font-size: 10px;
@@ -514,21 +514,27 @@
   }
 
   .badge-vinyle, .badge-vinyl {
-    background: rgba(255, 149, 0, 0.18);
-    color: #ff9f0a;
-    border: 1px solid rgba(255, 149, 0, 0.35);
+    background: rgba(217, 119, 6, 0.22);
+    color: #f59e0b;
+    border: 1px solid rgba(217, 119, 6, 0.45);
   }
 
-  .badge-cd, .badge-cdr {
-    background: rgba(10, 132, 255, 0.18);
-    color: #64d2ff;
-    border: 1px solid rgba(10, 132, 255, 0.35);
+  .badge-cd {
+    background: rgba(2, 132, 199, 0.22);
+    color: #38bdf8;
+    border: 1px solid rgba(2, 132, 199, 0.45);
+  }
+
+  .badge-cdr {
+    background: rgba(13, 148, 136, 0.22);
+    color: #2dd4bf;
+    border: 1px solid rgba(13, 148, 136, 0.45);
   }
 
   .badge-sacd {
-    background: rgba(191, 90, 242, 0.18);
-    color: #da8fff;
-    border: 1px solid rgba(191, 90, 242, 0.35);
+    background: rgba(124, 58, 237, 0.22);
+    color: #c084fc;
+    border: 1px solid rgba(124, 58, 237, 0.45);
   }
 
   .badge-audiophile {
@@ -538,15 +544,25 @@
   }
 
   .badge-coffret {
-    background: rgba(48, 209, 88, 0.18);
-    color: #30d158;
-    border: 1px solid rgba(48, 209, 88, 0.35);
+    background: rgba(46, 125, 50, 0.22);
+    color: #4ade80;
+    border: 1px solid rgba(46, 125, 50, 0.45);
   }
 
   .badge-wantlist {
     background: rgba(255, 45, 85, 0.18);
     color: #ff375f;
     border: 1px solid rgba(255, 45, 85, 0.35);
+  }
+
+  /* Badge spécial Option A (Dégradé tri-couleur : Vert Coffret -> Orange Ambré -> Or Chaud Audiophile) */
+  .badge-audiophile-box {
+    background: linear-gradient(115deg, #2e7d32 0%, #d97706 50%, #d4af37 100%);
+    color: #ffffff;
+    font-weight: 700;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   .genre-badge {
@@ -955,7 +971,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 09-11-2026 00:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 01:10</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1327,35 +1343,35 @@
     }
 
     function updateViewToggleButton() {
-  const icon = document.getElementById('viewToggleIcon');
-  const btn = document.getElementById('viewToggleBtn');
-  if (!icon || !btn) return;
+      const icon = document.getElementById('viewToggleIcon');
+      const btn = document.getElementById('viewToggleBtn');
+      if (!icon || !btn) return;
 
-  // Détection mobile (iPhone / smartphone)
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
+      // Détection mobile (iPhone / smartphone)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
-  icon.style.display = 'inline-block';
-  
-  if (isMobile) {
-    // Réglage pour iPhone / mobile
-    icon.style.fontSize = '22px';
-    icon.style.transform = 'scale(1.25)';
-    icon.style.webkitTransform = 'scale(1.25)';
-  } else {
-    // Réglage sobre pour Windows / PC
-    icon.style.fontSize = '18px';
-    icon.style.transform = 'scale(1.0)';
-    icon.style.webkitTransform = 'scale(1.0)';
-  }
+      icon.style.display = 'inline-block';
+      
+      if (isMobile) {
+        // Réglage pour iPhone / mobile
+        icon.style.fontSize = '22px';
+        icon.style.transform = 'scale(1.25)';
+        icon.style.webkitTransform = 'scale(1.25)';
+      } else {
+        // Réglage sobre pour Windows / PC
+        icon.style.fontSize = '18px';
+        icon.style.transform = 'scale(1.0)';
+        icon.style.webkitTransform = 'scale(1.0)';
+      }
 
-  if (currentViewMode === 'list') {
-    icon.textContent = '⊞';
-    btn.title = "Passer en vue Cartes";
-  } else {
-    icon.textContent = '⊟';
-    btn.title = "Passer en vue Liste compacte";
-  }
-}
+      if (currentViewMode === 'list') {
+        icon.textContent = '⊞';
+        btn.title = "Passer en vue Cartes";
+      } else {
+        icon.textContent = '⊟';
+        btn.title = "Passer en vue Liste compacte";
+      }
+    }
     
     // --- GESTION DU DEFILEMENT ET DE L'INTERFACE ---
     function lockBodyScroll() {
@@ -1731,7 +1747,7 @@
       renderCollection();
     }
 
-            async function clearCollection() {
+    async function clearCollection() {
       const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?\n\n1/2 - Saisissez SUPPRIMER ci-dessous pour continuer :");
       if (!confirmWord || confirmWord.trim().toUpperCase() !== "SUPPRIMER") {
         if (confirmWord !== null) alert("Action annulée : mot de confirmation incorrect.");
@@ -2129,6 +2145,10 @@
       if (album.isWantlist) {
         badgeClass = 'badge-wantlist';
         badgeText = `SOUHAITS ${badgeText}`;
+      } else if (isBoxSet && (supp === 'VINYLE' || album.support === 'Vinyle') && album.isAudiophile) {
+        badgeClass = 'badge-audiophile-box';
+        const details = nbDisques > 0 ? `${nbDisques} DISQUES ` : '';
+        badgeText = `COFFRET • ${details}${suppDisplay} ${audiophileDisplay}`.trim();
       } else if (isBoxSet) {
         badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
         const details = nbDisques > 0 ? `${nbDisques} DISQUES ` : '';
@@ -2181,6 +2201,7 @@
       let supp = (album.support || 'CD').toUpperCase();
 
       if (album.isWantlist) badgeClass = 'badge-wantlist';
+      else if (isBoxSet && (supp === 'VINYLE' || album.support === 'Vinyle') && album.isAudiophile) badgeClass = 'badge-audiophile-box';
       else if (isBoxSet) badgeClass = album.isAudiophile ? 'badge-audiophile' : 'badge-coffret';
       else if (album.isAudiophile) badgeClass = 'badge-audiophile';
       else if (album.support === 'Vinyle') badgeClass = 'badge-vinyle';
@@ -2881,29 +2902,29 @@
     }
 
     function getRandomAlbum() {
-  const owned = collection
-    .map((album, index) => ({ album, index }))
-    .filter(item => !item.album.isWantlist);
+      const owned = collection
+        .map((album, index) => ({ album, index }))
+        .filter(item => !item.album.isWantlist);
 
-  if (!owned.length) return;
+      if (!owned.length) return;
 
-  // 1. Si la pioche est vide (au démarrage ou après avoir fait le tour complet)
-  if (albumDeck.length === 0) {
-    albumDeck = [...owned];
+      // 1. Si la pioche est vide (au démarrage ou après avoir fait le tour complet)
+      if (albumDeck.length === 0) {
+        albumDeck = [...owned];
 
-    // 2. Mélange parfait de Fisher-Yates
-    for (let i = albumDeck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [albumDeck[i], albumDeck[j]] = [albumDeck[j], albumDeck[i]];
+        // 2. Mélange parfait de Fisher-Yates
+        for (let i = albumDeck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [albumDeck[i], albumDeck[j]] = [albumDeck[j], albumDeck[i]];
+        }
+      }
+
+      // 3. On tire et on retire le dernier album du paquet mélangé
+      const picked = albumDeck.pop();
+
+      // 4. Affichage de la fiche album
+      showDetails(picked.index);
     }
-  }
-
-  // 3. On tire et on retire le dernier album du paquet mélangé
-  const picked = albumDeck.pop();
-
-  // 4. Affichage de la fiche album
-  showDetails(picked.index);
-}
 
     function closeModal(id, event) {
       if (event && event.stopPropagation) event.stopPropagation();
