@@ -550,7 +550,7 @@
     display: inline-block;
     width: 12px;
     height: 12px;
-    margin-left: 8px;
+    margin-right: 6px;
     border-radius: 3px;
     vertical-align: middle;
     border: 1px solid rgba(30, 41, 59, 0.15);
@@ -967,7 +967,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 23:10</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 10-11-2026 23:40</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1949,11 +1949,11 @@
 document.getElementById("statsModalContent").innerHTML = `
 <div class="details-row"><span class="details-label">Nb réel de disques :</span><span class="details-val">${totalDiscsPhysical}</span></div>
 <div class="details-row"><span class="details-label">Nb de vignettes (appli) :</span><span class="details-val">${collection.length - countWantlist}</span></div>
-<div class="details-row"><span class="details-label">Nb réel de vinyles :</span><span class="details-val">${countVinyle} <span class="stat-dot dot-vinyle"></span></span></div>
-<div class="details-row"><span class="details-label">Nb réel de CD :</span><span class="details-val">${countCD} <span class="stat-dot dot-cd"></span></span></div>
-<div class="details-row"><span class="details-label">Nb réel de CD-R :</span><span class="details-val">${countCDr} <span class="stat-dot dot-cdr"></span></span></div>
-<div class="details-row"><span class="details-label">Nb réel de SACD :</span><span class="details-val">${countSACD} <span class="stat-dot dot-sacd"></span></span></div>
-<div class="details-row"><span class="details-label">Nb réel de coffrets :</span><span class="details-val">${countCoffret} <span class="stat-dot dot-coffret"></span></span></div>
+<div class="details-row"><span class="details-label">Nb réel de vinyles : <span class="stat-dot dot-vinyle"></span></span><span class="details-val">${countVinyle}</span></div>
+<div class="details-row"><span class="details-label">Nb réel de CD : <span class="stat-dot dot-cd"></span></span><span class="details-val">${countCD}</span></div>
+<div class="details-row"><span class="details-label">Nb réel de CD-R : <span class="stat-dot dot-cdr"></span></span><span class="details-val">${countCDr}</span></div>
+<div class="details-row"><span class="details-label">Nb réel de SACD : <span class="stat-dot dot-sacd"></span></span><span class="details-val">${countSACD}</span></div>
+<div class="details-row"><span class="details-label">Nb réel de coffrets : <span class="stat-dot dot-coffret"></span></span><span class="details-val">${countCoffret}</span></div>
 <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
 <div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
 <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
