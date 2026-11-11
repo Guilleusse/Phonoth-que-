@@ -561,6 +561,7 @@
   .dot-sacd { background-color: #d8b4fe; }
   .dot-coffret { background-color: #bbf7d0; }
   .dot-audiophile { background-color: #fef08a; }
+  .dot-wantlist { background-color: #f87171; }
     
   .genre-badge {
     display: inline-block;
@@ -998,7 +999,7 @@ body.light-mode .volumes-box div[style*="background: #1c1c1e"] {
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 11-11-2026 02:09</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 11-11-2026 02:40</div>
     
     <header>
       <div class="logo-container">
@@ -1978,7 +1979,7 @@ body.light-mode .volumes-box div[style*="background: #1c1c1e"] {
         <div class="details-row"><span class="details-label">Nb réel de coffrets : <span class="stat-dot dot-coffret"></span></span><span class="details-val">${countCoffret}</span></div>
         <div class="details-row"><span class="details-label">Éditions audiophiles : <span class="stat-dot dot-audiophile"></span></span><span class="details-val">—</span></div>
         <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
-        <div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
+        <div class="details-row"><span class="details-label">Liste de souhaits : <span class="stat-dot dot-wantlist"></span></span><span class="details-val">${countWantlist}</span></div>
         <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
         <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
           <button class="btn-secondary" style="width: 100%; justify-content: center; background: var(--bg-color);" onclick="toggleTheme()">🌓 Activer / Désactiver le mode Clair</button>
