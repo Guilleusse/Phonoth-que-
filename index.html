@@ -980,12 +980,25 @@
     background: rgba(255, 255, 255, 0.85);
     border: 1px solid var(--card-border);
   }
-</style>
+  
+  /* Fond blanc pour la pochette principale dans le modal "Détails de l'album" */
+body.light-mode .modal-cover {
+  background: #ffffff !important;
+}
+
+/* Harmonie pour les vignettes et conteneurs de la sous-collection (coffrets / volumes) */
+body.light-mode .volumes-box > div,
+body.light-mode .volumes-box div[style*="background:#1c1c1e"],
+body.light-mode .volumes-box div[style*="background: #1c1c1e"] {
+  background: #ffffff !important;
+  border-color: var(--card-border) !important;
+}
+  </style>
 </head>
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 11-11-2026 01:45</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 11-11-2026 02:09</div>
     
     <header>
       <div class="logo-container">
