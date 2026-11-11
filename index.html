@@ -115,6 +115,7 @@
     width: auto;
     object-fit: contain;
     display: block;
+    border-radius: 12px;
   }
 
   /* --- BOUTONS D'ACTION HARMONISÉS --- */
@@ -954,6 +955,26 @@
     color: var(--text-main) !important;
   }
 
+  /* --- CORRECTIFS CIBLÉS DU MODE CLAIR --- */
+  /* 1. DJ Gemini : préserver le texte blanc sur les options à fond sombre */
+  body.light-mode #moodModal span[style*="color: white"],
+  body.light-mode #moodModal span[style*="color:white"] {
+    color: #ffffff !important;
+  }
+
+  /* 2. Bouton de retour rapide (flèche en bas à droite) */
+  body.light-mode .back-to-top-btn {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--card-border);
+    color: var(--text-main);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* 3. Intégration du logo en mode clair */
+  body.light-mode .app-logo {
+    mix-blend-mode: multiply;
+  }
+
   body.light-mode .search-clear-btn {
     background: #d1d5db;
     color: #111827;
@@ -968,7 +989,7 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 11-11-2026 00:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 11-11-2026 01:32</div>
     
     <header>
       <!-- 1. LOGO EN HAUT (CENTRÉ) -->
@@ -1487,13 +1508,20 @@
       let lastPicked = JSON.parse(localStorage.getItem('phonotheque_last_picked') || '[]');
       const catalogueText = ownedAlbums
         .map(a => `[ID: ${a.originalIndex}] ${a.artist} - ${a.title} (${a.style || ''})`)
-        .join('\n');
+        .join('
+');
 
       const exclusionText = lastPicked.length > 0 
-        ? `\nNE CHOISIS PAS parmi ces IDs d'albums déjà recommandés récemment : [${lastPicked.join(', ')}].` 
+        ? `
+NE CHOISIS PAS parmi ces IDs d'albums déjà recommandés récemment : [${lastPicked.join(', ')}].` 
         : '';
 
-      const promptText = `Voici ma collection de disques :\n${catalogueText}\n\nMon humeur / ambiance actuelle est : "${moodText}".${exclusionText}\nChoisis UN SEUL album de ma collection qui correspond parfaitement à cette ambiance.\nRends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans aucun autre texte, sans explication, ni ponctuation.`;
+      const promptText = `Voici ma collection de disques :
+${catalogueText}
+
+Mon humeur / ambiance actuelle est : "${moodText}".${exclusionText}
+Choisis UN SEUL album de ma collection qui correspond parfaitement à cette ambiance.
+Rends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans aucun autre texte, sans explication, ni ponctuation.`;
       
       document.getElementById("moodModal").classList.remove("active");
       showSpinner();
@@ -1745,14 +1773,18 @@
     }
 
     async function clearCollection() {
-      const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?\n\n1/2 - Saisissez SUPPRIMER ci-dessous pour continuer :");
+      const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?
+
+1/2 - Saisissez SUPPRIMER ci-dessous pour continuer :");
       if (!confirmWord || confirmWord.trim().toUpperCase() !== "SUPPRIMER") {
         if (confirmWord !== null) alert("Action annulée : mot de confirmation incorrect.");
         return;
       }
 
       if (authUser) {
-        const pass = prompt("⚠️ VÉRIFICATION D'IDENTITÉ :\n\n2/2 - Entrez le mot de passe de votre compte (" + authUser.email + ") pour valider :");
+        const pass = prompt("⚠️ VÉRIFICATION D'IDENTITÉ :
+
+2/2 - Entrez le mot de passe de votre compte (" + authUser.email + ") pour valider :");
         if (!pass) {
           if (pass !== null) alert("Action annulée : mot de passe non saisi.");
           return;
@@ -1801,7 +1833,7 @@
 
     // --- RECHERCHE ET UTILITAIRES DE TEXTE ---
     function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return string.replace(/[.*+?^${}()|[\]\]/g, '\$&');
     }
 
     function matchText(text, search) {
@@ -1810,7 +1842,7 @@
       const s = search.toLowerCase().trim();
       if (!s) return true;
       if (s.length <= 3) {
-        return new RegExp('\\b' + escapeRegExp(s) + '\\b', 'i').test(t);
+        return new RegExp('\b' + escapeRegExp(s) + '\b', 'i').test(t);
       }
       return t.includes(s);
     }
@@ -2528,7 +2560,8 @@ document.getElementById("statsModal").classList.add("active");
       const text = document.getElementById("bulkInput").value.trim();
 
       if (text) {
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        const lines = text.split('
+').map(l => l.trim()).filter(l => l.length > 0);
         if (!album.volumes) album.volumes = [];
         lines.forEach((line, idx) => {
           album.volumes[idx] = album.volumes[idx] || { cover: album.cover || '', tracks: [] };
@@ -2571,7 +2604,8 @@ document.getElementById("statsModal").classList.add("active");
       document.getElementById("editVolTitle").value = current.title && !/^\d+$/.test(current.title) ? current.title : `Disque ${volIdx + 1}`;
       document.getElementById("editVolCover").value = current.cover || '';
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
-      document.getElementById("editVolTracks").value = (current.tracks || []).map(t => t.title || '').join('\n');
+      document.getElementById("editVolTracks").value = (current.tracks || []).map(t => t.title || '').join('
+');
       document.getElementById("editVolumeModal").classList.add("active");
     }
 
@@ -2593,7 +2627,8 @@ document.getElementById("statsModal").classList.add("active");
 
           if (!tracks.length) tracks = data.tracklist;
 
-          document.getElementById("editVolTracks").value = tracks.map(t => t.position ? `${t.position}. ${t.title||''}` : t.title||'').join('\n');
+          document.getElementById("editVolTracks").value = tracks.map(t => t.position ? `${t.position}. ${t.title||''}` : t.title||'').join('
+');
 
           if (data.images?.length && !pendingEditVolCoverUrl) {
             pendingEditVolCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\/\//, ''))}`;
@@ -2618,7 +2653,8 @@ document.getElementById("statsModal").classList.add("active");
       album.volumes[volIdx] = {
         title: document.getElementById("editVolTitle").value.trim(),
         cover: pendingEditVolCoverUrl || document.getElementById("editVolCover").value.trim(),
-        tracks: document.getElementById("editVolTracks").value.trim().split('\n')
+        tracks: document.getElementById("editVolTracks").value.trim().split('
+')
           .map(line => ({ position: '', title: line.trim(), duration: '' }))
           .filter(t => t.title.length > 0)
       };
@@ -2691,14 +2727,15 @@ document.getElementById("statsModal").classList.add("active");
         document.getElementById(id).value = a[key] || '';
       });
 
-      document.getElementById("formTracks").value = (!a.isBoxSet && a.tracks?.length) ? a.tracks.map(t => t.title || '').join('\n') : '';
+      document.getElementById("formTracks").value = (!a.isBoxSet && a.tracks?.length) ? a.tracks.map(t => t.title || '').join('
+') : '';
       pendingCoverUrl = a.cover || '';
       document.getElementById("formCover").value = a.cover || '';
       document.getElementById("formDiscsCount").value = a.discsCount || a.volumes?.length || '';
       document.getElementById("formModal").classList.add("active");
     }
 
-    function saveAlbumForm() {
+    saveAlbumForm = function() {
       const title = document.getElementById("formTitle").value.trim();
       const artist = document.getElementById("formArtist").value.trim();
       const discogsId = document.getElementById("formDiscogsId").value.trim();
@@ -2724,7 +2761,8 @@ document.getElementById("statsModal").classList.add("active");
         existingVols = [];
       }
 
-      const mTrks = document.getElementById("formTracks").value.trim().split('\n')
+      const mTrks = document.getElementById("formTracks").value.trim().split('
+')
         .map(l => ({ position: '', title: l.trim(), duration: '' }))
         .filter(t => t.title);
 
@@ -2924,7 +2962,8 @@ document.getElementById("statsModal").classList.add("active");
           }));
 
           if (document.getElementById("formRawTracks").checked && !document.getElementById("isBoxSet").checked) {
-            document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\n');
+            document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('
+');
           }
         }
         alert("Données chargées depuis Discogs !");
@@ -2981,7 +3020,8 @@ document.getElementById("statsModal").classList.add("active");
     async function importFromCSV(e) {
       const r = new FileReader();
       r.onload = async (ev) => {
-        const lines = ev.target.result.split('\n').map(l => l.trim()).filter(l => l);
+        const lines = ev.target.result.split('
+').map(l => l.trim()).filter(l => l);
         let n = [];
 
         if (lines.length > 1) {
@@ -3025,7 +3065,8 @@ document.getElementById("statsModal").classList.add("active");
     }
 
     function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum\n";
+      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum
+";
 
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
@@ -3037,9 +3078,13 @@ document.getElementById("statsModal").classList.add("active");
         }).join('||') : '';
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
-        const cleanNotes = (a.notes || '').replace(/\r?\n|\r/g, ' ');
+        const cleanNotes = (a.notes || '').replace(/
+?
+|
+/g, ' ');
 
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${cleanNotes}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\n`;  
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${cleanNotes}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"
+`;  
       });
 
       const today = new Date().toISOString().split('T')[0];
