@@ -517,8 +517,7 @@
     border: 1px solid rgba(255, 255, 255, 0.15);
   }
 
-    
-     /* Badges Simples (Effet Surligneur Pastel Texturé avec orange ajusté #fdba74) */
+  /* Badges Simples (Effet Surligneur Pastel Texturé) */
   .badge-audiophile { background: #fef08a url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E"); color: #1e293b !important; text-shadow: none !important; }
   .badge-coffret { background: #bbf7d0 url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E"); color: #1e293b !important; text-shadow: none !important; }
   .badge-vinyle, .badge-vinyl { background: #fdba74 url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E"); color: #1e293b !important; text-shadow: none !important; }
@@ -527,7 +526,7 @@
   .badge-cdr { background: #5eead4 url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E"); color: #1e293b !important; text-shadow: none !important; }
   .badge-wantlist { background: #f87171 url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E"); color: #1e293b !important; text-shadow: none !important; }
 
-  /* Badges Combinés (Bandes de surligneurs en biais avec transition douce) */
+  /* Badges Combinés (Bandes de surligneurs en biais) */
   .badge-coffret-vinyle { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 47%, #fdba74 53%, #fdba74 100%); color: #1e293b !important; text-shadow: none !important; }
   .badge-coffret-cd { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 47%, #7dd3fc 53%, #7dd3fc 100%); color: #1e293b !important; text-shadow: none !important; }
   .badge-coffret-sacd { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 47%, #d8b4fe 53%, #d8b4fe 100%); color: #1e293b !important; text-shadow: none !important; }
@@ -540,7 +539,7 @@
   .badge-audiophile-sacd { background: linear-gradient(102deg, #d8b4fe 0%, #d8b4fe 47%, #fef08a 53%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
   .badge-audiophile-cdr { background: linear-gradient(102deg, #5eead4 0%, #5eead4 47%, #fef08a 53%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
 
-  /* Badges Tri-couleurs (Coffret + Support + Jaune Audiophile en biais) */
+  /* Badges Tri-couleurs */
   .badge-coffret-audiophile-vinyle { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 31%, #fdba74 36%, #fdba74 64%, #fef08a 69%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
   .badge-coffret-audiophile-cd { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 31%, #7dd3fc 36%, #7dd3fc 64%, #fef08a 69%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
   .badge-coffret-audiophile-sacd { background: linear-gradient(102deg, #bbf7d0 0%, #bbf7d0 31%, #d8b4fe 36%, #d8b4fe 64%, #fef08a 69%, #fef08a 100%); color: #1e293b !important; text-shadow: none !important; }
@@ -563,7 +562,7 @@
   .dot-coffret { background-color: #bbf7d0; }
   .dot-audiophile { background-color: #fef08a; }
     
-    .genre-badge {
+  .genre-badge {
     display: inline-block;
     font-size: 10px;
     color: #a0a0a0;
@@ -956,13 +955,11 @@
   }
 
   /* --- CORRECTIFS CIBLÉS DU MODE CLAIR --- */
-  /* 1. DJ Gemini : préserver le texte blanc sur les options à fond sombre */
   body.light-mode #moodModal span[style*="color: white"],
   body.light-mode #moodModal span[style*="color:white"] {
     color: #ffffff !important;
   }
 
-  /* 2. Bouton de retour rapide (flèche en bas à droite) */
   body.light-mode .back-to-top-btn {
     background: rgba(255, 255, 255, 0.95);
     border-color: var(--card-border);
@@ -970,7 +967,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
-  /* 3. Intégration du logo en mode clair */
   body.light-mode .app-logo {
     mix-blend-mode: multiply;
   }
@@ -989,16 +985,14 @@
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 11-11-2026 01:32</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 11-11-2026 01:45</div>
     
     <header>
-      <!-- 1. LOGO EN HAUT (CENTRÉ) -->
       <div class="logo-container">
         <img src="logo.png" alt="Phonothèque" class="app-logo">
         <div id="syncSpinner" class="spinner" style="display:none;" title="Synchronisation..."></div>
       </div>
 
-      <!-- 2. BOUTONS D'ACTION HARMONISÉS -->
       <div class="header-actions">
         <button class="icon-btn" onclick="openStatsModal()" title="Statistiques">ℹ️ Stats</button>
         <button class="icon-btn" onclick="openMoodModal()" title="DJ Gemini (Humeur)">🧞‍♂️ Gemini</button>
@@ -1365,18 +1359,15 @@
       const btn = document.getElementById('viewToggleBtn');
       if (!icon || !btn) return;
 
-      // Détection mobile (iPhone / smartphone)
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
       icon.style.display = 'inline-block';
       
       if (isMobile) {
-        // Réglage pour iPhone / mobile
         icon.style.fontSize = '22px';
         icon.style.transform = 'scale(1.25)';
         icon.style.webkitTransform = 'scale(1.25)';
       } else {
-        // Réglage sobre pour Windows / PC
         icon.style.fontSize = '18px';
         icon.style.transform = 'scale(1.0)';
         icon.style.webkitTransform = 'scale(1.0)';
@@ -1418,10 +1409,6 @@
       localStorage.setItem('phonotheque_theme', isLight ? 'light' : 'dark');
     }
 
-    let lastScrollY = window.scrollY;
-    let scrollUpAccumulator = 0;
-    const THRESHOLD_SHOW = 80;
-
     let isScrollTicking = false;
     window.addEventListener('scroll', () => {
       const btn = document.getElementById('backToTopBtn');
@@ -1434,7 +1421,7 @@
           const stickyZone = document.querySelector('.sticky-zone');
           if (stickyZone) {
             const scrollY = window.scrollY;
-            const maxScroll = 140; // Distance en px pour la disparition progressive
+            const maxScroll = 140;
             const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
             
             const opacity = (1 - progress).toFixed(2);
@@ -1508,20 +1495,13 @@
       let lastPicked = JSON.parse(localStorage.getItem('phonotheque_last_picked') || '[]');
       const catalogueText = ownedAlbums
         .map(a => `[ID: ${a.originalIndex}] ${a.artist} - ${a.title} (${a.style || ''})`)
-        .join('
-');
+        .join('\n');
 
       const exclusionText = lastPicked.length > 0 
-        ? `
-NE CHOISIS PAS parmi ces IDs d'albums déjà recommandés récemment : [${lastPicked.join(', ')}].` 
+        ? `\nNE CHOISIS PAS parmi ces IDs d'albums déjà recommandés récemment : [${lastPicked.join(', ')}].` 
         : '';
 
-      const promptText = `Voici ma collection de disques :
-${catalogueText}
-
-Mon humeur / ambiance actuelle est : "${moodText}".${exclusionText}
-Choisis UN SEUL album de ma collection qui correspond parfaitement à cette ambiance.
-Rends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans aucun autre texte, sans explication, ni ponctuation.`;
+      const promptText = `Voici ma collection de disques :\n${catalogueText}\n\nMon humeur / ambiance actuelle est : "${moodText}".${exclusionText}\nChoisis UN SEUL album de ma collection qui correspond parfaitement à cette ambiance.\nRends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans aucun autre texte, sans explication, ni ponctuation.`;
       
       document.getElementById("moodModal").classList.remove("active");
       showSpinner();
@@ -1773,18 +1753,14 @@ Rends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans a
     }
 
     async function clearCollection() {
-      const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?
-
-1/2 - Saisissez SUPPRIMER ci-dessous pour continuer :");
+      const confirmWord = prompt("⚠️ ZONE DANGEREUSE : Voulez-vous VRAIMENT supprimer TOUTE votre phonothèque ?\n\n1/2 - Saisissez SUPPRIMER ci-dessous pour continuer :");
       if (!confirmWord || confirmWord.trim().toUpperCase() !== "SUPPRIMER") {
         if (confirmWord !== null) alert("Action annulée : mot de confirmation incorrect.");
         return;
       }
 
       if (authUser) {
-        const pass = prompt("⚠️ VÉRIFICATION D'IDENTITÉ :
-
-2/2 - Entrez le mot de passe de votre compte (" + authUser.email + ") pour valider :");
+        const pass = prompt("⚠️ VÉRIFICATION D'IDENTITÉ :\n\n2/2 - Entrez le mot de passe de votre compte (" + authUser.email + ") pour valider :");
         if (!pass) {
           if (pass !== null) alert("Action annulée : mot de passe non saisi.");
           return;
@@ -1833,7 +1809,7 @@ Rends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans a
 
     // --- RECHERCHE ET UTILITAIRES DE TEXTE ---
     function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\]/g, '\$&');
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     function matchText(text, search) {
@@ -1842,7 +1818,7 @@ Rends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans a
       const s = search.toLowerCase().trim();
       if (!s) return true;
       if (s.length <= 3) {
-        return new RegExp('\b' + escapeRegExp(s) + '\b', 'i').test(t);
+        return new RegExp('\\b' + escapeRegExp(s) + '\\b', 'i').test(t);
       }
       return t.includes(s);
     }
@@ -1977,27 +1953,27 @@ Rends-moi UNIQUEMENT l'ID numérique de l'album choisi (par exemple: 42), sans a
         }
       });
 
-     const formattedPrice = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalPrice);
+      const formattedPrice = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalPrice);
 
-document.getElementById("statsModalContent").innerHTML = `
-<div class="details-row"><span class="details-label">Nb réel de disques :</span><span class="details-val">${totalDiscsPhysical}</span></div>
-<div class="details-row"><span class="details-label">Nb de vignettes (appli) :</span><span class="details-val">${collection.length - countWantlist}</span></div>
-<div class="details-row"><span class="details-label">Nb réel de vinyles : <span class="stat-dot dot-vinyle"></span></span><span class="details-val">${countVinyle}</span></div>
-<div class="details-row"><span class="details-label">Nb réel de CD : <span class="stat-dot dot-cd"></span></span><span class="details-val">${countCD}</span></div>
-<div class="details-row"><span class="details-label">Nb réel de CD-R : <span class="stat-dot dot-cdr"></span></span><span class="details-val">${countCDr}</span></div>
-<div class="details-row"><span class="details-label">Nb réel de SACD : <span class="stat-dot dot-sacd"></span></span><span class="details-val">${countSACD}</span></div>
-<div class="details-row"><span class="details-label">Nb réel de coffrets : <span class="stat-dot dot-coffret"></span></span><span class="details-val">${countCoffret}</span></div>
-<div class="details-row"><span class="details-label">Éditions audiophiles : <span class="stat-dot dot-audiophile"></span></span><span class="details-val">—</span></div>
-<div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
-<div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
-<div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
-  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
-    <button class="btn-secondary" style="width: 100%; justify-content: center; background: var(--bg-color);" onclick="toggleTheme()">🌓 Activer / Désactiver le mode Clair</button>
-    <button class="btn-secondary btn-danger-soft" style="width: 100%; justify-content: center; border-color: rgba(239, 68, 68, 0.4); color: var(--danger);" onclick="clearCollection()">🗑️ Vider toute la phonothèque</button>
-  </div>
-`;
-document.getElementById("statsModal").classList.add("active");
-}
+      document.getElementById("statsModalContent").innerHTML = `
+        <div class="details-row"><span class="details-label">Nb réel de disques :</span><span class="details-val">${totalDiscsPhysical}</span></div>
+        <div class="details-row"><span class="details-label">Nb de vignettes (appli) :</span><span class="details-val">${collection.length - countWantlist}</span></div>
+        <div class="details-row"><span class="details-label">Nb réel de vinyles : <span class="stat-dot dot-vinyle"></span></span><span class="details-val">${countVinyle}</span></div>
+        <div class="details-row"><span class="details-label">Nb réel de CD : <span class="stat-dot dot-cd"></span></span><span class="details-val">${countCD}</span></div>
+        <div class="details-row"><span class="details-label">Nb réel de CD-R : <span class="stat-dot dot-cdr"></span></span><span class="details-val">${countCDr}</span></div>
+        <div class="details-row"><span class="details-label">Nb réel de SACD : <span class="stat-dot dot-sacd"></span></span><span class="details-val">${countSACD}</span></div>
+        <div class="details-row"><span class="details-label">Nb réel de coffrets : <span class="stat-dot dot-coffret"></span></span><span class="details-val">${countCoffret}</span></div>
+        <div class="details-row"><span class="details-label">Éditions audiophiles : <span class="stat-dot dot-audiophile"></span></span><span class="details-val">—</span></div>
+        <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
+        <div class="details-row"><span class="details-label">Liste de souhaits :</span><span class="details-val">${countWantlist}</span></div>
+        <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
+          <button class="btn-secondary" style="width: 100%; justify-content: center; background: var(--bg-color);" onclick="toggleTheme()">🌓 Activer / Désactiver le mode Clair</button>
+          <button class="btn-secondary btn-danger-soft" style="width: 100%; justify-content: center; border-color: rgba(239, 68, 68, 0.4); color: var(--danger);" onclick="clearCollection()">🗑️ Vider toute la phonothèque</button>
+        </div>
+      `;
+      document.getElementById("statsModal").classList.add("active");
+    }
       
     /* --- COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
     function updateFilterCounts() {
@@ -2560,8 +2536,7 @@ document.getElementById("statsModal").classList.add("active");
       const text = document.getElementById("bulkInput").value.trim();
 
       if (text) {
-        const lines = text.split('
-').map(l => l.trim()).filter(l => l.length > 0);
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         if (!album.volumes) album.volumes = [];
         lines.forEach((line, idx) => {
           album.volumes[idx] = album.volumes[idx] || { cover: album.cover || '', tracks: [] };
@@ -2604,8 +2579,7 @@ document.getElementById("statsModal").classList.add("active");
       document.getElementById("editVolTitle").value = current.title && !/^\d+$/.test(current.title) ? current.title : `Disque ${volIdx + 1}`;
       document.getElementById("editVolCover").value = current.cover || '';
       document.getElementById("editVolDiscogsId").value = album.discogsId || '';
-      document.getElementById("editVolTracks").value = (current.tracks || []).map(t => t.title || '').join('
-');
+      document.getElementById("editVolTracks").value = (current.tracks || []).map(t => t.title || '').join('\n');
       document.getElementById("editVolumeModal").classList.add("active");
     }
 
@@ -2627,8 +2601,7 @@ document.getElementById("statsModal").classList.add("active");
 
           if (!tracks.length) tracks = data.tracklist;
 
-          document.getElementById("editVolTracks").value = tracks.map(t => t.position ? `${t.position}. ${t.title||''}` : t.title||'').join('
-');
+          document.getElementById("editVolTracks").value = tracks.map(t => t.position ? `${t.position}. ${t.title||''}` : t.title||'').join('\n');
 
           if (data.images?.length && !pendingEditVolCoverUrl) {
             pendingEditVolCoverUrl = `https://wsrv.nl/?url=${encodeURIComponent((data.images[0].resource_url || data.images[0].uri).replace(/^https?:\/\//, ''))}`;
@@ -2653,8 +2626,7 @@ document.getElementById("statsModal").classList.add("active");
       album.volumes[volIdx] = {
         title: document.getElementById("editVolTitle").value.trim(),
         cover: pendingEditVolCoverUrl || document.getElementById("editVolCover").value.trim(),
-        tracks: document.getElementById("editVolTracks").value.trim().split('
-')
+        tracks: document.getElementById("editVolTracks").value.trim().split('\n')
           .map(line => ({ position: '', title: line.trim(), duration: '' }))
           .filter(t => t.title.length > 0)
       };
@@ -2727,15 +2699,14 @@ document.getElementById("statsModal").classList.add("active");
         document.getElementById(id).value = a[key] || '';
       });
 
-      document.getElementById("formTracks").value = (!a.isBoxSet && a.tracks?.length) ? a.tracks.map(t => t.title || '').join('
-') : '';
+      document.getElementById("formTracks").value = (!a.isBoxSet && a.tracks?.length) ? a.tracks.map(t => t.title || '').join('\n') : '';
       pendingCoverUrl = a.cover || '';
       document.getElementById("formCover").value = a.cover || '';
       document.getElementById("formDiscsCount").value = a.discsCount || a.volumes?.length || '';
       document.getElementById("formModal").classList.add("active");
     }
 
-    saveAlbumForm = function() {
+    function saveAlbumForm() {
       const title = document.getElementById("formTitle").value.trim();
       const artist = document.getElementById("formArtist").value.trim();
       const discogsId = document.getElementById("formDiscogsId").value.trim();
@@ -2761,8 +2732,7 @@ document.getElementById("statsModal").classList.add("active");
         existingVols = [];
       }
 
-      const mTrks = document.getElementById("formTracks").value.trim().split('
-')
+      const mTrks = document.getElementById("formTracks").value.trim().split('\n')
         .map(l => ({ position: '', title: l.trim(), duration: '' }))
         .filter(t => t.title);
 
@@ -2962,8 +2932,7 @@ document.getElementById("statsModal").classList.add("active");
           }));
 
           if (document.getElementById("formRawTracks").checked && !document.getElementById("isBoxSet").checked) {
-            document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('
-');
+            document.getElementById("formTracks").value = currentFetchedTracks.map(t => t.title).join('\n');
           }
         }
         alert("Données chargées depuis Discogs !");
@@ -2980,21 +2949,15 @@ document.getElementById("statsModal").classList.add("active");
 
       if (!owned.length) return;
 
-      // 1. Si la pioche est vide (au démarrage ou après avoir fait le tour complet)
       if (albumDeck.length === 0) {
         albumDeck = [...owned];
-
-        // 2. Mélange parfait de Fisher-Yates
         for (let i = albumDeck.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [albumDeck[i], albumDeck[j]] = [albumDeck[j], albumDeck[i]];
         }
       }
 
-      // 3. On tire et on retire le dernier album du paquet mélangé
       const picked = albumDeck.pop();
-
-      // 4. Affichage de la fiche album
       showDetails(picked.index);
     }
 
@@ -3020,8 +2983,7 @@ document.getElementById("statsModal").classList.add("active");
     async function importFromCSV(e) {
       const r = new FileReader();
       r.onload = async (ev) => {
-        const lines = ev.target.result.split('
-').map(l => l.trim()).filter(l => l);
+        const lines = ev.target.result.split('\n').map(l => l.trim()).filter(l => l);
         let n = [];
 
         if (lines.length > 1) {
@@ -3065,8 +3027,7 @@ document.getElementById("statsModal").classList.add("active");
     }
 
     function exportToCSV() {
-      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum
-";
+      let csv = "Artiste;Titre;Chef;Éditeur;CatalogNumber;Style;Année;Pays;DateAchat;PrixAchat;LieuAchat;Notes;Support;DiscogsID;Pochette;IsBoxSet;IsWantlist;IsAudiophile;Is45RPM;DiscsCount;Volumes;Tracks;SortName;IsDoubleAlbum;IsTripleAlbum;IsQuadrupleAlbum\n";
 
       collection.forEach(a => {
         const vols = a.volumes ? a.volumes.map(v => {
@@ -3078,13 +3039,9 @@ document.getElementById("statsModal").classList.add("active");
         }).join('||') : '';
 
         const trks = a.tracks ? a.tracks.map(t => `${t.position||''}:::${t.title||''}:::${t.duration||''}`).join('||') : '';
-        const cleanNotes = (a.notes || '').replace(/
-?
-|
-/g, ' ');
+        const cleanNotes = (a.notes || '').replace(/\r?\n|\r/g, ' ');
 
-        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${cleanNotes}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"
-`;  
+        csv += `"${a.artist||''}";"${a.title||''}";"${a.conductor||''}";"${a.label||''}";"${a.catalogNumber||''}";"${a.style||''}";"${a.year||''}";"${a.country||''}";"${a.purchaseDate||''}";"${a.purchasePrice||''}";"${a.purchaseLocation||''}";"${cleanNotes}";"${a.support||''}";"${a.discogsId||''}";"${a.cover||''}";"${a.isBoxSet||false}";"${a.isWantlist||false}";"${a.isAudiophile||false}";"${a.is45RPM||false}";"${a.discsCount||0}";"${vols}";"${trks}";"${a.sortName||''}";"${a.isDoubleAlbum||false}";"${a.isTripleAlbum||false}";"${a.isQuadrupleAlbum||false}"\n`;  
       });
 
       const today = new Date().toISOString().split('T')[0];
