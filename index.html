@@ -834,16 +834,26 @@
     color: var(--text-sub);
   }
 
-  .modal-cover {
+  .modal-cover-box {
     width: 100%;
-    max-height: 286px;
     padding: 18px 16px;
-    object-fit: contain;
     border-radius: 16px;
     background: #121212;
-    margin-bottom: 15px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.85);
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-cover {
+    width: auto;
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 8px;
+    object-fit: contain;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.9);
   }
 
   .form-group {
@@ -1047,10 +1057,14 @@
   }
 
   /* Fond blanc et ombre grise pour la pochette principale dans le modal "Détails de l'album" */
+  body.light-mode .modal-cover-box {
+    background: #f3f4f6 !important;
+    border-color: var(--card-border) !important;
+  }
+
   body.light-mode .modal-cover {
-    background: #ffffff !important;
-    border: 1px solid var(--card-border) !important;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25) !important;
   }
 
   /* Harmonie pour les vignettes et conteneurs de la sous-collection (coffrets / volumes) */
@@ -1072,7 +1086,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 12-11-2026 02:40</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 12-11-2026 03:00</div>
     
     <header>
       <div class="logo-container">
