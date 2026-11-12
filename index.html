@@ -126,7 +126,7 @@
     gap: 6px;
     margin-bottom: 10px;
   }
-  
+
   .header-actions .icon-btn {
     flex: 1;
     width: auto !important;
@@ -452,6 +452,8 @@
     color: var(--text-sub);
     font-size: 10px;
     text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.75);
   }
 
   .cover-box img {
@@ -617,7 +619,7 @@
     margin-top: 4px;
     margin-right: 4px;
   }
-    
+
   .card-actions {
     position: absolute;
     right: 12px;
@@ -671,6 +673,8 @@
     object-fit: cover;
     flex-shrink: 0;
     background: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
   }
 
   .album-row-compact .row-main {
@@ -832,11 +836,14 @@
 
   .modal-cover {
     width: 100%;
-    max-height: 250px;
+    max-height: 286px;
+    padding: 18px 16px;
     object-fit: contain;
     border-radius: 16px;
     background: #121212;
     margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.85);
   }
 
   .form-group {
@@ -1025,31 +1032,46 @@
     background: rgba(255, 255, 255, 0.85);
     border: 1px solid var(--card-border);
   }
-  
-  /* Fond blanc pour la pochette principale dans le modal "Détails de l'album" */
-body.light-mode .modal-cover {
-  background: #ffffff !important;
-}
 
-/* Harmonie pour les vignettes et conteneurs de la sous-collection (coffrets / volumes) */
-body.light-mode .volumes-box > div,
-body.light-mode .volumes-box div[style*="background:#1c1c1e"],
-body.light-mode .volumes-box div[style*="background: #1c1c1e"] {
-  background: #ffffff !important;
-  border-color: var(--card-border) !important;
-}
-  
+  /* Ombres portées grises douces pour les vignettes en mode clair */
+  body.light-mode .cover-box {
+    background: #f3f4f6;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.22);
+  }
+
+  body.light-mode .album-row-compact .row-cover {
+    background: #f3f4f6;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2);
+  }
+
+  /* Fond blanc et ombre grise pour la pochette principale dans le modal "Détails de l'album" */
+  body.light-mode .modal-cover {
+    background: #ffffff !important;
+    border: 1px solid var(--card-border) !important;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18) !important;
+  }
+
+  /* Harmonie pour les vignettes et conteneurs de la sous-collection (coffrets / volumes) */
+  body.light-mode .volumes-box > div,
+  body.light-mode .volumes-box div[style*="background:#1c1c1e"],
+  body.light-mode .volumes-box div[style*="background: #1c1c1e"] {
+    background: #ffffff !important;
+    border-color: var(--card-border) !important;
+  }
+
   /* Effet de survol/clic adapté au mode clair pour les vignettes réduites */
-body.light-mode .album-row-compact:hover {
-  background: #e5e7eb !important;
-  border-color: var(--accent-blue) !important;
-}
-  </style>
+  body.light-mode .album-row-compact:hover {
+    background: #e5e7eb !important;
+    border-color: var(--accent-blue) !important;
+  }
+</style>
 </head>
 <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 12-11-2026 00:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 12-11-2026 02:00</div>
     
     <header>
       <div class="logo-container">
