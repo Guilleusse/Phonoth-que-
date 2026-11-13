@@ -725,25 +725,32 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.38s ease, visibility 0s linear 0.38s;
+    transition: opacity 0.42s ease, visibility 0s linear 0.42s;
   }
 
   .modal-overlay.active {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transition: opacity 0.18s ease, visibility 0s linear 0s;
+    transition: opacity 0.20s ease, visibility 0s linear 0s;
   }
 
-  /* Scénarios forcés image par image (sans recalcul d'ombre ni blocage GPU) */
+  /* Scénarios d'ouverture et de fermeture symétriques (100% GPU léger) */
   @keyframes tiroirOuverture {
     0% {
       transform: translate3d(0, 100%, 0);
-      opacity: 0.4;
     }
     100% {
       transform: translate3d(0, 0, 0);
-      opacity: 1;
+    }
+  }
+
+  @keyframes tiroirFermeture {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(0, 100%, 0);
     }
   }
 
@@ -758,7 +765,18 @@
     }
   }
 
-  /* 1. LES 5 GRANDES FICHES QUI MONTENT DU BAS (Glissement pur 100% fluide iOS) */
+  @keyframes zoomFermeture {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate3d(0, 45px, 0) scale(0.65);
+      opacity: 0;
+    }
+  }
+
+  /* 1. LES 5 GRANDES FICHES DU BAS (Montée et descente en souplesse) */
   .modal-content {
     background: #1c1c1e;
     border-radius: 20px 20px 0 0;
@@ -771,16 +789,11 @@
     border-top: 1px solid var(--card-border);
     overflow: hidden;
     padding-top: env(safe-area-inset-top);
-    contain: layout style;
     transform: translate3d(0, 100%, 0);
-    opacity: 0;
-    transition: transform 0.36s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
+    animation: tiroirFermeture 0.42s cubic-bezier(0.32, 0, 0.67, 1) forwards;
   }
 
   .modal-overlay.active .modal-content {
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
-    transition: none;
     animation: tiroirOuverture 0.68s cubic-bezier(0.22, 1.14, 0.36, 1) forwards;
   }
 
@@ -790,15 +803,12 @@
   #statsModal .modal-content {
     transform: translate3d(0, 60px, 0) scale(0.52);
     opacity: 0;
-    transition: transform 0.34s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.26s ease;
+    animation: zoomFermeture 0.36s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
   #loginModal.active .login-box,
   #moodModal.active .modal-content,
   #statsModal.active .modal-content {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 1;
-    transition: none;
     animation: zoomOuverture 0.65s cubic-bezier(0.34, 1.62, 0.64, 1) forwards;
   }
 
@@ -1143,7 +1153,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 13-11-2026 02:40</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 13-11-2026 03:00</div>
     
     <header>
       <div class="logo-container">
