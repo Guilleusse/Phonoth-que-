@@ -718,8 +718,8 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -737,7 +737,7 @@
     transition: opacity 0.22s ease, visibility 0s linear 0s;
   }
 
-  /* 1. LES 5 GRANDES FICHES (Amplitude maximale montée + zoom + rebond) */
+  /* 1. LES 5 GRANDES FICHES (Accélération GPU forcée pour PWA iPhone + PC) */
   .modal-content {
     background: #1c1c1e;
     border-radius: 20px 20px 0 0;
@@ -751,23 +751,27 @@
     overflow: hidden;
     padding-top: env(safe-area-inset-top);
     will-change: transform, opacity;
-    transform: translateY(100%) scale(0.72);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translate3d(0, 100%, 0) scale(0.72);
     opacity: 0;
     transition: transform 0.50s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.40s ease;
   }
 
   .modal-overlay.active .modal-content {
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
     opacity: 1;
     transition: transform 0.85s cubic-bezier(0.34, 1.32, 0.64, 1), opacity 0.35s ease;
   }
 
-  /* 2. LES 3 PETITES FENÊTRES DU MILIEU (Zoom & ressort maximum) */
+  /* 2. LES 3 PETITES FENÊTRES DU MILIEU (Zoom & ressort maximum GPU) */
   #loginModal .login-box,
   #moodModal .modal-content,
   #statsModal .modal-content {
     will-change: transform, opacity;
-    transform: scale(0.35) translateY(80px);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translate3d(0, 80px, 0) scale(0.35);
     opacity: 0;
     transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
   }
@@ -775,7 +779,7 @@
   #loginModal.active .login-box,
   #moodModal.active .modal-content,
   #statsModal.active .modal-content {
-    transform: scale(1) translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
     opacity: 1;
     transition: transform 0.78s cubic-bezier(0.34, 1.82, 0.64, 1), opacity 0.30s ease;
   }
@@ -1121,7 +1125,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 13-11-2026 01:15</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 13-11-2026 01:45</div>
     
     <header>
       <div class="logo-container">
