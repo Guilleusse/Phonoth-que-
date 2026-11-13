@@ -727,17 +727,17 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.52s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.52s;
+    transition: opacity 0.48s ease, visibility 0s linear 0.48s;
   }
 
   .modal-overlay.active {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transition: opacity 0.58s cubic-bezier(0.25, 0.1, 0.25, 1), visibility 0s linear 0s;
+    transition: opacity 0.22s ease, visibility 0s linear 0s;
   }
 
-  /* 1. LES 5 GRANDES FICHES QUI MONTENT DU BAS (Détails, Ajouter, Scanner...) */
+  /* 1. LES 5 GRANDES FICHES (Amplitude maximale montée + zoom + rebond) */
   .modal-content {
     background: #1c1c1e;
     border-radius: 20px 20px 0 0;
@@ -751,29 +751,25 @@
     overflow: hidden;
     padding-top: env(safe-area-inset-top);
     will-change: transform, opacity;
-    transform: translateY(100%);
-    opacity: 0.5;
-    /* Vitesse de fermeture (descente) : 0.55s */
-    transition: transform 0.55s cubic-bezier(0.32, 0, 0.67, 1), opacity 0.48s ease;
+    transform: translateY(100%) scale(0.72);
+    opacity: 0;
+    transition: transform 0.50s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.40s ease;
   }
 
   .modal-overlay.active .modal-content {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
-    /* Vitesse d'ouverture (montée) : 0.85s + amorti maximal 1.15 */
-    transition: transform 0.85s cubic-bezier(0.18, 1.15, 0.32, 1), opacity 0.52s ease;
+    transition: transform 0.85s cubic-bezier(0.34, 1.32, 0.64, 1), opacity 0.35s ease;
   }
 
-  /* 2. LES 3 PETITES FENÊTRES DU MILIEU (Connexion, Stats, Gemini) */
+  /* 2. LES 3 PETITES FENÊTRES DU MILIEU (Zoom & ressort maximum) */
   #loginModal .login-box,
   #moodModal .modal-content,
   #statsModal .modal-content {
     will-change: transform, opacity;
-    /* Taille de départ du zoom amplifiée : 0.58 */
-    transform: scale(0.58) translateY(48px);
+    transform: scale(0.35) translateY(80px);
     opacity: 0;
-    /* Vitesse de fermeture : 0.45s */
-    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.38s ease;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
   }
 
   #loginModal.active .login-box,
@@ -781,8 +777,7 @@
   #statsModal.active .modal-content {
     transform: scale(1) translateY(0);
     opacity: 1;
-    /* Vitesse d'ouverture : 0.68s + rebond amplifié 1.75 */
-    transition: transform 0.68s cubic-bezier(0.32, 1.75, 0.58, 1), opacity 0.42s ease;
+    transition: transform 0.78s cubic-bezier(0.34, 1.82, 0.64, 1), opacity 0.30s ease;
   }
 
   .modal-header {
@@ -1126,7 +1121,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 13-11-2026 01:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 13-11-2026 01:15</div>
     
     <header>
       <div class="logo-container">
