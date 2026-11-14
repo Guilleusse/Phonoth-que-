@@ -725,7 +725,8 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.42s ease, visibility 0s linear 0.42s;
+    /* Synchronisé sur 0.62s pour laisser le temps à la fenêtre de finir sa descente */
+    transition: opacity 0.62s ease, visibility 0s linear 0.62s;
   }
 
   .modal-overlay.active {
@@ -771,12 +772,12 @@
       opacity: 1;
     }
     100% {
-      transform: translate3d(0, 45px, 0) scale(0.65);
+      transform: translate3d(0, 60px, 0) scale(0.48);
       opacity: 0;
     }
   }
 
-  /* 1. LES 5 GRANDES FICHES DU BAS (Montée et descente en souplesse) */
+  /* 1. LES 5 GRANDES FICHES DU BAS (Descente allongée et amortie) */
   .modal-content {
     background: #1c1c1e;
     border-radius: 20px 20px 0 0;
@@ -790,7 +791,7 @@
     overflow: hidden;
     padding-top: env(safe-area-inset-top);
     transform: translate3d(0, 100%, 0);
-    animation: tiroirFermeture 0.42s cubic-bezier(0.32, 0, 0.67, 1) forwards;
+    animation: tiroirFermeture 0.62s cubic-bezier(0.33, 0, 0.2, 1) forwards;
   }
 
   .modal-overlay.active .modal-content {
@@ -803,7 +804,7 @@
   #statsModal .modal-content {
     transform: translate3d(0, 60px, 0) scale(0.52);
     opacity: 0;
-    animation: zoomFermeture 0.36s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: zoomFermeture 0.55s cubic-bezier(0.33, 0, 0.2, 1) forwards;
   }
 
   #loginModal.active .login-box,
@@ -811,7 +812,7 @@
   #statsModal.active .modal-content {
     animation: zoomOuverture 0.65s cubic-bezier(0.34, 1.62, 0.64, 1) forwards;
   }
-
+    
   .modal-header {
     flex-shrink: 0;
     height: 58px;
@@ -1153,7 +1154,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 13-11-2026 03:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 14-11-2026 02:10</div>
     
     <header>
       <div class="logo-container">
