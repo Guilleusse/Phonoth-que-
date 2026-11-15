@@ -1215,7 +1215,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 15-11-2026 20:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 16-11-2026 00:05</div>
     
     <header>
       <div class="logo-container">
@@ -2153,6 +2153,7 @@
       let countCDr = 0;
       let countSACD = 0;
       let countCoffret = 0;
+      let countAudiophile = 0;
       let countWantlist = 0;
       let totalPrice = 0;
       let totalDiscsPhysical = 0;
@@ -2172,6 +2173,10 @@
 
           if (isCoffretAlbum(a)) {
             countCoffret += getBoxCountForAlbum(a);
+          }
+
+          if (a.isAudiophile) {
+            countAudiophile++;
           }
 
           let p = 0;
@@ -2200,7 +2205,7 @@
         <div class="details-row"><span class="details-label">Nb réel de CD-R : <span class="stat-dot dot-cdr"></span></span><span class="details-val">${countCDr}</span></div>
         <div class="details-row"><span class="details-label">Nb réel de SACD : <span class="stat-dot dot-sacd"></span></span><span class="details-val">${countSACD}</span></div>
         <div class="details-row"><span class="details-label">Nb réel de coffrets : <span class="stat-dot dot-coffret"></span></span><span class="details-val">${countCoffret}</span></div>
-        <div class="details-row"><span class="details-label">Éditions audiophiles : <span class="stat-dot dot-audiophile"></span></span><span class="details-val">—</span></div>
+        <div class="details-row"><span class="details-label">Éditions audiophiles : <span class="stat-dot dot-audiophile"></span></span><span class="details-val">${countAudiophile}</span></div>
         <div class="details-row"><span class="details-label">Liste de souhaits : <span class="stat-dot dot-wantlist"></span></span><span class="details-val">${countWantlist}</span></div>
         <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
         <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
@@ -2569,6 +2574,9 @@
       if (support !== 'Vinyle') {
         document.getElementById("is45RPM").checked = false;
       }
+      if (selectedAlbumIndex === -1 && support === 'SACD') {
+        document.getElementById("isAudiophile").checked = true;
+      }
     }
 
     function onMultiDiscChange(count) {
@@ -2618,9 +2626,10 @@
       document.getElementById("modalDetailArtist").textContent = album.artist || '';
       document.getElementById("modalDetailAlbumName").textContent = album.title || '';
 
-      document.getElementById("modalDetailSupport").textContent = isBox 
-        ? `Coffret (${album.support})` 
-        : (album.isDoubleAlbum ? `Double Album (${album.support})` : (album.isTripleAlbum ? `Triple Album (${album.support})` : (album.isQuadrupleAlbum ? `Quadruple Album (${album.support})` : album.support))) + (album.isAudiophile ? ' Audiophile' : '');
+      const baseSupportLabel = isBox
+        ? `Coffret (${album.support})`
+        : (album.isDoubleAlbum ? `Double Album (${album.support})` : (album.isTripleAlbum ? `Triple Album (${album.support})` : (album.isQuadrupleAlbum ? `Quadruple Album (${album.support})` : album.support)));
+      document.getElementById("modalDetailSupport").textContent = baseSupportLabel + (album.isAudiophile ? ' • Édition Audiophile' : '');
 
       document.getElementById("rowSpeed").style.display = album.support === 'Vinyle' ? 'flex' : 'none';
       if (album.support === 'Vinyle') {
@@ -3128,6 +3137,82 @@
       }
     }
 
+    function detectAudiophileEdition(data, detectedSupport) {
+      if (!data) return false;
+      if (detectedSupport === 'SACD') return true;
+
+      const chunks = [];
+      if (data.title) chunks.push(data.title);
+      if (data.notes) chunks.push(data.notes);
+      if (Array.isArray(data.labels)) {
+        data.labels.forEach(l => {
+          if (l?.name) chunks.push(l.name);
+          if (l?.catno) chunks.push(l.catno);
+        });
+      }
+      if (Array.isArray(data.series)) {
+        data.series.forEach(s => {
+          if (s?.name) chunks.push(s.name);
+        });
+      }
+      if (Array.isArray(data.formats)) {
+        data.formats.forEach(fmt => {
+          if (fmt?.name) chunks.push(fmt.name);
+          if (Array.isArray(fmt?.descriptions)) chunks.push(fmt.descriptions.join(' '));
+          if (fmt?.text) chunks.push(fmt.text);
+        });
+      }
+
+      const haystack = chunks.join(' ').toLowerCase();
+      const audiophilePatterns = [
+        /\bmofi\b/,
+        /mobile fidelity/,
+        /\bmfsl\b/,
+        /original master recording/,
+        /ultradisc/,
+        /\bud1s\b/,
+        /one[- ]step/,
+        /analogue productions/,
+        /acoustic sounds/,
+        /\buhqr\b/,
+        /speakers corner/,
+        /\bimpex\b/,
+        /reference recordings/,
+        /\bchesky\b/,
+        /\btelarc\b/,
+        /pure pleasure/,
+        /classic records/,
+        /audio fidelity/,
+        /\bstockfisch\b/,
+        /tone poet/,
+        /original source/,
+        /intervention records/,
+        /first impression music/,
+        /\bgroovenote\b/,
+        /original recordings group/,
+        /\besoteric\b/,
+        /half[- ]speed/,
+        /\b180\s*g(ram)?\b/,
+        /\b200\s*g(ram)?\b/,
+        /direct metal mastering/,
+        /\bdmm\b/,
+        /pure analog(ue)?/,
+        /all[- ]analog(ue)?/,
+        /\baaa\b/,
+        /\bsacd\b/,
+        /super audio cd/,
+        /shm[- ]?(sacd|cd)/,
+        /\bxrcd\b/,
+        /\bk2hd\b/,
+        /blu[- ]spec/,
+        /\bhqcd\b/,
+        /\buhqcd\b/,
+        /\baudiophile\b/
+      ];
+
+      return audiophilePatterns.some(rx => rx.test(haystack));
+    }
+
     async function fetchDiscogsById(id) {
       if (!id) return;
       if (selectedAlbumIndex === -1 && collection.find(a => String(a.discogsId) === String(id))) {
@@ -3162,21 +3247,25 @@
         if (data.year) document.getElementById("formYear").value = data.year;
         if (data.country) document.getElementById("formCountry").value = data.country;
 
+        let detectedSupp = null;
         if (data.formats?.length) {
           const f = data.formats[0].name?.toLowerCase() || '';
           const d = data.formats[0].descriptions?.join(' ').toLowerCase() || '';
-          let supp = null;
 
-          if (d.includes('sacd') || f.includes('sacd')) supp = 'SACD';
-          else if (d.includes('cdr') || f.includes('cdr')) supp = 'CD-R';
-          else if (f.includes('vinyl')) supp = 'Vinyle';
-          else if (f.includes('cd')) supp = 'CD';
+          if (d.includes('sacd') || f.includes('sacd')) detectedSupp = 'SACD';
+          else if (d.includes('cdr') || f.includes('cdr')) detectedSupp = 'CD-R';
+          else if (f.includes('vinyl')) detectedSupp = 'Vinyle';
+          else if (f.includes('cd')) detectedSupp = 'CD';
 
-          if (supp) {
-            document.getElementById("formSupport").value = supp;
+          if (detectedSupp) {
+            document.getElementById("formSupport").value = detectedSupp;
             toggleVinylSpeedField();
-            if (supp === 'Vinyle' && d.includes('45 rpm')) document.getElementById("is45RPM").checked = true;
+            if (detectedSupp === 'Vinyle' && d.includes('45 rpm')) document.getElementById("is45RPM").checked = true;
           }
+        }
+
+        if (detectAudiophileEdition(data, detectedSupp)) {
+          document.getElementById("isAudiophile").checked = true;
         }
 
         if (data.images?.length) {
