@@ -1168,7 +1168,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 15-11-2026 02:55</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 15-11-2026 03:15</div>
     
     <header>
       <div class="logo-container">
@@ -3326,6 +3326,92 @@
 
     window.addEventListener('touchend', resetBlur, { passive: true });
     window.addEventListener('touchcancel', resetBlur, { passive: true });
+  })();
+  
+  // --- MÉMOIRE DE FICHE ALBUM AU RETOUR DE DISCOGS / FNAC / JPC (iOS PWA) ---
+  (function initModalPersistence() {
+    const STORAGE_KEY = 'phonotheque_open_album';
+    const detailsModal = document.getElementById('detailsModal');
+    if (!detailsModal) return;
+
+    // 1. Force l'ouverture des liens externes dans une fenêtre séparée
+    const enforceExternalTargets = () => {
+      detailsModal.querySelectorAll('a[href^="http"]').forEach((link) => {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      });
+    };
+
+    // 2. Mémorise l'album ouvert et la position de défilement de la collection
+    if (typeof showDetails === 'function') {
+      const originalShowDetails = showDetails;
+      showDetails = function (arg, ...rest) {
+        originalShowDetails.apply(this, [arg, ...rest]);
+        enforceExternalTargets();
+
+        try {
+          const item = (typeof collection !== 'undefined' && Array.isArray(collection))
+            ? collection[arg]
+            : null;
+
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            arg: arg,
+            albumId: item && item.id ? item.id : null,
+            title: item && item.title ? item.title : null,
+            scrollY: window.scrollY || 0,
+            timestamp: Date.now()
+          }));
+        } catch (err) {}
+      };
+    }
+
+    // 3. Efface la mémoire dès que tu refermes volontairement la fiche album
+    const observer = new MutationObserver(() => {
+      if (detailsModal.classList.contains('active')) {
+        enforceExternalTargets();
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    });
+    observer.observe(detailsModal, { attributes: true, attributeFilter: ['class'] });
+
+    // 4. Rouvre automatiquement la fiche si iOS a rechargé la PWA en arrière-plan
+    const rawSaved = localStorage.getItem(STORAGE_KEY);
+    if (rawSaved) {
+      let saved = null;
+      try { saved = JSON.parse(rawSaved); } catch (e) {}
+
+      // Valable 30 minutes (évite de rouvrir une vieille fiche le lendemain)
+      if (saved && (Date.now() - saved.timestamp) < 30 * 60 * 1000) {
+        let attempts = 0;
+        const waitForCollection = setInterval(() => {
+          attempts++;
+          if (typeof collection !== 'undefined' && Array.isArray(collection) && collection.length > 0 && typeof showDetails === 'function') {
+            clearInterval(waitForCollection);
+
+            let targetIndex = saved.arg;
+            if (saved.albumId) {
+              const foundById = collection.findIndex((a) => a.id === saved.albumId);
+              if (foundById !== -1) targetIndex = foundById;
+            } else if (saved.title) {
+              const foundByTitle = collection.findIndex((a) => a.title === saved.title);
+              if (foundByTitle !== -1) targetIndex = foundByTitle;
+            }
+
+            if (collection[targetIndex]) {
+              window.scrollTo(0, saved.scrollY || 0);
+              showDetails(targetIndex);
+            } else {
+              localStorage.removeItem(STORAGE_KEY);
+            }
+          } else if (attempts > 60) {
+            clearInterval(waitForCollection);
+          }
+        }, 150);
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
   })();
   </script>
 </body>
