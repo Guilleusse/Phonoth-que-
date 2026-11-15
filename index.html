@@ -1168,7 +1168,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 15-11-2026 02:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 15-11-2026 02:55</div>
     
     <header>
       <div class="logo-container">
@@ -3244,7 +3244,7 @@
 
    window.onload = initApp;
 
-  // --- GESTION DU FLOU PROGRESSIF AU TIRAGE VERS LE BAS (CALIBRAGE iOS) ---
+  // --- GESTION DU FLOU PROGRESSIF EN HAUT (A) ET EN BAS (Z) (CALIBRAGE iOS) ---
   (function initPullBlur() {
     const blurLayer = document.createElement('div');
     blurLayer.id = 'pullBlurOverlay';
@@ -3252,28 +3252,55 @@
 
     let startY = 0;
     let startX = 0;
-    let isPulling = false;
-    const deadZone = 14;   // Seuil de déclenchement iOS (évite tout déclenchement au simple toucher)
+    let pullDirection = 0; // 1 = tirage vers le bas (en haut), -1 = tirage vers le haut (en bas), 2 = liste courte
+    const deadZone = 14;   // Seuil de déclenchement iOS
     const maxPull = 115;   // Course du pouce pour atteindre 100 % du flou
 
     window.addEventListener('touchstart', (e) => {
-      if (window.scrollY > 0 || document.querySelector('.modal-overlay.active')) {
-        isPulling = false;
+      if (document.querySelector('.modal-overlay.active')) {
+        pullDirection = 0;
         return;
       }
+
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight;
+      const winHeight = window.innerHeight;
+
+      const isAtTop = scrollTop <= 2;
+      const isAtBottom = (scrollTop + winHeight) >= (docHeight - 4);
+
+      if (!isAtTop && !isAtBottom) {
+        pullDirection = 0;
+        return;
+      }
+
       startY = e.touches[0].clientY;
       startX = e.touches[0].clientX;
-      isPulling = true;
+
+      if (isAtTop && isAtBottom) {
+        pullDirection = 2;
+      } else {
+        pullDirection = isAtTop ? 1 : -1;
+      }
     }, { passive: true });
 
     window.addEventListener('touchmove', (e) => {
-      if (!isPulling) return;
+      if (pullDirection === 0) return;
 
-      const deltaY = e.touches[0].clientY - startY;
+      const rawDeltaY = e.touches[0].clientY - startY;
       const deltaX = Math.abs(e.touches[0].clientX - startX);
 
-      if (deltaY <= deadZone || deltaX > deltaY) {
-        if (deltaY <= deadZone) {
+      let pullDistance = 0;
+      if (pullDirection === 1 && rawDeltaY > 0) {
+        pullDistance = rawDeltaY;
+      } else if (pullDirection === -1 && rawDeltaY < 0) {
+        pullDistance = Math.abs(rawDeltaY);
+      } else if (pullDirection === 2) {
+        pullDistance = Math.abs(rawDeltaY);
+      }
+
+      if (pullDistance <= deadZone || deltaX > pullDistance) {
+        if (pullDistance <= deadZone) {
           blurLayer.style.opacity = '0';
           blurLayer.style.visibility = 'hidden';
         }
@@ -3283,17 +3310,15 @@
       blurLayer.style.transition = 'none';
       blurLayer.style.visibility = 'visible';
 
-      // Progression souple entre la zone morte (14px) et la course maximale (115px)
-      const effectivePull = deltaY - deadZone;
+      const effectivePull = pullDistance - deadZone;
       const progress = Math.min(effectivePull / (maxPull - deadZone), 1);
       blurLayer.style.opacity = progress.toFixed(3);
     }, { passive: true });
 
     const resetBlur = () => {
-      if (!isPulling) return;
-      isPulling = false;
+      if (pullDirection === 0) return;
+      pullDirection = 0;
 
-      // Courbe de relâchement amortie façon iOS
       blurLayer.style.transition = 'opacity 0.42s cubic-bezier(0.25, 1, 0.5, 1), visibility 0s linear 0.42s';
       blurLayer.style.opacity = '0';
       blurLayer.style.visibility = 'hidden';
