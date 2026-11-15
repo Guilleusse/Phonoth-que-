@@ -813,7 +813,21 @@
     animation: zoomOuverture 0.65s cubic-bezier(0.34, 1.62, 0.64, 1) forwards;
   }
     
-  .modal-header {
+  /* --- EFFET FLOU MATÉRIAU SOMBRE iOS (STYLE SPOTLIGHT) --- */
+  #pullBlurOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(22, 22, 26, 0.42);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 950;
+    transition: opacity 0.42s cubic-bezier(0.25, 1, 0.5, 1), visibility 0s linear 0.42s;
+  }
+    
+    .modal-header {
     flex-shrink: 0;
     height: 58px;
     padding: 0 20px;
@@ -1154,7 +1168,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 14-11-2026 02:35</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 15-11-2026 02:30</div>
     
     <header>
       <div class="logo-container">
@@ -3228,7 +3242,66 @@
       document.body.removeChild(link);
     }
 
-    window.onload = initApp;
+   window.onload = initApp;
+
+  // --- GESTION DU FLOU PROGRESSIF AU TIRAGE VERS LE BAS (CALIBRAGE iOS) ---
+  (function initPullBlur() {
+    const blurLayer = document.createElement('div');
+    blurLayer.id = 'pullBlurOverlay';
+    document.body.appendChild(blurLayer);
+
+    let startY = 0;
+    let startX = 0;
+    let isPulling = false;
+    const deadZone = 14;   // Seuil de déclenchement iOS (évite tout déclenchement au simple toucher)
+    const maxPull = 115;   // Course du pouce pour atteindre 100 % du flou
+
+    window.addEventListener('touchstart', (e) => {
+      if (window.scrollY > 0 || document.querySelector('.modal-overlay.active')) {
+        isPulling = false;
+        return;
+      }
+      startY = e.touches[0].clientY;
+      startX = e.touches[0].clientX;
+      isPulling = true;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isPulling) return;
+
+      const deltaY = e.touches[0].clientY - startY;
+      const deltaX = Math.abs(e.touches[0].clientX - startX);
+
+      if (deltaY <= deadZone || deltaX > deltaY) {
+        if (deltaY <= deadZone) {
+          blurLayer.style.opacity = '0';
+          blurLayer.style.visibility = 'hidden';
+        }
+        return;
+      }
+
+      blurLayer.style.transition = 'none';
+      blurLayer.style.visibility = 'visible';
+
+      // Progression souple entre la zone morte (14px) et la course maximale (115px)
+      const effectivePull = deltaY - deadZone;
+      const progress = Math.min(effectivePull / (maxPull - deadZone), 1);
+      blurLayer.style.opacity = progress.toFixed(3);
+    }, { passive: true });
+
+    const resetBlur = () => {
+      if (!isPulling) return;
+      isPulling = false;
+
+      // Courbe de relâchement amortie façon iOS
+      blurLayer.style.transition = 'opacity 0.42s cubic-bezier(0.25, 1, 0.5, 1), visibility 0s linear 0.42s';
+      blurLayer.style.opacity = '0';
+      blurLayer.style.visibility = 'hidden';
+    };
+
+    window.addEventListener('touchend', resetBlur, { passive: true });
+    window.addEventListener('touchcancel', resetBlur, { passive: true });
+  })();
   </script>
 </body>
 </html>
