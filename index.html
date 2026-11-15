@@ -468,10 +468,11 @@
 
   .album-info {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-right: 40px;
+    padding-right: 4px;
   }
 
   .album-artist {
@@ -642,6 +643,51 @@
     color: var(--text-sub);
     font-size: 16px;
     cursor: pointer;
+  }
+
+  /* --- BOUTONS D'ACTION SUR LA POCHETTE DANS DÉTAILS ALBUM --- */
+  .detail-cover-wrapper {
+    position: relative !important;
+    min-height: 116px;
+  }
+
+  .detail-cover-btn {
+    position: absolute;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(28, 28, 30, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+  }
+
+  .detail-cover-btn:active {
+    transform: scale(0.9);
+  }
+
+  .detail-delete-btn {
+    top: 12px;
+  }
+
+  .detail-edit-btn {
+    bottom: 12px;
+  }
+
+  body.light-mode .detail-cover-btn {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
   }
 
   /* --- MODE LISTE COMPACTE --- */
@@ -827,7 +873,7 @@
     transition: opacity 0.42s cubic-bezier(0.25, 1, 0.5, 1), visibility 0s linear 0.42s;
   }
     
-    .modal-header {
+  .modal-header {
     flex-shrink: 0;
     height: 58px;
     padding: 0 20px;
@@ -926,6 +972,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
   }
 
   .modal-cover {
@@ -1168,7 +1215,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 15-11-2026 03:15</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 15-11-2026 20:00</div>
     
     <header>
       <div class="logo-container">
@@ -1307,8 +1354,10 @@
         <button class="modal-close" onclick="closeModal('detailsModal', event)">Fermer</button>
       </div>
       <div class="modal-body">
-        <div class="modal-cover-box">
+        <div class="modal-cover-box detail-cover-wrapper" id="modalDetailCoverBox">
+          <button type="button" id="modalDetailDeleteBtn" class="detail-cover-btn detail-delete-btn" title="Supprimer cet album">🗑️</button>
           <img id="modalDetailCover" class="modal-cover" src="" alt="Pochette">
+          <button type="button" id="modalDetailEditBtn" class="detail-cover-btn detail-edit-btn" title="Modifier la référence">✏️</button>
         </div>
         <h2 id="modalDetailArtist" style="font-size: 20px; font-weight: 700; color: var(--accent-blue); margin-bottom: 2px;"></h2>
         <h3 id="modalDetailAlbumName" style="font-size: 15px; font-weight: 600; color: var(--text-sub); margin-bottom: 15px;"></h3>
@@ -1985,11 +2034,14 @@
     function deleteAlbum(index, e) {
       if (e) e.stopPropagation();
       const album = collection[index];
+      if (!album) return false;
       if (confirm(`Voulez-vous supprimer "${album.title}" ?`)) {
         const supabaseId = album.supabaseId;
         collection.splice(index, 1);
         deleteAlbumFromSupabase(supabaseId);
+        return true;
       }
+      return false;
     }
 
     // --- RECHERCHE ET UTILITAIRES DE TEXTE ---
@@ -2294,6 +2346,10 @@
         if (document.getElementById("azIndex")) document.getElementById("azIndex").innerHTML = "";
         filtered.forEach(a => currentViewMode === "list" ? renderAlbumRow(a, container) : renderAlbumCard(a, container));
       }
+
+      if (isBodyLocked) {
+        document.body.style.top = `-${savedScrollPosition}px`;
+      }
     }
 
     function renderAlbumCard(album, container) {
@@ -2378,7 +2434,6 @@
       ].filter(Boolean).join(' • ');
 
       card.innerHTML = `
-        <div class="card-delete-top"><button class="card-action-btn" onclick="deleteAlbum(${realIndex}, event)">🗑️</button></div>
         <div class="cover-box">${album.cover ? `<img src="${album.cover}" onerror="this.style.display='none'">` : 'Pochette'}</div>
         <div class="album-info">
           <span class="badge ${badgeClass}">${badgeText}</span>
@@ -2387,7 +2442,6 @@
           <div class="album-sub">${metaText}</div>
           ${album.style ? `<div style="margin-top:2px;">${album.style.split(' / ').map(s => `<span class="genre-badge">${s}</span>`).join('')}</div>` : ''}
         </div>
-        <div class="card-actions"><button class="card-action-btn" onclick="openEditModal(${realIndex})">✏️</button></div>
       `;
       container.appendChild(card);
     }
@@ -2554,6 +2608,7 @@
       lockBodyScroll();
       selectedAlbumIndex = index;
       const album = collection[index];
+      if (!album) return;
       const isBox = isCoffretAlbum(album);
 
       document.getElementById("modalDetailTitle").textContent = album.isWantlist 
@@ -2615,6 +2670,24 @@
         coverImg.style.display = 'none';
       }
 
+      const delBtn = document.getElementById("modalDetailDeleteBtn");
+      if (delBtn) {
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          if (deleteAlbum(index, e)) {
+            closeModal('detailsModal');
+          }
+        };
+      }
+
+      const editBtn = document.getElementById("modalDetailEditBtn");
+      if (editBtn) {
+        editBtn.onclick = (e) => {
+          e.stopPropagation();
+          openEditModal(index);
+        };
+      }
+
       const dBtn = document.getElementById("discogsLink");
       if (album.discogsId) {
         dBtn.href = `https://www.discogs.com/release/${album.discogsId}`;
@@ -2623,7 +2696,7 @@
         dBtn.style.display = 'none';
       }
 
-      const q = encodeURIComponent(`${album.artist||''}${album.title||''}`.trim());
+      const q = encodeURIComponent(`${album.artist||''} ${album.title||''}`.trim());
       const fBtn = document.getElementById("fnacLink");
       const jBtn = document.getElementById("jpcLink");
 
@@ -2868,6 +2941,7 @@
       selectedAlbumIndex = index;
       currentFetchedTracks = [];
       const a = collection[index];
+      if (!a) return;
 
       document.getElementById("formModalTitle").textContent = "Modifier la référence";
 
@@ -3242,177 +3316,215 @@
       document.body.removeChild(link);
     }
 
-   window.onload = initApp;
+    window.onload = initApp;
 
-  // --- GESTION DU FLOU PROGRESSIF EN HAUT (A) ET EN BAS (Z) (CALIBRAGE iOS) ---
-  (function initPullBlur() {
-    const blurLayer = document.createElement('div');
-    blurLayer.id = 'pullBlurOverlay';
-    document.body.appendChild(blurLayer);
+    // --- GESTION DU FLOU PROGRESSIF EN HAUT (A) ET EN BAS (Z) (CALIBRAGE iOS) ---
+    (function initPullBlur() {
+      const blurLayer = document.createElement('div');
+      blurLayer.id = 'pullBlurOverlay';
+      document.body.appendChild(blurLayer);
 
-    let startY = 0;
-    let startX = 0;
-    let pullDirection = 0; // 1 = tirage vers le bas (en haut), -1 = tirage vers le haut (en bas), 2 = liste courte
-    const deadZone = 14;   // Seuil de déclenchement iOS
-    const maxPull = 115;   // Course du pouce pour atteindre 100 % du flou
+      let startY = 0;
+      let startX = 0;
+      let pullDirection = 0; // 1 = tirage vers le bas (en haut), -1 = tirage vers le haut (en bas), 2 = liste courte
+      const deadZone = 14;   // Seuil de déclenchement iOS
+      const maxPull = 115;   // Course du pouce pour atteindre 100 % du flou
 
-    window.addEventListener('touchstart', (e) => {
-      if (document.querySelector('.modal-overlay.active')) {
-        pullDirection = 0;
-        return;
-      }
-
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const docHeight = document.documentElement.scrollHeight;
-      const winHeight = window.innerHeight;
-
-      const isAtTop = scrollTop <= 2;
-      const isAtBottom = (scrollTop + winHeight) >= (docHeight - 4);
-
-      if (!isAtTop && !isAtBottom) {
-        pullDirection = 0;
-        return;
-      }
-
-      startY = e.touches[0].clientY;
-      startX = e.touches[0].clientX;
-
-      if (isAtTop && isAtBottom) {
-        pullDirection = 2;
-      } else {
-        pullDirection = isAtTop ? 1 : -1;
-      }
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-      if (pullDirection === 0) return;
-
-      const rawDeltaY = e.touches[0].clientY - startY;
-      const deltaX = Math.abs(e.touches[0].clientX - startX);
-
-      let pullDistance = 0;
-      if (pullDirection === 1 && rawDeltaY > 0) {
-        pullDistance = rawDeltaY;
-      } else if (pullDirection === -1 && rawDeltaY < 0) {
-        pullDistance = Math.abs(rawDeltaY);
-      } else if (pullDirection === 2) {
-        pullDistance = Math.abs(rawDeltaY);
-      }
-
-      if (pullDistance <= deadZone || deltaX > pullDistance) {
-        if (pullDistance <= deadZone) {
-          blurLayer.style.opacity = '0';
-          blurLayer.style.visibility = 'hidden';
+      window.addEventListener('touchstart', (e) => {
+        if (document.querySelector('.modal-overlay.active')) {
+          pullDirection = 0;
+          return;
         }
-        return;
-      }
 
-      blurLayer.style.transition = 'none';
-      blurLayer.style.visibility = 'visible';
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight;
+        const winHeight = window.innerHeight;
 
-      const effectivePull = pullDistance - deadZone;
-      const progress = Math.min(effectivePull / (maxPull - deadZone), 1);
-      blurLayer.style.opacity = progress.toFixed(3);
-    }, { passive: true });
+        const isAtTop = scrollTop <= 2;
+        const isAtBottom = (scrollTop + winHeight) >= (docHeight - 4);
 
-    const resetBlur = () => {
-      if (pullDirection === 0) return;
-      pullDirection = 0;
+        if (!isAtTop && !isAtBottom) {
+          pullDirection = 0;
+          return;
+        }
 
-      blurLayer.style.transition = 'opacity 0.42s cubic-bezier(0.25, 1, 0.5, 1), visibility 0s linear 0.42s';
-      blurLayer.style.opacity = '0';
-      blurLayer.style.visibility = 'hidden';
-    };
+        startY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
 
-    window.addEventListener('touchend', resetBlur, { passive: true });
-    window.addEventListener('touchcancel', resetBlur, { passive: true });
-  })();
-  
-  // --- MÉMOIRE DE FICHE ALBUM AU RETOUR DE DISCOGS / FNAC / JPC (iOS PWA) ---
-  (function initModalPersistence() {
-    const STORAGE_KEY = 'phonotheque_open_album';
-    const detailsModal = document.getElementById('detailsModal');
-    if (!detailsModal) return;
+        if (isAtTop && isAtBottom) {
+          pullDirection = 2;
+        } else {
+          pullDirection = isAtTop ? 1 : -1;
+        }
+      }, { passive: true });
 
-    // 1. Force l'ouverture des liens externes dans une fenêtre séparée
-    const enforceExternalTargets = () => {
-      detailsModal.querySelectorAll('a[href^="http"]').forEach((link) => {
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', 'noopener noreferrer');
-      });
-    };
+      window.addEventListener('touchmove', (e) => {
+        if (pullDirection === 0) return;
 
-    // 2. Mémorise l'album ouvert et la position de défilement de la collection
-    if (typeof showDetails === 'function') {
-      const originalShowDetails = showDetails;
-      showDetails = function (arg, ...rest) {
-        originalShowDetails.apply(this, [arg, ...rest]);
-        enforceExternalTargets();
+        const rawDeltaY = e.touches[0].clientY - startY;
+        const deltaX = Math.abs(e.touches[0].clientX - startX);
 
+        let pullDistance = 0;
+        if (pullDirection === 1 && rawDeltaY > 0) {
+          pullDistance = rawDeltaY;
+        } else if (pullDirection === -1 && rawDeltaY < 0) {
+          pullDistance = Math.abs(rawDeltaY);
+        } else if (pullDirection === 2) {
+          pullDistance = Math.abs(rawDeltaY);
+        }
+
+        if (pullDistance <= deadZone || deltaX > pullDistance) {
+          if (pullDistance <= deadZone) {
+            blurLayer.style.opacity = '0';
+            blurLayer.style.visibility = 'hidden';
+          }
+          return;
+        }
+
+        blurLayer.style.transition = 'none';
+        blurLayer.style.visibility = 'visible';
+
+        const effectivePull = pullDistance - deadZone;
+        const progress = Math.min(effectivePull / (maxPull - deadZone), 1);
+        blurLayer.style.opacity = progress.toFixed(3);
+      }, { passive: true });
+
+      const resetBlur = () => {
+        if (pullDirection === 0) return;
+        pullDirection = 0;
+
+        blurLayer.style.transition = 'opacity 0.42s cubic-bezier(0.25, 1, 0.5, 1), visibility 0s linear 0.42s';
+        blurLayer.style.opacity = '0';
+        blurLayer.style.visibility = 'hidden';
+      };
+
+      window.addEventListener('touchend', resetBlur, { passive: true });
+      window.addEventListener('touchcancel', resetBlur, { passive: true });
+    })();
+    
+    // --- MÉMOIRE DE FICHE ALBUM, D'ÉDITION ET DE POSITION AU RETOUR DES LIENS EXTERNES (iOS PWA) ---
+    (function initModalPersistence() {
+      const STORAGE_KEY = 'phonotheque_open_album';
+      const detailsModal = document.getElementById('detailsModal');
+      const formModal = document.getElementById('formModal');
+      if (!detailsModal) return;
+
+      const enforceExternalTargets = () => {
+        detailsModal.querySelectorAll('a[href^="http"]').forEach((link) => {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+        });
+      };
+
+      const saveActiveState = (mode, index) => {
         try {
-          const item = (typeof collection !== 'undefined' && Array.isArray(collection))
-            ? collection[arg]
+          const item = (typeof collection !== 'undefined' && Array.isArray(collection) && index >= 0)
+            ? collection[index]
             : null;
+          if (!item) return;
+
+          const currentScroll = isBodyLocked
+            ? savedScrollPosition
+            : (window.scrollY || document.documentElement.scrollTop || 0);
 
           localStorage.setItem(STORAGE_KEY, JSON.stringify({
-            arg: arg,
-            albumId: item && item.id ? item.id : null,
-            title: item && item.title ? item.title : null,
-            scrollY: window.scrollY || 0,
+            mode: mode, // 'details' ou 'edit'
+            arg: index,
+            supabaseId: item.supabaseId || null,
+            artist: item.artist || null,
+            title: item.title || null,
+            scrollY: currentScroll,
             timestamp: Date.now()
           }));
         } catch (err) {}
       };
-    }
 
-    // 3. Efface la mémoire dès que tu refermes volontairement la fiche album
-    const observer = new MutationObserver(() => {
-      if (detailsModal.classList.contains('active')) {
-        enforceExternalTargets();
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
+      if (typeof showDetails === 'function') {
+        const originalShowDetails = showDetails;
+        showDetails = function (arg, ...rest) {
+          originalShowDetails.apply(this, [arg, ...rest]);
+          enforceExternalTargets();
+          saveActiveState('details', arg);
+        };
       }
-    });
-    observer.observe(detailsModal, { attributes: true, attributeFilter: ['class'] });
 
-    // 4. Rouvre automatiquement la fiche si iOS a rechargé la PWA en arrière-plan
-    const rawSaved = localStorage.getItem(STORAGE_KEY);
-    if (rawSaved) {
-      let saved = null;
-      try { saved = JSON.parse(rawSaved); } catch (e) {}
-
-      // Valable 30 minutes (évite de rouvrir une vieille fiche le lendemain)
-      if (saved && (Date.now() - saved.timestamp) < 30 * 60 * 1000) {
-        let attempts = 0;
-        const waitForCollection = setInterval(() => {
-          attempts++;
-          if (typeof collection !== 'undefined' && Array.isArray(collection) && collection.length > 0 && typeof showDetails === 'function') {
-            clearInterval(waitForCollection);
-
-            let targetIndex = saved.arg;
-            if (saved.albumId) {
-              const foundById = collection.findIndex((a) => a.id === saved.albumId);
-              if (foundById !== -1) targetIndex = foundById;
-            } else if (saved.title) {
-              const foundByTitle = collection.findIndex((a) => a.title === saved.title);
-              if (foundByTitle !== -1) targetIndex = foundByTitle;
-            }
-
-            if (collection[targetIndex]) {
-              window.scrollTo(0, saved.scrollY || 0);
-              showDetails(targetIndex);
-            } else {
-              localStorage.removeItem(STORAGE_KEY);
-            }
-          } else if (attempts > 60) {
-            clearInterval(waitForCollection);
-          }
-        }, 150);
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
+      if (typeof openEditModal === 'function') {
+        const originalOpenEditModal = openEditModal;
+        openEditModal = function (index, ...rest) {
+          originalOpenEditModal.apply(this, [index, ...rest]);
+          saveActiveState('edit', index);
+        };
       }
-    }
-  })();
+
+      const checkClearStorage = () => {
+        const detailsOpen = detailsModal.classList.contains('active');
+        const editOpen = formModal && formModal.classList.contains('active') && selectedAlbumIndex >= 0;
+
+        if (detailsOpen) {
+          enforceExternalTargets();
+        } else if (!editOpen) {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      };
+
+      const observer = new MutationObserver(checkClearStorage);
+      observer.observe(detailsModal, { attributes: true, attributeFilter: ['class'] });
+      if (formModal) {
+        observer.observe(formModal, { attributes: true, attributeFilter: ['class'] });
+      }
+
+      const rawSaved = localStorage.getItem(STORAGE_KEY);
+      if (rawSaved) {
+        let saved = null;
+        try { saved = JSON.parse(rawSaved); } catch (e) {}
+
+        if (saved && (Date.now() - saved.timestamp) < 30 * 60 * 1000) {
+          let attempts = 0;
+          const waitForCollection = setInterval(() => {
+            attempts++;
+            if (typeof collection !== 'undefined' && Array.isArray(collection) && collection.length > 0 && typeof showDetails === 'function') {
+              clearInterval(waitForCollection);
+
+              let targetIndex = -1;
+              if (saved.supabaseId) {
+                targetIndex = collection.findIndex((a) => a.supabaseId === saved.supabaseId);
+              }
+              if (targetIndex === -1 && saved.artist && saved.title) {
+                targetIndex = collection.findIndex((a) => a.artist === saved.artist && a.title === saved.title);
+              }
+              if (targetIndex === -1 && saved.title) {
+                targetIndex = collection.findIndex((a) => a.title === saved.title);
+              }
+              if (targetIndex === -1 && typeof saved.arg === 'number' && collection[saved.arg]) {
+                targetIndex = saved.arg;
+              }
+
+              if (targetIndex !== -1 && collection[targetIndex]) {
+                const targetY = saved.scrollY || 0;
+                window.scrollTo(0, targetY);
+                savedScrollPosition = targetY;
+
+                if (saved.mode === 'edit' && typeof openEditModal === 'function') {
+                  openEditModal(targetIndex);
+                } else {
+                  showDetails(targetIndex);
+                }
+
+                // Force la position de verrouillage exacte même si le navigateur n'avait pas encore peint le scroll
+                savedScrollPosition = targetY;
+                document.body.style.top = `-${targetY}px`;
+              } else {
+                localStorage.removeItem(STORAGE_KEY);
+              }
+            } else if (attempts > 60) {
+              clearInterval(waitForCollection);
+            }
+          }, 150);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+    })();
   </script>
 </body>
 </html>
