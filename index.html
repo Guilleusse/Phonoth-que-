@@ -1215,7 +1215,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 16-11-2026 01:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 16-11-2026 02:00</div>
     
     <header>
       <div class="logo-container">
@@ -3502,6 +3502,9 @@
       const formModal = document.getElementById('formModal');
       if (!detailsModal) return;
 
+      let restoredAlbumTitle = null;
+      let restoredAlbumArtist = null;
+
       const enforceExternalTargets = () => {
         detailsModal.querySelectorAll('a[href^="http"]').forEach((link) => {
           link.setAttribute('target', '_blank');
@@ -3521,11 +3524,13 @@
             : (window.scrollY || document.documentElement.scrollTop || 0);
 
           localStorage.setItem(STORAGE_KEY, JSON.stringify({
-            mode: mode, // 'details' ou 'edit'
+            mode: mode,
             arg: index,
             supabaseId: item.supabaseId || null,
             artist: item.artist || null,
             title: item.title || null,
+            filter: typeof currentFilter !== 'undefined' ? currentFilter : 'all',
+            sort: document.getElementById('sortSelect')?.value || 'artist-az',
             scrollY: currentScroll,
             timestamp: Date.now()
           }));
@@ -3549,6 +3554,29 @@
         };
       }
 
+      // Recadre proprement la carte de l'album à l'écran lorsqu'on ferme la fiche restaurée
+      const alignRestoredCardInView = () => {
+        if (!restoredAlbumTitle) return;
+        const targetTitle = restoredAlbumTitle;
+        const targetArtist = restoredAlbumArtist;
+        restoredAlbumTitle = null;
+        restoredAlbumArtist = null;
+
+        requestAnimationFrame(() => {
+          const cards = document.querySelectorAll('.album-card, .album-row-compact');
+          for (const card of cards) {
+            const titleEl = card.querySelector('.album-title, .row-title');
+            const artistEl = card.querySelector('.album-artist, .row-sub-artist');
+            const titleMatch = titleEl && titleEl.textContent.trim() === targetTitle.trim();
+            const artistMatch = !targetArtist || !artistEl || artistEl.textContent.includes(targetArtist.trim());
+            if (titleMatch && artistMatch) {
+              card.scrollIntoView({ behavior: 'instant', block: 'center' });
+              break;
+            }
+          }
+        });
+      };
+
       const checkClearStorage = () => {
         const detailsOpen = detailsModal.classList.contains('active');
         const editOpen = formModal && formModal.classList.contains('active') && selectedAlbumIndex >= 0;
@@ -3557,6 +3585,7 @@
           enforceExternalTargets();
         } else if (!editOpen) {
           localStorage.removeItem(STORAGE_KEY);
+          alignRestoredCardInView();
         }
       };
 
@@ -3578,6 +3607,18 @@
             if (typeof collection !== 'undefined' && Array.isArray(collection) && collection.length > 0 && typeof showDetails === 'function') {
               clearInterval(waitForCollection);
 
+              // 1. Restaurer le tri et le filtre actifs avant d'ouvrir la fiche
+              if (saved.sort && document.getElementById('sortSelect')) {
+                document.getElementById('sortSelect').value = saved.sort;
+              }
+              if (saved.filter && saved.filter !== 'all' && typeof setFilter === 'function') {
+                const targetChip = Array.from(document.querySelectorAll('.filter-chip'))
+                  .find(c => (c.getAttribute('onclick') || '').includes(`'${saved.filter}'`));
+                if (targetChip) {
+                  setFilter(saved.filter, targetChip);
+                }
+              }
+
               let targetIndex = -1;
               if (saved.supabaseId) {
                 targetIndex = collection.findIndex((a) => a.supabaseId === saved.supabaseId);
@@ -3593,6 +3634,9 @@
               }
 
               if (targetIndex !== -1 && collection[targetIndex]) {
+                restoredAlbumTitle = collection[targetIndex].title || null;
+                restoredAlbumArtist = collection[targetIndex].artist || null;
+
                 const targetY = saved.scrollY || 0;
                 window.scrollTo(0, targetY);
                 savedScrollPosition = targetY;
@@ -3603,7 +3647,6 @@
                   showDetails(targetIndex);
                 }
 
-                // Force la position de verrouillage exacte même si le navigateur n'avait pas encore peint le scroll
                 savedScrollPosition = targetY;
                 document.body.style.top = `-${targetY}px`;
               } else {
