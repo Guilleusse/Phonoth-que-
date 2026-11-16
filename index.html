@@ -1215,7 +1215,7 @@
   <body>
 
   <div class="sticky-zone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 16-11-2026 00:05</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 16-11-2026 01:30</div>
     
     <header>
       <div class="logo-container">
@@ -1261,6 +1261,7 @@
         <button class="filter-chip" onclick="setFilter('CD-R', this)">CD-R</button>
         <button class="filter-chip" onclick="setFilter('SACD', this)">SACD</button>
         <button class="filter-chip" onclick="setFilter('Coffret', this)">Coffrets</button>
+        <button class="filter-chip" onclick="setFilter('Audiophile', this)">Éditions audiophiles</button>
         <button class="filter-chip filter-chip-wantlist" onclick="setFilter('Wantlist', this)">Liste de souhaits</button>
       </div>
     </header>
@@ -2229,6 +2230,7 @@
         cdr: collection.filter(a => a && !a.isWantlist && a.support === 'CD-R').length,
         sacd: collection.filter(a => a && !a.isWantlist && a.support === 'SACD').length,
         coffret: collection.filter(a => a && !a.isWantlist).reduce((sum, a) => sum + getBoxCountForAlbum(a), 0),
+        audiophile: collection.filter(a => a && !a.isWantlist && a.isAudiophile).length,
         wantlist: collection.filter(a => a && a.isWantlist).length
       };
 
@@ -2242,6 +2244,7 @@
         else if (act.includes("'CD-R'")) chip.textContent = `CD-R (${counts.cdr})`;
         else if (act.includes("'CD'")) chip.textContent = `CD (${counts.cd})`;
         else if (act.includes("'Coffret'")) chip.textContent = `Coffrets (${counts.coffret})`;
+        else if (act.includes("'Audiophile'")) chip.textContent = `Éditions audiophiles (${counts.audiophile})`;
         else if (act.includes("'Wantlist'")) chip.textContent = `Liste de souhaits (${counts.wantlist})`;
       });
     }
@@ -2272,7 +2275,8 @@
           if (currentFilter === 'Wantlist') return album.isWantlist;
           if (album.isWantlist) return false;
           if (currentFilter === 'Coffret' && !isCoffretAlbum(album)) return false;
-          if (currentFilter !== 'all' && currentFilter !== 'Coffret' && album.support !== currentFilter) return false;
+          if (currentFilter === 'Audiophile' && !album.isAudiophile) return false;
+          if (currentFilter !== 'all' && currentFilter !== 'Coffret' && currentFilter !== 'Audiophile' && album.support !== currentFilter) return false;
         }
 
         if (activeExactFilter) {
