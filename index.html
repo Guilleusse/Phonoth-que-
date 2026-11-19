@@ -21,7 +21,9 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
-  /* --- VARIABLES GLOBALES --- */
+  /* =========================================================================
+     1. VARIABLES GLOBALES & THÈME SOMBRE (DÉFAUT)
+     ========================================================================= */
   :root {
     --bg-color: #121212;
     --card-bg: #1e1e1e;
@@ -40,7 +42,9 @@
     --sticky-bg: rgba(18, 18, 18, 0.82);
   }
 
-  /* --- STYLES DE BASE & RESET --- */
+  /* =========================================================================
+     2. STYLES DE BASE & RESET
+     ========================================================================= */
   * {
     box-sizing: border-box;
     margin: 0;
@@ -58,6 +62,10 @@
     background: transparent;
   }
 
+  html, body {
+    overflow-x: hidden;
+  }
+
   body {
     background-color: var(--bg-color);
     color: var(--text-main);
@@ -68,7 +76,9 @@
     margin: 0 auto;
   }
 
-  /* --- ZONE FIXE GLOBALE --- */
+  /* =========================================================================
+     3. ZONE FIXE GLOBALE & EN-TÊTE (LOGO + ACTIONS)
+     ========================================================================= */
   .sticky-zone {
     position: -webkit-sticky;
     position: sticky;
@@ -100,7 +110,6 @@
     margin-bottom: 0px;
   }
 
-  /* --- CONTAINER DU LOGO --- */
   .logo-container {
     display: flex;
     justify-content: center;
@@ -109,11 +118,6 @@
     margin-bottom: 8px;
   }
 
-  html, body {
-    overflow-x: hidden;
-  }
-
-  /* --- LOGO --- */
   .app-logo {
     max-height: 80px;
     max-width: 100%;
@@ -123,7 +127,6 @@
     border-radius: 12px;
   }
 
-  /* --- BOUTONS D'ACTION HARMONISÉS --- */
   .header-actions {
     display: flex;
     justify-content: space-between;
@@ -166,12 +169,12 @@
   }
 
   @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
   }
 
-  /* --- BARRE D'IMPORT / EXPORT / VIDER --- */
+  /* =========================================================================
+     4. BARRE IMPORT/EXPORT, RECHERCHE, TRI & FILTRES
+     ========================================================================= */
   .io-bar {
     display: flex;
     gap: 8px;
@@ -202,7 +205,6 @@
     color: var(--text-sub);
   }
 
-  /* --- RECHERCHE ET TRI --- */
   .search-row {
     display: flex;
     gap: 8px;
@@ -293,7 +295,6 @@
     cursor: pointer;
   }
 
-  /* --- BANDE DE FILTRES AVEC FONDU --- */
   .filters-scroll {
     display: flex;
     flex-wrap: nowrap;
@@ -341,16 +342,28 @@
     margin-left: auto;
   }
 
-  /* --- GROUPES D'ARTISTES ET NAVIGATION A-Z --- */
+  /* =========================================================================
+     5. GROUPES D'ARTISTES STICKY, BARRE A-Z & BOUTONS FLOTTANTS
+     ========================================================================= */
   .artist-group-header {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 40;
     font-size: 18px;
     font-weight: 700;
     color: var(--accent-blue);
-    margin: 15px 0 10px 0;
+    background-color: var(--sticky-bg);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    backdrop-filter: blur(14px) saturate(180%);
+    margin: 14px -15px 10px -15px;
+    padding: 8px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     justify-content: flex-start;
     align-items: baseline;
     gap: 8px;
+    cursor: pointer;
     scroll-margin-top: calc(env(safe-area-inset-top) + 15px);
   }
 
@@ -370,7 +383,6 @@
     font-weight: normal;
   }
 
-  /* --- BARRE A-Z --- */
   .az-index {
     position: fixed;
     right: 4px;
@@ -431,7 +443,6 @@
     transform: scale(0.92);
   }
 
-  /* --- BOUTON FLOTTANT AJOUT (BAS) --- */
   .floating-add-btn {
     position: fixed;
     bottom: 25px;
@@ -466,7 +477,9 @@
     transform: scale(0.92);
   }
 
-  /* --- CARTES D'ALBUMS ET BADGES --- */
+  /* =========================================================================
+     6. CARTES D'ALBUMS, VUE LISTE COMPACTE & BADGES
+     ========================================================================= */
   .album-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -511,20 +524,22 @@
     padding-right: 4px;
   }
 
-  .album-artist {
+  /* Titre d'album agrandi et en gras pour une lecture directe */
+  .album-title {
     font-size: 16px;
     font-weight: 700;
-    color: var(--accent-blue);
-    line-height: 1.2;
-    margin-bottom: 2px;
+    color: var(--text-main);
+    line-height: 1.25;
+    margin-bottom: 3px;
   }
 
-  .album-title {
+  /* Affiché uniquement hors tri par artiste (Titre, Année, Date d'achat) */
+  .album-artist {
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-sub);
-    line-height: 1.3;
-    margin-bottom: 4px;
+    color: var(--accent-blue);
+    line-height: 1.25;
+    margin-bottom: 3px;
   }
 
   .album-sub {
@@ -543,7 +558,7 @@
     color: var(--text-main);
   }
 
-  /* --- HARMONISATION FINALE DES BADGES --- */
+  /* Badges supports & éditions */
   .badge {
     display: inline-block;
     font-size: 10px;
@@ -552,7 +567,7 @@
     padding: 3px 8px;
     border-radius: 6px;
     text-transform: uppercase;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     width: fit-content;
     color: #ffffff !important;
     text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.4) !important;
@@ -561,35 +576,18 @@
     box-sizing: border-box;
   }
 
-  /* 1. SUPPORTS SIMPLES (Fond = couleur du support) */
   .badge-cd { background-color: #00A1D8 !important; }
   .badge-vinyle, .badge-vinyl { background-color: #982ABC !important; }
   .badge-sacd { background-color: #B92D5D !important; }
   .badge-cdr { background-color: #E22400 !important; }
   .badge-wantlist { background-color: #f87171 !important; }
 
-  /* 2. ÉDITIONS AUDIOPHILES (Fond du support + Liseré vertical Ambre 4px à gauche) */
-  .badge-audiophile-vinyle { 
-    background-color: #982ABC !important; 
-    border-left: 4px solid #FFAB01 !important; 
-  }
-  .badge-audiophile-cd { 
-    background-color: #00A1D8 !important; 
-    border-left: 4px solid #FFAB01 !important; 
-  }
-  .badge-audiophile-sacd { 
-    background-color: #B92D5D !important; 
-    border-left: 4px solid #FFAB01 !important; 
-  }
-  .badge-audiophile-cdr { 
-    background-color: #E22400 !important; 
-    border-left: 4px solid #FFAB01 !important; 
-  }
-  .badge-audiophile { 
-    background-color: #FFAB01 !important; 
-  }
+  .badge-audiophile-vinyle { background-color: #982ABC !important; border-left: 4px solid #FFAB01 !important; }
+  .badge-audiophile-cd { background-color: #00A1D8 !important; border-left: 4px solid #FFAB01 !important; }
+  .badge-audiophile-sacd { background-color: #B92D5D !important; border-left: 4px solid #FFAB01 !important; }
+  .badge-audiophile-cdr { background-color: #E22400 !important; border-left: 4px solid #FFAB01 !important; }
+  .badge-audiophile { background-color: #FFAB01 !important; }
 
-  /* 3. COFFRETS (Fond Vert Feuillage) */
   .badge-coffret, 
   .badge-coffret-vinyle, 
   .badge-coffret-cd, 
@@ -603,35 +601,17 @@
     background-color: #669D34 !important; 
   }
 
-  /* Coffrets simples : Liseré du bas à 4px selon le support */
   .badge-coffret-vinyle { border-bottom: 4px solid #982ABC !important; }
   .badge-coffret-cd { border-bottom: 4px solid #00A1D8 !important; }
   .badge-coffret-sacd { border-bottom: 4px solid #B92D5D !important; }
   .badge-coffret-cdr { border-bottom: 4px solid #E22400 !important; }
 
-  /* Coffrets Audiophiles : Liseré du bas à 4px pour le support + Liseré gauche Ambre 4px pour l'Audiophile */
-  .badge-coffret-audiophile-vinyle { 
-    border-bottom: 4px solid #982ABC !important; 
-    border-left: 4px solid #FFAB01 !important; 
-  }
-  .badge-coffret-audiophile-cd { 
-    border-bottom: 4px solid #00A1D8 !important; 
-    border-left: 4px solid #FFAB01 !important; 
-  }
-  .badge-coffret-audiophile-sacd { 
-    border-bottom: 4px solid #B92D5D !important; 
-    border-left: 4px solid #FFAB01 !important; 
-  }
-  .badge-coffret-audiophile-cdr { 
-    border-bottom: 4px solid #E22400 !important; 
-    border-left: 4px solid #FFAB01 !important; 
-  }
-  .badge-coffret-audiophile { 
-    border-bottom: 4px solid #FFAB01 !important; 
-    border-left: 4px solid #FFAB01 !important; 
-  }
+  .badge-coffret-audiophile-vinyle { border-bottom: 4px solid #982ABC !important; border-left: 4px solid #FFAB01 !important; }
+  .badge-coffret-audiophile-cd { border-bottom: 4px solid #00A1D8 !important; border-left: 4px solid #FFAB01 !important; }
+  .badge-coffret-audiophile-sacd { border-bottom: 4px solid #B92D5D !important; border-left: 4px solid #FFAB01 !important; }
+  .badge-coffret-audiophile-cdr { border-bottom: 4px solid #E22400 !important; border-left: 4px solid #FFAB01 !important; }
+  .badge-coffret-audiophile { border-bottom: 4px solid #FFAB01 !important; border-left: 4px solid #FFAB01 !important; }
 
-  /* Petits carrés de rappel dans la fenêtre Stats */
   .stat-dot {
     display: inline-block;
     width: 12px;
@@ -681,52 +661,7 @@
     cursor: pointer;
   }
 
-  /* --- BOUTONS D'ACTION SUR LA POCHETTE DANS DÉTAILS ALBUM --- */
-  .detail-cover-wrapper {
-    position: relative !important;
-    min-height: 116px;
-  }
-
-  .detail-cover-btn {
-    position: absolute;
-    right: 12px;
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(28, 28, 30, 0.72);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    line-height: 1;
-    cursor: pointer;
-    z-index: 5;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
-  }
-
-  .detail-cover-btn:active {
-    transform: scale(0.9);
-  }
-
-  .detail-delete-btn {
-    top: 12px;
-  }
-
-  .detail-edit-btn {
-    bottom: 12px;
-  }
-
-  body.light-mode .detail-cover-btn {
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
-  }
-
-  /* --- MODE LISTE COMPACTE --- */
+  /* Vue liste condensée */
   #collectionContainer.list-view-active {
     display: flex !important;
     flex-direction: column !important;
@@ -774,7 +709,8 @@
   }
 
   .album-row-compact .row-title {
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
     color: var(--text-main);
     white-space: nowrap;
     overflow: hidden;
@@ -792,7 +728,9 @@
     flex-shrink: 2;
   }
 
-  /* --- FENÊTRES MODALES & FORMULAIRES --- */
+  /* =========================================================================
+     7. FENÊTRES MODALES, FICHE DÉTAILS & FORMULAIRES
+     ========================================================================= */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -996,6 +934,44 @@
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.9);
   }
 
+  .detail-cover-wrapper {
+    position: relative !important;
+    min-height: 116px;
+  }
+
+  .detail-cover-btn {
+    position: absolute;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(28, 28, 30, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+  }
+
+  .detail-cover-btn:active {
+    transform: scale(0.9);
+  }
+
+  .detail-delete-btn {
+    top: 12px;
+  }
+
+  .detail-edit-btn {
+    bottom: 12px;
+  }
+
   .form-group {
     margin-bottom: 15px;
   }
@@ -1054,7 +1030,9 @@
     margin-top: 10px;
   }
 
-  /* --- SCANNER CODE-BARRES & LOGIN --- */
+  /* =========================================================================
+     8. SCANNER CAMÉRA & CONNEXION (LOGIN)
+     ========================================================================= */
   #reader {
     position: relative !important;
     width: 100% !important;
@@ -1106,14 +1084,16 @@
     border: 1px solid var(--card-border);
   }
 
-  /* --- MODE CLAIR (THEME LIGHT) --- */
+  /* =========================================================================
+     9. MODE CLAIR (THÈME LIGHT)
+     ========================================================================= */
   body.light-mode {
     --bg-color: #f3f4f6;
     --card-bg: #ffffff;
     --card-border: #e5e7eb;
     --text-main: #111827;
     --text-sub: #4b5563;
-    --sticky-bg: rgba(243, 244, 246, 0.82);
+    --sticky-bg: rgba(243, 244, 246, 0.85);
   }
 
   body.light-mode h1 {
@@ -1121,6 +1101,10 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: none;
+  }
+
+  body.light-mode .artist-group-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   body.light-mode .filter-chip.active {
@@ -1174,6 +1158,12 @@
     color: white;
   }
 
+  body.light-mode .detail-cover-btn {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+  }
+
   body.light-mode .app-logo {
     mix-blend-mode: multiply;
   }
@@ -1224,10 +1214,13 @@
 </style>
 </head>
 
-  <body>
+<body>
 
+  <!-- =======================================================================
+       1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
+       ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 19-11-2026 02:35</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 19-11-2026 04:20</div>
     
     <header>
       <div class="logo-container">
@@ -1279,12 +1272,17 @@
     </header>
   </div>
 
+  <!-- =======================================================================
+       2. GRILLE DE COLLECTION, INDEX A-Z & BOUTONS FLOTTANTS
+       ======================================================================= -->
   <main id="collectionContainer"></main>
   <div class="az-index" id="azIndex"></div>
   <button id="backToTopBtn" class="back-to-top-btn" onclick="scrollToTop()" title="Revenir en haut">↑</button>
   <button id="floatingAddBtn" class="floating-add-btn" onclick="openAddModal()" title="Ajouter une référence">➕</button>
 
-  <!-- MODAL : LOGIN -->
+  <!-- =======================================================================
+       3. MODALE : CONNEXION (SUPABASE AUTH)
+       ======================================================================= -->
   <div class="modal-overlay" id="loginModal" style="align-items: center;">
     <div class="login-box">
       <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px; text-align: center;">🔐 Phonothèque</h2>
@@ -1302,7 +1300,9 @@
     </div>
   </div>
 
-  <!-- MODAL : GEMINI DJ -->
+  <!-- =======================================================================
+       4. MODALE : ASSISTANT DJ (GEMINI)
+       ======================================================================= -->
   <div class="modal-overlay" id="moodModal" style="z-index: 2500; align-items: center;">
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
       <div class="modal-header" style="border-radius: 20px 20px 0 0;">
@@ -1347,7 +1347,9 @@
     </div>
   </div>
 
-  <!-- MODAL : STATISTIQUES -->
+  <!-- =======================================================================
+       5. MODALE : STATISTIQUES & PARAMÈTRES
+       ======================================================================= -->
   <div class="modal-overlay" id="statsModal" style="align-items: center;">
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
       <div class="modal-header" style="border-radius: 20px 20px 0 0;">
@@ -1360,7 +1362,9 @@
     </div>
   </div>
 
-  <!-- MODAL : DÉTAILS ALBUM -->
+  <!-- =======================================================================
+       6. MODALE : DÉTAILS DE L'ALBUM / COFFRET
+       ======================================================================= -->
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1407,7 +1411,9 @@
     </div>
   </div>
 
-  <!-- MODAL : BULK LIST DISQUES -->
+  <!-- =======================================================================
+       7. MODALE : AJOUT EN MASSE DES DISQUES D'UN COFFRET
+       ======================================================================= -->
   <div class="modal-overlay" id="bulkModal" style="z-index: 1500;">
     <div class="modal-content" style="height: auto; max-height: 85vh;">
       <div class="modal-header">
@@ -1422,7 +1428,9 @@
     </div>
   </div>
 
-  <!-- MODAL : ÉDITION VOLUME -->
+  <!-- =======================================================================
+       8. MODALE : ÉDITION D'UN VOLUME DE COFFRET
+       ======================================================================= -->
   <div class="modal-overlay" id="editVolumeModal" style="z-index: 2500;">
     <div class="modal-content" style="height: auto; max-height: 90vh;">
       <div class="modal-header">
@@ -1457,7 +1465,9 @@
     </div>
   </div>
 
-  <!-- MODAL : FORMULAIRE AJOUT / EDITION -->
+  <!-- =======================================================================
+       9. MODALE : FORMULAIRE D'AJOUT / MODIFICATION DE RÉFÉRENCE
+       ======================================================================= -->
   <div class="modal-overlay" id="formModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -2166,7 +2176,7 @@
 
     function onArtistClick(el, e) {
       if (e) e.stopPropagation();
-      const artist = el.getAttribute('data-artist');
+      const artist = typeof el === 'string' ? el : el.getAttribute('data-artist');
       if (artist) {
         activeExactFilter = { field: 'artist', value: artist };
         document.getElementById("searchInput").value = artist;
@@ -2421,6 +2431,9 @@
           const grpHdr = document.createElement("div");
           grpHdr.className = "artist-group-header";
           grpHdr.id = 'artist-' + art.replace(/[^a-zA-Z0-9]/g, '');
+          grpHdr.title = "Filtrer uniquement cet artiste";
+          grpHdr.setAttribute('data-artist', art);
+          grpHdr.onclick = (e) => onArtistClick(grpHdr, e);
           grpHdr.innerHTML = `${art} <span class="artist-count">(${groups[art].length})</span>`;
           container.appendChild(grpHdr);
           groups[art].forEach(a => currentViewMode === "list" ? renderAlbumRow(a, container) : renderAlbumCard(a, container));
@@ -2510,6 +2523,12 @@
         badgeClass = 'badge-sacd';
       }
 
+      const sortVal = document.getElementById("sortSelect")?.value || 'artist-az';
+      const showArtistInCard = (sortVal !== 'artist-az' && sortVal !== 'artist-za');
+      const artistHtml = showArtistInCard
+        ? `<div class="album-artist">${album.artist ? `<span class="clickable-tag" data-artist="${album.artist.replace(/"/g, '&quot;')}" onclick="onArtistClick(this, event)">${album.artist}</span>` : 'Artiste inconnu'}</div>`
+        : '';
+
       const metaText = [
         album.label, 
         album.year, 
@@ -2520,8 +2539,8 @@
         <div class="cover-box">${album.cover ? `<img src="${album.cover}" onerror="this.style.display='none'">` : 'Pochette'}</div>
         <div class="album-info">
           <span class="badge ${badgeClass}">${badgeText}</span>
-          <div class="album-artist">${album.artist ? `<span class="clickable-tag" data-artist="${album.artist.replace(/"/g, '&quot;')}" onclick="onArtistClick(this, event)">${album.artist}</span>` : 'Artiste inconnu'}</div>
           <div class="album-title">${album.title || 'Sans titre'}</div>
+          ${artistHtml}
           <div class="album-sub">${metaText}</div>
           ${album.style ? `<div style="margin-top:2px;">${album.style.split(' / ').map(s => `<span class="genre-badge">${s}</span>`).join('')}</div>` : ''}
         </div>
