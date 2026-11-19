@@ -1227,7 +1227,7 @@
   <body>
 
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 18-11-2026 02:30</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 19-11-2026 02:35</div>
     
     <header>
       <div class="logo-container">
@@ -1561,9 +1561,12 @@
     <div class="modal-content" style="height: 75vh; max-height:75dvh; background: #000;">
       <div class="modal-header">
         <span class="modal-title">Scanner un code-barres</span>
-        <button class="modal-close" onclick="stopLiveScanner()">Fermer</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" id="torchToggleBtn" class="modal-close" style="background: #3a3a3c; display: none;" onclick="toggleFlashlight()" title="Activer / Désactiver la torche">🔦</button>
+          <button class="modal-close" onclick="stopLiveScanner()">Fermer</button>
+        </div>
       </div>
-      <div class="modal-body" style="padding:15px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="modal-body" style="padding:15px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
         <div id="reader" style="width:100%; max-width:360px;"></div>
       </div>
     </div>
@@ -1571,30 +1574,50 @@
 
   <!-- SCRIPT APPLICATION -->
   <script>
-    // --- CONFIGURATION SUPABASE ---
+    // =========================================================================
+    // 1. CONFIGURATION SUPABASE
+    // =========================================================================
     const SUPABASE_URL = 'https://mchljfhtgingnqxcjizf.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jaGxqZmh0Z2luZ25xeGNqaXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTY1NzYsImV4cCI6MjEwNTA3MjU3Nn0.aGv9w7XQB-FOVc7xScX-3HN-5ZcA3d3EM7JOBz0HCuQ';
     
     window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     document.addEventListener('touchstart', function() {}, { passive: true });
 
-    // --- ETAT GLOBAL DE L'APPLICATION ---
+    // =========================================================================
+    // 2. ÉTAT GLOBAL DE L'APPLICATION (VARIABLES CENTRALISÉES)
+    // =========================================================================
+
+    // --- A. Données, session & synchronisation ---
     let authUser = null;
     let collection = [];
+    let realtimeChannel = null;
+    let albumDeck = [];
+
+    // --- B. Affichage, filtres & recherche ---
     let currentFilter = 'all';
     let activeExactFilter = null;
+    let currentViewMode = localStorage.getItem('phonotheque_view_mode') || 'cards';
+    let searchDebounceTimer = null;
+
+    // --- C. Modales & formulaires ---
     let selectedAlbumIndex = -1;
-    let html5QrCode = null;
-    let savedScrollPosition = 0;
-    let isBodyLocked = false; 
     let currentFetchedTracks = [];
-    let realtimeChannel = null;
     let pendingCoverUrl = "";
     let pendingEditVolCoverUrl = "";
-    let searchDebounceTimer = null;
-    let currentViewMode = localStorage.getItem('phonotheque_view_mode') || 'cards';
-    let albumDeck = [];
-    
+
+    // --- D. Défilement & interface ---
+    let savedScrollPosition = 0;
+    let isBodyLocked = false;
+    let isScrollTicking = false;
+
+    // --- E. Scanner & torche caméra ---
+    let html5QrCode = null;
+    let currentStreamTrack = null;
+    let isTorchOn = false;
+
+    // =========================================================================
+    // 3. MODES D'AFFICHAGE (CARTES / LISTE COMPACTE)
+    // =========================================================================
     function toggleViewMode() {
       currentViewMode = (currentViewMode === 'cards') ? 'list' : 'cards';
       localStorage.setItem('phonotheque_view_mode', currentViewMode);
@@ -1630,7 +1653,9 @@
       }
     }
     
-    // --- GESTION DU DEFILEMENT ET DE L'INTERFACE ---
+    // =========================================================================
+    // 4. GESTION DU DÉFILEMENT & DE L'INTERFACE
+    // =========================================================================
     function lockBodyScroll() {
       if (isBodyLocked) return;
       savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
@@ -1657,7 +1682,6 @@
       localStorage.setItem('phonotheque_theme', isLight ? 'light' : 'dark');
     }
 
-    let isScrollTicking = false;
     window.addEventListener('scroll', () => {
       const btn = document.getElementById('backToTopBtn');
       if (btn) {
@@ -1688,7 +1712,6 @@
       }
     });
 
-    // --- OBSERVATEUR POUR LE BOUTON FLOTTANT D'AJOUT ---
     function initFloatingAddButton() {
       const headerAddBtn = document.getElementById('headerAddBtn');
       const floatingAddBtn = document.getElementById('floatingAddBtn');
@@ -1696,7 +1719,6 @@
 
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          // Si le bouton du haut n'est plus visible à l'écran, on affiche le bouton flottant du bas
           if (!entry.isIntersecting) {
             floatingAddBtn.classList.add('visible');
           } else {
@@ -1729,7 +1751,9 @@
       }, 10);
     }
 
-    // --- ASSISTANT GEMINI (DJ) ---
+    // =========================================================================
+    // 5. ASSISTANT GEMINI (DJ)
+    // =========================================================================
     function openMoodModal() {
       lockBodyScroll(); 
       document.getElementById("moodInput").value = ""; 
@@ -1816,7 +1840,9 @@
       }
     }
 
-    // --- ENVOI D'IMAGES SUPABASE STORAGE ---
+    // =========================================================================
+    // 6. ENVOI D'IMAGES SUPABASE STORAGE
+    // =========================================================================
     async function handleCoverFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1859,7 +1885,9 @@
       event.target.value = '';
     }
 
-    // --- INITIALISATION & AUTHENTIFICATION ---
+    // =========================================================================
+    // 7. INITIALISATION & AUTHENTIFICATION
+    // =========================================================================
     async function initApp() {
       loadLocal();
       updateViewToggleButton();
@@ -1924,7 +1952,9 @@
       }
     }
 
-    // --- SYNCHRONISATION DONNÉES & CACHE ---
+    // =========================================================================
+    // 8. SYNCHRONISATION DONNÉES & CACHE SUPABASE
+    // =========================================================================
     async function fetchCollectionFromSupabase() {
       if (!authUser) return;
       showSpinner();
@@ -2082,7 +2112,9 @@
       return false;
     }
 
-    // --- RECHERCHE ET UTILITAIRES DE TEXTE ---
+    // =========================================================================
+    // 9. RECHERCHE & UTILITAIRES DE TEXTE
+    // =========================================================================
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
@@ -2143,7 +2175,9 @@
       }
     }
 
-    // --- HELPER DE DÉCOMPTE DES COFFRETS & DISQUES ---
+    // =========================================================================
+    // 10. DÉCOMPTE DES COFFRETS & DISQUES PHYSIQUES
+    // =========================================================================
     function isCoffretAlbum(a) {
       if (!a || a.isWantlist) return false;
       const isBach = (a.title && (a.title.includes('Kantaten') || a.title.includes('Kantatenwerk'))) || (a.volumes && a.volumes.length === 45);
@@ -2183,7 +2217,9 @@
       return 1;
     }
 
-    // --- STATISTIQUES ---
+    // =========================================================================
+    // 11. STATISTIQUES & COMPTEURS DYNAMIQUES
+    // =========================================================================
     function openStatsModal() {
       lockBodyScroll();
       let countVinyle = 0;
@@ -2256,7 +2292,6 @@
       document.getElementById("statsModal").classList.add("active");
     }
       
-    /* --- COMPTEURS DYNAMIQUES DANS LES FILTRES --- */
     function updateFilterCounts() {
       if (typeof collection === 'undefined' || !Array.isArray(collection)) return;
 
@@ -2286,7 +2321,9 @@
       });
     }
     
-    // --- RENDU ET FILTRAGE DE LA COLLECTION ---
+    // =========================================================================
+    // 12. RENDU & FILTRAGE DE LA COLLECTION
+    // =========================================================================
     function renderCollection() {
       updateFilterCounts();
       updateViewToggleButton();
@@ -2573,7 +2610,6 @@
       });
     }
 
-    // --- RECHERCHE ET FILTRES (AVEC ANTI-REBOND / DEBOUNCE) ---
     function onSearchInput() {
       activeExactFilter = null;
       const searchInput = document.getElementById("searchInput");
@@ -2608,7 +2644,9 @@
       renderCollection();
     }
 
-    // --- LOGIQUE DES OPTIONS DE FORMULAIRE ---
+    // =========================================================================
+    // 13. LOGIQUE DES OPTIONS DE FORMULAIRE
+    // =========================================================================
     function toggleVinylSpeedField() {
       const support = document.getElementById("formSupport").value;
       document.getElementById("vinylSpeedGroup").style.display = support === 'Vinyle' ? 'flex' : 'none';
@@ -2652,7 +2690,9 @@
       document.getElementById("formTracksGroup").style.display = isBox ? 'none' : 'block';
     }
 
-    // --- FICHE DÉTAIL ALBUM ---
+    // =========================================================================
+    // 14. FICHE DÉTAIL ALBUM
+    // =========================================================================
     function showDetails(index) {
       lockBodyScroll();
       selectedAlbumIndex = index;
@@ -2782,7 +2822,9 @@
       }
     }
 
-    // --- GESTION DES VOLUMES / COFFRETS ---
+    // =========================================================================
+    // 15. GESTION DES VOLUMES / COFFRETS
+    // =========================================================================
     function renderVolumesList(vols, parentCover) {
       const box = document.getElementById("volumesList");
       box.innerHTML = `
@@ -2959,7 +3001,9 @@
       }
     }
 
-    // --- FORMULAIRES DE SAISIE & MODIFICATION ---
+    // =========================================================================
+    // 16. FORMULAIRES DE SAISIE & MODIFICATION
+    // =========================================================================
     function openAddModal() {
       lockBodyScroll();
       selectedAlbumIndex = -1;
@@ -3092,10 +3136,19 @@
       }, 250);
     }
 
-    // --- SCANNER EN DIRECT & APIS ---
+    // =========================================================================
+    // 17. SCANNER EN DIRECT, TORCHE & API DISCOGS
+    // =========================================================================
     async function startLiveScanner() {
       lockBodyScroll();
       document.getElementById("scannerModal").classList.add("active");
+      
+      const torchBtn = document.getElementById("torchToggleBtn");
+      isTorchOn = false;
+      if (torchBtn) {
+        torchBtn.style.display = "none";
+        torchBtn.style.background = "#3a3a3c";
+      }
 
       if (html5QrCode) {
         try {
@@ -3132,13 +3185,56 @@
           },
           () => {}
         );
+
+        setTimeout(() => {
+          try {
+            const videoElement = document.querySelector('#reader video');
+            if (videoElement && videoElement.srcObject) {
+              const tracks = videoElement.srcObject.getVideoTracks();
+              if (tracks && tracks.length > 0) {
+                currentStreamTrack = tracks[0];
+                const capabilities = currentStreamTrack.getCapabilities();
+                if (capabilities && capabilities.torch) {
+                  if (torchBtn) torchBtn.style.display = "flex";
+                }
+              }
+            }
+          } catch(err) {
+            console.log("Torche non exposée par le navigateur", err);
+          }
+        }, 500);
+
       } catch (err) {
         alert("Erreur caméra.");
         await stopLiveScanner();
       }
     }
 
+    async function toggleFlashlight() {
+      if (!currentStreamTrack) return;
+      try {
+        isTorchOn = !isTorchOn;
+        await currentStreamTrack.applyConstraints({
+          advanced: [{ torch: isTorchOn }]
+        });
+        const torchBtn = document.getElementById("torchToggleBtn");
+        if (torchBtn) {
+          torchBtn.style.background = isTorchOn ? 'var(--accent-blue)' : '#3a3a3c';
+        }
+      } catch (err) {
+        console.error("Impossible d'allumer le flash", err);
+      }
+    }
+
     async function stopLiveScanner() {
+      if (currentStreamTrack && isTorchOn) {
+        try {
+          await currentStreamTrack.applyConstraints({ advanced: [{ torch: false }] });
+        } catch(e) {}
+      }
+      isTorchOn = false;
+      currentStreamTrack = null;
+
       if (html5QrCode) {
         try {
           if (html5QrCode.isScanning) await html5QrCode.stop();
@@ -3362,7 +3458,9 @@
       }
     }
 
-    // --- IMPORT & EXPORT CSV ---
+    // =========================================================================
+    // 18. IMPORT & EXPORT CSV
+    // =========================================================================
     function parseCSV(str) {
       return (str || '').split('||').map(i => {
         const p = i.split(':::');
@@ -3446,9 +3544,12 @@
       document.body.removeChild(link);
     }
 
+    // =========================================================================
+    // 19. DÉMARRAGE & EFFETS TACTILES (FLOU + PERSISTANCE MOBILE)
+    // =========================================================================
     window.onload = initApp;
 
-    // --- GESTION DU FLOU PROGRESSIF EN HAUT (A) ET EN Z (Z) ---
+    // --- Effet de flou progressif en haut (A) et en bas (Z) ---
     (function initPullBlur() {
       const blurLayer = document.createElement('div');
       blurLayer.id = 'pullBlurOverlay';
@@ -3532,7 +3633,7 @@
       window.addEventListener('touchcancel', resetBlur, { passive: true });
     })();
     
-    // --- MÉMOIRE DE FICHE ALBUM, D'ÉDITION ET DE POSITION AU RETOUR ---
+    // --- Mémoire de fiche album, d'édition et de position au retour ---
     (function initModalPersistence() {
       const STORAGE_KEY = 'phonotheque_open_album';
       const detailsModal = document.getElementById('detailsModal');
