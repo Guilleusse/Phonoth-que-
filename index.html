@@ -374,14 +374,14 @@
     -webkit-backdrop-filter: blur(14px) saturate(180%);
     backdrop-filter: blur(14px) saturate(180%);
     margin: 12px -25px 8px -15px;
-    padding: 8px 25px 8px 15px;
+    padding: 8px 28px 8px 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     justify-content: flex-start;
     align-items: baseline;
     gap: 8px;
     cursor: pointer;
-    scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 46px);
+    scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 12px);
   }
 
   .artist-group-header:first-of-type {
@@ -1239,7 +1239,7 @@
 1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 20-11-2026 03:23</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 20-11-2026 03:35</div>
     
     <header>
       <div class="logo-container">
@@ -2622,46 +2622,94 @@
       container.appendChild(row);
     }
     
-    function scrollToArtistGroup(elementId) {
+    function getDocumentTop(el) {
+      let top = 0;
+      let curr = el;
+      while (curr) {
+        top += curr.offsetTop || 0;
+        curr = curr.offsetParent;
+      }
+      return top;
+    }
+
+    function scrollToArtistGroup(elementId, instant = false) {
       const target = document.getElementById(elementId);
       if (!target) return;
 
       const stickyZone = document.getElementById('topStickyZone');
-      const currentScroll = window.scrollY || document.documentElement.scrollTop;
-      const targetRect = target.getBoundingClientRect();
-      const targetTop = targetRect.top + currentScroll;
-
       const mask = document.querySelector('.ios-status-bar-mask');
       const safeTop = mask ? mask.offsetHeight : 0;
 
-      // Si le défilement nous laisse tout en haut (zone fixe encore visible),
-      // on décale pour ne pas passer sous la barre de filtres.
-      let offset = safeTop + 8;
-      if (stickyZone && targetTop < 260) {
-        offset = stickyZone.offsetHeight + 8;
+      // Position absolue réelle dans le document (indépendante de position: sticky)
+      const section = target.closest('.artist-section') || target;
+      const docTop = getDocumentTop(section);
+
+      // Si la position cible laisse scrollY < 145px, le bandeau du haut est encore visible :
+      // on place alors le nom de l'artiste juste sous le bandeau du haut.
+      // Sinon, le bandeau du haut s'est déjà effacé (scrollY >= 145px) :
+      // on place le nom de l'artiste juste sous la barre d'état iOS (safeTop).
+      const headerHeight = stickyZone ? stickyZone.offsetHeight : 230;
+      let finalY;
+      if (docTop - safeTop < 145) {
+        finalY = Math.max(0, docTop - headerHeight - 4);
+      } else {
+        finalY = Math.max(0, docTop - safeTop - 4);
       }
 
-      const finalY = Math.max(0, targetTop - offset);
-      window.scrollTo({ top: finalY, behavior: 'smooth' });
+      window.scrollTo({ top: finalY, behavior: instant ? 'auto' : 'smooth' });
     }
 
     function renderAZIndex(artists, sortKeyFor) {
       const az = document.getElementById("azIndex");
       az.innerHTML = "";
+      const letterToTargetId = {};
+
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(l => {
         const item = document.createElement("div");
         item.className = "az-letter";
+        item.dataset.letter = l;
         item.textContent = l;
         const matching = artists.find(a => (sortKeyFor || (x => x))(a).toUpperCase().startsWith(l));
         if (matching) {
+          const targetId = "artist-" + matching.replace(/[^a-zA-Z0-9]/g, '');
+          letterToTargetId[l] = targetId;
           item.style.opacity = "1";
           item.style.cursor = "pointer";
-          item.addEventListener('click', () => scrollToArtistGroup("artist-" + matching.replace(/[^a-zA-Z0-9]/g, '')));
+          item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            scrollToArtistGroup(targetId, false);
+          });
         } else {
           item.style.opacity = "0.2";
         }
         az.appendChild(item);
       });
+
+      // Glissement fluide du doigt le long de la barre verticale A-Z sur mobile
+      if (!az.dataset.touchBound) {
+        az.dataset.touchBound = "1";
+        let lastScrubbedLetter = null;
+
+        const handleAZTouch = (e, isStart) => {
+          if (!e.touches || !e.touches.length) return;
+          const touch = e.touches[0];
+          const el = document.elementFromPoint(touch.clientX, touch.clientY);
+          if (el && el.classList && el.classList.contains('az-letter')) {
+            const letter = el.dataset.letter;
+            const targetId = az._letterMap && az._letterMap[letter];
+            if (targetId && (isStart || letter !== lastScrubbedLetter)) {
+              lastScrubbedLetter = letter;
+              scrollToArtistGroup(targetId, !isStart);
+            }
+          }
+          if (e.cancelable) e.preventDefault();
+        };
+
+        az.addEventListener('touchstart', (e) => handleAZTouch(e, true), { passive: false });
+        az.addEventListener('touchmove', (e) => handleAZTouch(e, false), { passive: false });
+        az.addEventListener('touchend', () => { lastScrubbedLetter = null; }, { passive: true });
+      }
+      az._letterMap = letterToTargetId;
     }
 
     function onSearchInput() {
