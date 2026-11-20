@@ -22,7 +22,7 @@
 
   <style>
   /* =========================================================================
-     1. VARIABLES GLOBALES & THÈME SOMBRE (DÉFAUT)
+1. VARIABLES GLOBALES & THÈME SOMBRE (DÉFAUT)
      ========================================================================= */
   :root {
     --bg-color: #121212;
@@ -43,7 +43,7 @@
   }
 
   /* =========================================================================
-     2. STYLES DE BASE & RESET
+2. STYLES DE BASE & RESET
      ========================================================================= */
   * {
     box-sizing: border-box;
@@ -77,7 +77,7 @@
   }
 
   /* =========================================================================
-     3. ZONE FIXE GLOBALE & EN-TÊTE (LOGO + ACTIONS)
+3. ZONE FIXE GLOBALE & EN-TÊTE (LOGO + ACTIONS)
      ========================================================================= */
   .ios-status-bar-mask {
     position: fixed;
@@ -186,7 +186,7 @@
   }
 
   /* =========================================================================
-     4. BARRE IMPORT/EXPORT, RECHERCHE, TRI & FILTRES
+4. BARRE IMPORT/EXPORT, RECHERCHE, TRI & FILTRES
      ========================================================================= */
   .io-bar {
     display: flex;
@@ -356,7 +356,7 @@
   }
 
   /* =========================================================================
-     5. GROUPES D'ARTISTES STICKY, BARRE A-Z & BOUTONS FLOTTANTS
+5. GROUPES D'ARTISTES STICKY, BARRE A-Z & BOUTONS FLOTTANTS
      ========================================================================= */
   .artist-section {
     position: relative;
@@ -381,7 +381,7 @@
     align-items: baseline;
     gap: 8px;
     cursor: pointer;
-    scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 15px);
+    scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 46px);
   }
 
   .artist-group-header:first-of-type {
@@ -495,7 +495,7 @@
   }
 
   /* =========================================================================
-     6. CARTES D'ALBUMS, VUE LISTE COMPACTE & BADGES
+6. CARTES D'ALBUMS, VUE LISTE COMPACTE & BADGES
      ========================================================================= */
   .album-card {
     background: var(--card-bg);
@@ -746,7 +746,7 @@
   }
 
   /* =========================================================================
-     7. FENÊTRES MODALES, FICHE DÉTAILS & FORMULAIRES
+7. FENÊTRES MODALES, FICHE DÉTAILS & FORMULAIRES
      ========================================================================= */
   .modal-overlay {
     position: fixed;
@@ -1048,7 +1048,7 @@
   }
 
   /* =========================================================================
-     8. SCANNER CAMÉRA & CONNEXION (LOGIN)
+8. SCANNER CAMÉRA & CONNEXION (LOGIN)
      ========================================================================= */
   #reader {
     position: relative !important;
@@ -1102,7 +1102,7 @@
   }
 
   /* =========================================================================
-     9. MODE CLAIR (THÈME LIGHT)
+9. MODE CLAIR (THÈME LIGHT)
      ========================================================================= */
   body.light-mode {
     --bg-color: #f3f4f6;
@@ -1236,10 +1236,10 @@
 <div class="ios-status-bar-mask"></div>
   
   <!-- =======================================================================
-       1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
+1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 20-11-2026 02:45</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 20-11-2026 03:23</div>
     
     <header>
       <div class="logo-container">
@@ -1292,7 +1292,7 @@
   </div>
 
   <!-- =======================================================================
-       2. GRILLE DE COLLECTION, INDEX A-Z & BOUTONS FLOTTANTS
+2. GRILLE DE COLLECTION, INDEX A-Z & BOUTONS FLOTTANTS
        ======================================================================= -->
   <main id="collectionContainer"></main>
   <div class="az-index" id="azIndex"></div>
@@ -1300,7 +1300,7 @@
   <button id="floatingAddBtn" class="floating-add-btn" onclick="openAddModal()" title="Ajouter une référence">➕</button>
 
   <!-- =======================================================================
-       3. MODALE : CONNEXION (SUPABASE AUTH)
+3. MODALE : CONNEXION (SUPABASE AUTH)
        ======================================================================= -->
   <div class="modal-overlay" id="loginModal" style="align-items: center;">
     <div class="login-box">
@@ -1320,7 +1320,7 @@
   </div>
 
   <!-- =======================================================================
-       4. MODALE : ASSISTANT DJ (GEMINI)
+4. MODALE : ASSISTANT DJ (GEMINI)
        ======================================================================= -->
   <div class="modal-overlay" id="moodModal" style="z-index: 2500; align-items: center;">
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
@@ -1367,7 +1367,7 @@
   </div>
 
   <!-- =======================================================================
-       5. MODALE : STATISTIQUES & PARAMÈTRES
+5. MODALE : STATISTIQUES & PARAMÈTRES
        ======================================================================= -->
   <div class="modal-overlay" id="statsModal" style="align-items: center;">
     <div class="modal-content" style="height: auto; max-height: 85vh; border-radius: 20px; width: 90%; max-width: 450px;">
@@ -1382,7 +1382,7 @@
   </div>
 
   <!-- =======================================================================
-       6. MODALE : DÉTAILS DE L'ALBUM / COFFRET
+6. MODALE : DÉTAILS DE L'ALBUM / COFFRET
        ======================================================================= -->
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-content">
@@ -1431,7 +1431,7 @@
   </div>
 
   <!-- =======================================================================
-       7. MODALE : AJOUT EN MASSE DES DISQUES D'UN COFFRET
+7. MODALE : AJOUT EN MASSE DES DISQUES D'UN COFFRET
        ======================================================================= -->
   <div class="modal-overlay" id="bulkModal" style="z-index: 1500;">
     <div class="modal-content" style="height: auto; max-height: 85vh;">
@@ -1448,7 +1448,7 @@
   </div>
 
   <!-- =======================================================================
-       8. MODALE : ÉDITION D'UN VOLUME DE COFFRET
+8. MODALE : ÉDITION D'UN VOLUME DE COFFRET
        ======================================================================= -->
   <div class="modal-overlay" id="editVolumeModal" style="z-index: 2500;">
     <div class="modal-content" style="height: auto; max-height: 90vh;">
@@ -1485,7 +1485,7 @@
   </div>
 
   <!-- =======================================================================
-       9. MODALE : FORMULAIRE D'AJOUT / MODIFICATION DE RÉFÉRENCE
+9. MODALE : FORMULAIRE D'AJOUT / MODIFICATION DE RÉFÉRENCE
        ======================================================================= -->
   <div class="modal-overlay" id="formModal">
     <div class="modal-content">
@@ -2623,7 +2623,26 @@
     }
     
     function scrollToArtistGroup(elementId) {
-      document.getElementById(elementId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const target = document.getElementById(elementId);
+      if (!target) return;
+
+      const stickyZone = document.getElementById('topStickyZone');
+      const currentScroll = window.scrollY || document.documentElement.scrollTop;
+      const targetRect = target.getBoundingClientRect();
+      const targetTop = targetRect.top + currentScroll;
+
+      const mask = document.querySelector('.ios-status-bar-mask');
+      const safeTop = mask ? mask.offsetHeight : 0;
+
+      // Si le défilement nous laisse tout en haut (zone fixe encore visible),
+      // on décale pour ne pas passer sous la barre de filtres.
+      let offset = safeTop + 8;
+      if (stickyZone && targetTop < 260) {
+        offset = stickyZone.offsetHeight + 8;
+      }
+
+      const finalY = Math.max(0, targetTop - offset);
+      window.scrollTo({ top: finalY, behavior: 'smooth' });
     }
 
     function renderAZIndex(artists, sortKeyFor) {
