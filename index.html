@@ -79,6 +79,19 @@
   /* =========================================================================
      3. ZONE FIXE GLOBALE & EN-TÊTE (LOGO + ACTIONS)
      ========================================================================= */
+  .ios-status-bar-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 0px);
+    background-color: var(--sticky-bg);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    backdrop-filter: blur(14px) saturate(180%);
+    z-index: 65;
+    pointer-events: none;
+  }
+
   .sticky-zone {
     position: -webkit-sticky;
     position: sticky;
@@ -352,7 +365,7 @@
   .artist-group-header {
     position: -webkit-sticky;
     position: sticky;
-    top: 0;
+    top: env(safe-area-inset-top, 0px);
     z-index: 60;
     font-size: 18px;
     font-weight: 700;
@@ -368,7 +381,7 @@
     align-items: baseline;
     gap: 8px;
     cursor: pointer;
-    scroll-margin-top: calc(env(safe-area-inset-top) + 15px);
+    scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 15px);
   }
 
   .artist-group-header:first-of-type {
@@ -1220,11 +1233,13 @@
 
 <body>
 
+<div class="ios-status-bar-mask"></div>
+  
   <!-- =======================================================================
        1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 20-11-2026 01:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 20-11-2026 02:45</div>
     
     <header>
       <div class="logo-container">
@@ -1702,6 +1717,11 @@
         btn.classList.toggle('visible', window.scrollY > 400);
       }
 
+      const addBtn = document.getElementById('floatingAddBtn');
+      if (addBtn) {
+        addBtn.classList.toggle('visible', window.scrollY > 140);
+      }
+
       if (!isScrollTicking) {
         window.requestAnimationFrame(() => {
           const stickyZone = document.querySelector('.sticky-zone');
@@ -1727,23 +1747,10 @@
     });
 
     function initFloatingAddButton() {
-      const headerAddBtn = document.getElementById('headerAddBtn');
       const floatingAddBtn = document.getElementById('floatingAddBtn');
-      if (!headerAddBtn || !floatingAddBtn) return;
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) {
-            floatingAddBtn.classList.add('visible');
-          } else {
-            floatingAddBtn.classList.remove('visible');
-          }
-        });
-      }, {
-        threshold: 0
-      });
-
-      observer.observe(headerAddBtn);
+      if (floatingAddBtn) {
+        floatingAddBtn.classList.toggle('visible', window.scrollY > 140);
+      }
     }
 
     function scrollToTop() {
