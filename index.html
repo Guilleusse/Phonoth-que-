@@ -63,7 +63,7 @@
   }
 
   html, body {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
@@ -353,15 +353,15 @@
     position: -webkit-sticky;
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 60;
     font-size: 18px;
     font-weight: 700;
     color: var(--accent-blue);
     background-color: var(--sticky-bg);
     -webkit-backdrop-filter: blur(14px) saturate(180%);
     backdrop-filter: blur(14px) saturate(180%);
-    margin: 14px -25px 10px -15px;
-    padding: calc(env(safe-area-inset-top, 0px) + 8px) 25px 8px 15px;
+    margin: 12px -25px 8px -15px;
+    padding: 8px 25px 8px 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     justify-content: flex-start;
@@ -1224,7 +1224,7 @@
        1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 20-11-2026 01:20</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 20-11-2026 01:50</div>
     
     <header>
       <div class="logo-container">
