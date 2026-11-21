@@ -84,7 +84,7 @@
     top: 0;
     left: 0;
     right: 0;
-    height: env(safe-area-inset-top, 0px);
+    height: calc(env(safe-area-inset-top, 0px) + 7px);
     background-color: var(--bg-color);
     z-index: 65;
     pointer-events: none;
@@ -363,23 +363,22 @@
   .artist-group-header {
     position: -webkit-sticky;
     position: sticky;
-    top: env(safe-area-inset-top, 0px);
+    top: calc(env(safe-area-inset-top, 0px) + 6px);
     z-index: 60;
     font-size: 18px;
     font-weight: 700;
     color: var(--accent-blue);
     background-color: var(--bg-color);
     margin: 12px -25px 8px -15px;
-    padding: 18px 28px 8px 15px;
+    padding: 8px 28px 8px 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     justify-content: flex-start;
     align-items: baseline;
     gap: 8px;
     cursor: pointer;
-    scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 12px);
+    scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 18px);
   }
-
   .artist-group-header:first-of-type {
     margin-top: 0px;
   }
@@ -1258,7 +1257,7 @@
 1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 21-11-2026 03:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 21-11-2026 03:15</div>
     
     <header>
       <div class="logo-container">
