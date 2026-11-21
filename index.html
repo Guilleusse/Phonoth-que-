@@ -1228,6 +1228,29 @@
     background: #e5e7eb !important;
     border-color: var(--accent-blue) !important;
   }
+  /* Blocage / avertissement mode paysage */
+  #landscapeLockOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--bg-color, #121212);
+    color: var(--text-main, #f3f4f6);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  @media screen and (orientation: landscape) and (max-height: 500px) {
+    #landscapeLockOverlay {
+      display: flex;
+    }
+  }
 </style>
 </head>
 
@@ -1239,7 +1262,7 @@
 1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 20-11-2026 03:35</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 21-11-2026 01:51</div>
     
     <header>
       <div class="logo-container">
@@ -1298,6 +1321,11 @@
   <div class="az-index" id="azIndex"></div>
   <button id="backToTopBtn" class="back-to-top-btn" onclick="scrollToTop()" title="Revenir en haut">↑</button>
   <button id="floatingAddBtn" class="floating-add-btn" onclick="openAddModal()" title="Ajouter une référence">➕</button>
+
+  <div id="landscapeLockOverlay">
+    <div>📱</div>
+    <div>Merci d'utiliser la Phonothèque en mode portrait.</div>
+  </div>
 
   <!-- =======================================================================
 3. MODALE : CONNEXION (SUPABASE AUTH)
@@ -3899,6 +3927,18 @@
         }
       }
     })();
+
+    async function lockPortraitOrientation() {
+      try {
+        if (screen.orientation && typeof screen.orientation.lock === 'function') {
+          await screen.orientation.lock('portrait');
+        }
+      } catch (e) {
+        // Sur iOS Safari / PWA, le verrouillage natif est souvent ignoré : le CSS prend le relais
+      }
+    }
+
+    window.addEventListener('load', lockPortraitOrientation);
   </script>
 </body>
 </html>
