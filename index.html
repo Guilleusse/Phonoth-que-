@@ -71,7 +71,7 @@
     color: var(--text-main);
     padding-bottom: 80px;
     padding-left: 15px;
-    padding-right: 34px;
+    padding-right: 15px;
     max-width: 650px;
     margin: 0 auto;
   }
@@ -103,9 +103,9 @@
     padding-bottom: 6px;
     margin-bottom: 16px;
     margin-left: -15px;
-    margin-right: -34pxpx;
+    margin-right: -15px;
     padding-left: 15px;
-    padding-right: 34px;
+    padding-right: 15px;
     border-bottom: 1px solid var(--card-border);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     will-change: opacity, transform, backdrop-filter;
@@ -369,8 +369,8 @@
     font-weight: 700;
     color: var(--accent-blue);
     background-color: var(--bg-color);
-    margin: 12px -34px 8px -15px;
-    padding: 8px 36px 8px 15px;
+    margin: 12px -15px 8px -15px;
+    padding: 8px 34px 8px 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     justify-content: flex-start;
@@ -397,17 +397,18 @@
 
   .az-index {
     position: fixed;
-    right: 3px;
-    top: calc(50% + 90px);
-    transform: translateY(-50%);
+    right: 2px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    top: auto;
+    transform: none;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1.5px;
     z-index: 101;
     font-size: 11px;
     font-weight: 700;
     color: var(--text-sub);
-    background: rgba(18, 18, 18, 0.82);
+    background: rgba(18, 18, 18, 0.85);
     padding: 6px 3px;
     border-radius: 12px;
     backdrop-filter: blur(5px);
@@ -419,8 +420,8 @@
     text-decoration: none;
     text-align: center;
     width: 22px;
-    line-height: 1.25;
-    padding: 1.5px 0;
+    line-height: 1.18;
+    padding: 1px 0;
     display: block;
     user-select: none;
   }
@@ -494,7 +495,10 @@
   /* =========================================================================
 6. CARTES D'ALBUMS, VUE LISTE COMPACTE & BADGES
      ========================================================================= */
-  .album-card {
+    #collectionContainer {
+    padding-right: 20px;
+  }
+    .album-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 16px;
@@ -1259,7 +1263,7 @@
 1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 23-11-2026 00:50</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 23-11-2026 01:30</div>
     
     <header>
       <div class="logo-container">
