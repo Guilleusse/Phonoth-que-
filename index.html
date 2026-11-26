@@ -1271,7 +1271,7 @@
 1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 26-11-2026 03:40</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Ver. Stable API 27-11-2026 00:50</div>
     
     <header>
       <div class="logo-container">
@@ -2840,6 +2840,14 @@
       window.open(`https://music.apple.com/fr/search?term=${query}`, '_blank', 'noopener,noreferrer');
     }
 
+    function playOnAmazonMusic(index) {
+      const album = collection[index];
+      if (!album) return;
+      const query = encodeURIComponent(`${album.artist || ''} ${album.title || ''}`.trim());
+      if (!query) return;
+      window.open(`https://music.amazon.fr/search/${query}`, '_blank', 'noopener,noreferrer');
+    }
+
     function renderAudioCastButtons(index) {
       const dBtn = document.getElementById("discogsLink");
       const linksParent = dBtn ? dBtn.parentElement : null;
@@ -2849,12 +2857,13 @@
       if (!castBar) {
         castBar = document.createElement("div");
         castBar.id = "audioCastBar";
-        castBar.style.cssText = "width:100%; margin-bottom:10px;";
+        castBar.style.cssText = "display:flex; gap:8px; width:100%; margin-bottom:10px;";
         linksParent.parentElement.insertBefore(castBar, linksParent);
       }
 
       castBar.innerHTML = `
-        <button type="button" class="btn-secondary" style="width:100%; justify-content:center; padding:12px 10px; font-size:13.5px; font-weight:600; white-space:nowrap; background:var(--accent-blue); color:#ffffff; border:none; border-radius:12px; cursor:pointer;" onclick="playOnAppleMusic(${index})">▶️ Écouter sur Echo/WTX depuis Apple Music</button>
+        <button type="button" class="btn-secondary" style="flex:1; justify-content:center; padding:11px 8px; font-size:13px; font-weight:600; white-space:nowrap; background:var(--accent-blue); color:#ffffff; border:none; border-radius:12px; cursor:pointer;" onclick="playOnAmazonMusic(${index})">▶️ Amazon Music</button>
+        <button type="button" class="btn-secondary" style="flex:1; justify-content:center; padding:11px 8px; font-size:13px; font-weight:600; white-space:nowrap; background:#fa243c; color:#ffffff; border:none; border-radius:12px; cursor:pointer;" onclick="playOnAppleMusic(${index})">▶️ Apple Music</button>
       `;
     }
 
