@@ -1271,7 +1271,7 @@
 1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Verion Stable 28-11-2026 01:00</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Verion Stable 28-11-2026 01:40</div>
     
     <header>
       <div class="logo-container">
@@ -2331,7 +2331,7 @@
 
       document.getElementById("statsModalContent").innerHTML = `
         <div class="details-row"><span class="details-label">Nb réel de disques :</span><span class="details-val">${totalDiscsPhysical}</span></div>
-        <div class="details-row"><span class="details-label">Nb de vignettes (appli) :</span><span class="details-val">${collection.length - countWantlist}</span></div>
+        <div class="details-row"><span class="details-label">Nb de vignettes dans l'appli :</span><span class="details-val">${collection.length - countWantlist}</span></div>
         <div class="details-row"><span class="details-label">Nb réel de vinyles : <span class="stat-dot dot-vinyle"></span></span><span class="details-val">${countVinyle}</span></div>
         <div class="details-row"><span class="details-label">Nb réel de CD : <span class="stat-dot dot-cd"></span></span><span class="details-val">${countCD}</span></div>
         <div class="details-row"><span class="details-label">Nb réel de CD-R : <span class="stat-dot dot-cdr"></span></span><span class="details-val">${countCDr}</span></div>
@@ -2340,7 +2340,7 @@
         <div class="details-row"><span class="details-label">Éditions audiophiles : <span class="stat-dot dot-audiophile"></span></span><span class="details-val">${countAudiophile}</span></div>
         <div class="details-row"><span class="details-label">Liste de souhaits : <span class="stat-dot dot-wantlist"></span></span><span class="details-val">${countWantlist}</span></div>
         <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
-        <div class="details-row" style="border-bottom: none;"><span class="details-label">Total Cloud (vignettes) :</span><span class="details-val">${collection.length}</span></div> 
+        <div class="details-row" style="border-bottom: none;"><span class="details-label">Nb de vignettes dans le Cloud :</span><span class="details-val">${collection.length}</span></div> 
         <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
           <button class="btn-secondary" style="width: 100%; justify-content: center; background: var(--bg-color);" onclick="toggleTheme()">🌓 Activer / Désactiver le mode Clair</button>
           <button class="btn-secondary btn-danger-soft" style="width: 100%; justify-content: center; border-color: rgba(239, 68, 68, 0.4); color: var(--danger);" onclick="clearCollection()">🗑️ Vider toute la phonothèque</button>
@@ -2860,12 +2860,22 @@
         window.open(targetUrl, '_blank', 'noopener,noreferrer');
       }
     }
+    
     function playOnAmazonMusic(index) {
       const album = collection[index];
       if (!album) return;
-      const query = encodeURIComponent(`${album.artist || ''} ${album.title || ''}`.trim());
-      if (!query) return;
-      window.open(`https://music.amazon.fr/search/${query}`, '_blank', 'noopener,noreferrer');
+      const rawText = `${album.artist || ''} ${album.title || ''}`.trim();
+      if (!rawText) return;
+
+      const query = encodeURIComponent(rawText);
+      const targetUrl = `https://music.amazon.fr/search/${query}`;
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (isIOS) {
+        window.location.href = targetUrl;
+      } else {
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      }
     }
 
     function renderAudioCastButtons(index) {
