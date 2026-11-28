@@ -1271,7 +1271,7 @@
 1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Verion Stable 27-11-2026 03:15</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Verion Stable 28-11-2026 01:00</div>
     
     <header>
       <div class="logo-container">
@@ -1287,8 +1287,8 @@
       </div>
 
       <div class="io-bar">
-        <button class="btn-secondary" onclick="exportToCSV()">📤 Exporte la collection</button>
-        <button class="btn-secondary" onclick="document.getElementById('csvInput').click()">📥 Importe la collection</button>
+        <button class="btn-secondary" onclick="exportToCSV()">📤 Exporter collection</button>
+        <button class="btn-secondary" onclick="document.getElementById('csvInput').click()">📥 Importer collection</button>
         <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="importFromCSV(event)">
       </div>
 
@@ -2832,14 +2832,34 @@
     // =========================================================================
     // 14. FICHE DÉTAIL ALBUM & DIFFUSION APPLE MUSIC (ECHO / WTX TUBE)
     // =========================================================================
-    function playOnAppleMusic(index) {
+    async function playOnAppleMusic(index) {
       const album = collection[index];
       if (!album) return;
-      const query = encodeURIComponent(`${album.artist || ''} ${album.title || ''}`.trim());
-      if (!query) return;
-      window.open(`https://music.apple.com/fr/search?term=${query}`, '_blank', 'noopener,noreferrer');
-    }
+      const rawText = `${album.artist || ''} ${album.title || ''}`.trim();
+      if (!rawText) return;
 
+      const query = encodeURIComponent(rawText);
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      let targetUrl = `https://music.apple.com/fr/search?term=${query}`;
+
+      try {
+        const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&country=fr&limit=1`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.results && data.results.length > 0 && data.results[0].collectionViewUrl) {
+            targetUrl = data.results[0].collectionViewUrl;
+          }
+        }
+      } catch (e) {
+        // Repli silencieux sur l'URL de recherche si réseau lent
+      }
+
+      if (isIOS) {
+        window.location.href = targetUrl.replace(/^https:\/\//i, 'music://');
+      } else {
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      }
+    }
     function playOnAmazonMusic(index) {
       const album = collection[index];
       if (!album) return;
