@@ -1271,7 +1271,7 @@
 1. EN-TÊTE FIXE (LOGO, ACTIONS, RECHERCHE, TRI & FILTRES)
        ======================================================================= -->
   <div class="sticky-zone" id="topStickyZone">
-    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Verion Stable 28-11-2026 01:40</div>
+    <div style="font-size: 11px; color: var(--text-sub); opacity: 0.7; margin-bottom: 1px;">©️ GD Gemini 2026 Verion Stable 28-11-2026 02:00</div>
     
     <header>
       <div class="logo-container">
@@ -2340,7 +2340,7 @@
         <div class="details-row"><span class="details-label">Éditions audiophiles : <span class="stat-dot dot-audiophile"></span></span><span class="details-val">${countAudiophile}</span></div>
         <div class="details-row"><span class="details-label">Liste de souhaits : <span class="stat-dot dot-wantlist"></span></span><span class="details-val">${countWantlist}</span></div>
         <div class="details-row"><span class="details-label">Valeur estimée :</span><span class="details-val">${formattedPrice}</span></div>
-        <div class="details-row" style="border-bottom: none;"><span class="details-label">Nb de vignettes dans le Cloud :</span><span class="details-val">${collection.length}</span></div> 
+        <div class="details-row" style="border-bottom: none;"><span class="details-label">Nb de vignettes dans Supabase :</span><span class="details-val">${collection.length}</span></div> 
         <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
           <button class="btn-secondary" style="width: 100%; justify-content: center; background: var(--bg-color);" onclick="toggleTheme()">🌓 Activer / Désactiver le mode Clair</button>
           <button class="btn-secondary btn-danger-soft" style="width: 100%; justify-content: center; border-color: rgba(239, 68, 68, 0.4); color: var(--danger);" onclick="clearCollection()">🗑️ Vider toute la phonothèque</button>
@@ -2868,7 +2868,7 @@
       if (!rawText) return;
 
       const query = encodeURIComponent(rawText);
-      const targetUrl = `https://music.amazon.fr/search/${query}`;
+      const targetUrl = `https://music.amazon.fr/search/${query}/albums`;
       const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
       if (isIOS) {
